@@ -1,6 +1,5 @@
 # dramavis, by Frank Fischer & Christopher Kittel
-# Spaghetti-code version written in August, 2014
-# rewritten in June, 2015
+Spaghetti-code version written in August, 2014; rewritten in June, 2015.
 
 Purposes of this Python script:
 * reading character networks of dramatic pieces from CSV files and
