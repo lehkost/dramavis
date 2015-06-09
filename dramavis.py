@@ -59,8 +59,14 @@ def read_csv_files(inputfolder):
     """
     Reads all files in the inputfolder,
     returns a list of dramas.
+    Also performs a complicated date-oriented filename sorting.
     """
     filelist = [f for f in os.listdir(inputfolder)]
+    years = [f for f in filelist if f[0].isdigit()]
+    bcs = [f for f in filelist if not f[0].isdigit()]
+    years.sort()
+    bcs.sort(reverse=True)
+    filelist = bcs+years
     return filelist
 
 
@@ -219,8 +225,6 @@ def export2html(parsed_dramas):
             # sort by degree
             chardata.sort(key=lambda x: x[1], reverse=True)
         dramadata.append((drama.get("title"), chardata))
-    #sort by date
-    dramadata.sort(key=lambda x: x[0])
     
 
     tmpl = Template(dj_template)
