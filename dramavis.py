@@ -54,21 +54,18 @@ def extract_metadata(header):
     except:
         date_premiere = None
     
-    if date_print:
-        date_definite = date_print
-    elif date_written:
-        date_definite = date_written
-    else:
+    if date_print and date_premiere:
+        date_definite = min(date_print, date_premiere)
+    elif date_premiere:
         date_definite = date_premiere
-    
-    if (date_premiere and date_print):
-        if date_print > date_premiere:
-            date_definite = date_premiere
-        
-    if (date_print and date_written):
-        if date_print - date_written > 10:
+    else:
+        date_definite = date_print
+
+    if date_written and date_definite:
+        if date_definite - date_written > 10:
             date_definite = date_written
-        
+    elif date_written and not date_definite:
+        date_definite = date_written
         
     source_textgrid = header.find("{http://lina.digital}source").text
     
