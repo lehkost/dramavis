@@ -3,292 +3,373 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
+
+from lxml import etree
 import os
+import glob
+from io import StringIO
+import networkx as nx
+import matplotlib.pyplot as plt
 import csv
-import igraph as ig
-from igraph.drawing.text import TextDrawer
-import cairo
-from django.template import Context, Template
-from django.conf import settings
-
-# Where are the CSV files stored?
-inputfolder = "input/"
-outputfolder = "output/"
-
-settings.configure()
+from itertools import chain
+import pandas as pd
+import math
 
 
-def main():
-    all_drama_csvs = (read_csv_files(inputfolder))
-    for single_drama_csv in all_drama_csvs:
-        parse_single_csv(single_drama_csv)
-    parsed_dramas = [parse_single_csv(single_drama_csv) for single_drama_csv in all_drama_csvs]
+def parse_drama(tree, filename):
+    root = tree.getroot()
+    ID = root.attrib.get("id")
+    header = root.find("{http://lina.digital}header")
+    persons = root.find("{http://lina.digital}personae")
+    text = root.find("{http://lina.digital}text")
+    metadata = extract_metadata(header)
+    metadata["filename"] = filename
+    personae = extract_personae(persons)
+    speakers, scene_count = extract_speakers(text)
+    metadata["scenecount"] = scene_count
+    return ID, {"metadata": metadata, "personae":personae, "speakers":speakers}
+
+def extract_metadata(header):
+    title = header.find("{http://lina.digital}title").text
+    try:
+        subtitle = header.find("{http://lina.digital}subtitle").text
+    except AttributeError:
+        subtitle = ""
+    try:
+        genretitle = header.find("{http://lina.digital}genretitle").text
+    except AttributeError:
+        genretitle = ""
+    author = header.find("{http://lina.digital}author").text
+    pnd = header.find("{http://lina.digital}title").text
+    try:
+        date_print = int(header.find("{http://lina.digital}date[@type='print']").attrib.get("when"))
+    except:
+        date_print = None
+    try:
+        date_written = int(header.find("{http://lina.digital}date[@type='written']").attrib.get("when"))
+    except:
+        date_written = None
+    try:
+        date_premiere = int(header.find("{http://lina.digital}date[@type='premiere']").attrib.get("when"))
+    except:
+        date_premiere = None
     
-    print("Building graph objects for each drama.")
-    for drama in parsed_dramas:
-        drama["graph"] = create_graph(drama)
-
-    print("Analyzing drama-related network metrics.")
-    for drama in parsed_dramas:
-        drama["values"] = analyze_graph(drama.get("graph"))
-
-    print("Analyzing character-related network metrics.")
-    for drama in parsed_dramas:
-        drama["charvalues"] = analyze_characters(drama.get("graph"))
-
-    print("Exporting network metrics to CSV file.")
-    export2table(parsed_dramas)
-    print("Exporting character metrics to HTML file.")
-    export2html(parsed_dramas)
-
-    progress = 0
-    maxi = len(parsed_dramas)
-    print("Writing PNG graphs of each drama network.")
-    for drama in parsed_dramas:
-        plot(drama)
-        update_progress(progress/maxi*100)
-        progress += 1
-    print("\nFinished.")
-
-
-def update_progress(progress):
-    print("\r[{0}] {1}%".format("#"*(int(progress/10)), int(progress)), end='')
-
-
-def read_csv_files(inputfolder):
-    """
-    Reads all files in the inputfolder,
-    returns a list of dramas.
-    Also performs a complicated date-oriented filename sorting.
-    """
-    filelist = [f for f in os.listdir(inputfolder)]
-    years = [f for f in filelist if f[0].isdigit()]
-    bcs = [f for f in filelist if not f[0].isdigit()]
-    years.sort()
-    bcs.sort(reverse=True)
-    filelist = bcs+years
-    return filelist
+    if date_print:
+        date_definite = date_print
+    elif date_written:
+        date_definite = date_written
+    else:
+        date_definite = date_premiere
+    
+    if (date_premiere and date_print):
+        if date_print > date_premiere:
+            date_definite = date_premiere
+        
+    if (date_print and date_written):
+        if date_print - date_written > 10:
+            date_definite = date_written
+        
+        
+    source_textgrid = header.find("{http://lina.digital}source").text
+    
+    metadata = {
+        "title":title,
+        "subtitle":subtitle,
+        "genretitle":genretitle,
+        "author":author,
+        "pnd":pnd,
+        "date_print":date_print,
+        "date_written":date_written,
+        "date_premiere":date_premiere,
+        "date_definite":date_definite,
+        "source_textgrid":source_textgrid
+    }
+    return metadata
 
 
-def get_filename(filepath):
-    root, ext = os.path.splitext(filepath)
-    head, tail = os.path.split(root)
-    return tail
+def extract_personae(persons):
+    personae = []
+    for char in persons.getchildren():
+        name = char.find("{http://lina.digital}name").text
+        aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{http://lina.digital}alias")]
+        personae.append({name:aliases})
+    return personae
 
 
-def parse_single_csv(single_drama_csv):
-    """
-    Reads a drama CSV and returns a dict,
-    containing as keys 'name' and 'relations',
-    where value of relations is a list of dicts
-    {source:"A", target:"B", weight:3}.
-    """
-    parsed_drama = {}
-    with open(inputfolder+single_drama_csv, "r") as infile:
-        dramareader = csv.reader(infile, delimiter=";")
-        parsed_drama["title"] = get_filename(single_drama_csv)
+def extract_speakers(text):
+    acts = {}
+    scene_count = 0
+    for c in text.getchildren():
+        act = c.find("{http://lina.digital}head").text
+        act = c.find("{http://lina.digital}head").text
+        acts[act] = {}
 
-        relations =  []
-        for rel in dramareader:
+        for div in c.getchildren():
             try:
-                source, target, weight = rel
+                scene = div.find("{http://lina.digital}head").text
             except:
-                parsed_drama["relations"] = None
+                scene = None
+            sps = [sp.attrib.get("who").replace("#","").split() for sp in div.findall(".//{http://lina.digital}sp")]
+            sps = list(chain.from_iterable(sps))
+            if sps:
+                acts[act][scene] = sps
+                scene_count += 1
+    return acts, scene_count
 
-            source = source.strip()
-            target = target.strip()
-            weight = int(weight)
-            
-            relations.append({"source":source,
-                    "target":target,
-                    "weight":weight})
+def read_dramas(datadir):
+    dramafiles = glob.glob(os.path.join(datadir, '*.xml'))
+    dramas = {}
+    for drama in dramafiles:
+        tree = etree.parse(drama)
+        filename = os.path.splitext(os.path.basename((drama)))[0]
+        ID, ps = parse_drama(tree, filename)
+        dramas[ID] = ps
+    return dramas
 
-        parsed_drama["relations"] = relations
+def create_charmap(personae):
+    charmap = {}
+    for person in personae:
+        for charname, aliases in person.items():
+            for alias in aliases:
+                charmap[alias] = charname
+    return charmap
 
-    return parsed_drama
 
+def create_graph(speakerset, personae):
+    charmap = create_charmap(personae)
 
-def create_graph(parsed_drama):
-    """
-    Takes a drama dict and returns an igraph graph object.
-    """
-    G = ig.Graph() # generate empty graph
-    if not parsed_drama.get("relations"):
-        G = ig.Graph.Formula()
-    for rel in parsed_drama.get("relations"):
-        # check whether source or target already exist as node
-        # if not, add
-        try:
-            G.vs.find(rel.get("source"))
-        except:
-            G.add_vertex(rel.get("source"), text=rel.get("source"))
-        try:
-            G.vs.find(rel.get("target"))
-        except:
-            G.add_vertex(rel.get("target"), text=rel.get("target"))
-        # add edge
-        G.add_edge(rel.get("source"), rel.get("target"), weight=rel.get("weight"))
+    B = nx.Graph()
+    labels = {}
+    for act, scenes in speakerset.items():
+        for scene, speakers in scenes.items():
+            try:
+                source = " ".join([act, scene])
+            except TypeError:
+                source = " ".join([scene, scene])
+            targets = speakers
 
-    G.simplify(multiple=True, combine_edges={"weight":"min"})
+            if not source in B.nodes():
+                B.add_node(source, bipartite=0)
+                labels[source] = source
 
+            for target in targets:
+                target = charmap.get(target)
+                if not target in B.nodes():
+                    B.add_node(target, bipartite=1)
+                B.add_edge(source, target)
+
+    scene_nodes = set(n for n,d in B.nodes(data=True) if d['bipartite']==0)
+    person_nodes = set(B) - scene_nodes
+    nx.is_bipartite(B)
+    G = nx.bipartite.weighted_projected_graph(B, person_nodes)
+    
     return G
-
 
 def analyze_graph(G):
     values = {}
-    values["charcount"] = get_nr_of_characters(G)
-    values["maxdegree"] = get_maxdegree(G)
-    values["avgdegree"] = get_avgdegree(G)
-    values["density"] = get_density(G)
-    values["avgpathlength"] = get_avgpathlength(G)
+    values["charcount"] = len(G.nodes())
+    values["edgecount"] = len(G.edges())
+    try:
+        values["maxdegree"] = max(G.degree().values())
+    except:
+        print("ValueError: max() arg is an empty sequence")
+        values["maxdegree"] = "NaN"
+    try:
+        values["avgdegree"] = sum(G.degree().values())/len(G.nodes())
+    except:
+        print("ZeroDivisionError: division by zero")
+        values["avgdegree"] = "NaN"
+    try:
+        values["density"] = nx.density(G)
+    except:
+        values["density"] = "NaN"
+    try:
+        values["avgpathlength"] = nx.average_shortest_path_length(G)
+    except nx.NetworkXError:
+        print("NetworkXError: Graph is not connected.")
+        values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+    except:
+        print("NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.')")
+        values["avgdegree"] = "NaN"
+    try:
+        values["clustering_coefficient"] = nx.average_clustering(G)
+    except:
+        print("ZeroDivisionError: float division by zero")
+        values["clustering_coefficient"] = "NaN"
     return values
 
 
-def get_nr_of_characters(G):
-    return len(G.vs)
-
-def get_maxdegree(G):
-    return round(G.maxdegree(), 2)
-
-def get_avgdegree(G):
-    return round(ig.mean(G.degree()), 2)
-
-def get_density(G):
-    return round(G.density(), 2)
-
-def get_avgpathlength(G):
-    return round(G.average_path_length(), 2)
-
-
 def analyze_characters(G):
-    character_values = []
-    for char in G.vs:
-        charvalue = {}
-        charvalue["name"] = char["name"]
-        charvalue["betweenness"] = round(G.betweenness(char), 2)
-        charvalue["degree"] = round(G.degree(char), 2)
-        charvalue["avgdistance"] = round(1/G.closeness(char), 2)
-        charvalue["closeness"] = round(G.closeness(char), 2)
-        character_values.append(charvalue)
+    character_values = {}
+    character_values["betweenness"] = nx.betweenness_centrality(G)
+    character_values["degree"] = nx.degree(G)
+    character_values["closeness"] = nx.closeness_centrality(G)
     return character_values
 
-
-def export2html(parsed_dramas):
-    dj_template ="""
-                <html>
-                    <head>
-                        <title>Drama Character Values</title>
-                        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-                    </head>
-                        <body>
-                            {# dramadata #}
-                            {% for drama, rows in dramadata %}
-                                <h1>{{drama}}</h1>
-                                <table border="1" cellspacing="0" cellpadding="4">
-                                {# headings #}
-                                    <tr>
-                                    {% for heading in headings %}
-                                        <th>{{ heading }}</th>
-                                    {% endfor %}
-                                    </tr>
-                                {# rows #}
-                                {% for row in rows %}
-                                    <tr align="center">
-                                        {% for val in row %}
-                                        <td>{{ val|default:'' }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                                </table>
-                            {% endfor %}
-                        </body>
-                </html>
-                """
-
-    headings = ["Character",
-                "Degree",
-                "Betweenness Centrality",
-                "Average Distance",
-                "Closeness Centrality"]
-
-    dramanames = [drama.get("title") for drama in parsed_dramas]
-    dramadata = []
-    for drama in parsed_dramas:
-        chardata = []
-        for char in drama.get("charvalues"):
-            row = [char.get("name"),
-                    char.get("degree"),
-                    char.get("betweenness"),
-                    char.get("avgdistance"),
-                    char.get("closeness")]
-            chardata.append(row)
-            # sort by degree
-            chardata.sort(key=lambda x: x[1], reverse=True)
-        dramadata.append((drama.get("title"), chardata))
-    
-
-    tmpl = Template(dj_template)
-    with open(outputfolder+"drama_character_values.html", "w") as outfile:
-        outfile.write(tmpl.render(Context(dict(dramadata=dramadata, headings=headings))))
-
-
-def export2table(parsed_dramas):
-    with open(outputfolder+"drama_network_values.csv", "w") as outfile:
-        csvwriter = csv.writer(outfile, delimiter=";")
-        csvwriter.writerow(["Title",
-                            "Number of characters",
-                            "Max Degree",
-                            "Average Degree",
-                            "Density",
-                            "Average Path Length"])
-        for drama in parsed_dramas:
-            values = drama.get("values")
-            csvwriter.writerow([drama.get("title"),
-                                values.get("charcount"),
-                                values.get("maxdegree"),
-                                values.get("avgdegree"),
-                                values.get("density"),
-                                values.get("avgpathlength")])
-
-
-def plot(drama, caption=True):
-
-    plot = ig.Plot(outputfolder+drama.get("title")+".png",
-                                    bbox=(600, 600), background="white")    
-
+def transpose_dict(d):
+    td = {}
     try:
-        graph = ig.VertexClustering(drama.get("graph")).giant()
-        visual_style = {}
-        visual_style["layout"] = graph.layout_fruchterman_reingold()
-        visual_style["vertex_color"] = "#0000ff"
-        visual_style["vertex_shape"] = "rectangle"
-        visual_style["vertex_size"] = 8
-        visual_style["vertex_label"] = graph.vs["name"]
-        visual_style["vertex_label_size"] = 15
-        visual_style["vertex_label_dist"] = 1.5
-        visual_style["edge_color"] = "#6495ed"
-        visual_style["edge_width"] = graph.es["weight"]
-        visual_style["bbox"] = (600, 600)
-        visual_style["margin"] = 50
-        plot.add(graph, **visual_style)
+        for cent, chars in d.items():
+            for char in chars:
+                td[char] = {}
     except:
         pass
+    try:
+        for cent, chars in d.items():
+            for char, value in chars.items():
+                td[char][cent] = value
+    except:
+        pass
+    return td
 
 
-    if caption:
-       # Make the plot draw itself on the Cairo surface.
-        plot.redraw()
+def export_dict(d, filepath):
+    with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
+        w = csv.DictWriter(f, d.keys())
+        w.writeheader()
+        w.writerow(d)
+        
+def export_dicts(d, filepath):
+    with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
+        w = csv.writer(f, delimiter=";")
+        d = transpose_dict(d)
+        try:
+            subkeys = list(list(d.values())[0].keys())
+            w.writerow([""] + subkeys)
+            for k, v in d.items():
+                w.writerow([k] + list(v.values()))
+        except:
+            print("Empty values.")
 
-        # Grab the surface, construct a drawing context and a TextDrawer.
-        ctx = cairo.Context(plot.surface)
-        ctx.set_font_size(15)
-        drawer = TextDrawer(ctx, drama.get("title"),
-                            halign=TextDrawer.CENTER)
-        drawer.draw_at(0, 597, width=600)
 
-    plot.save()
+def randomize_graph(n,e):
+    randcluster = 0
+    randavgpathl = 0
+    c = 0
+    for i in range(0, 1000):
+        R = nx.gnm_random_graph(n, e)
+        try:
+            randcluster += nx.average_clustering(R)
+            c += 1
+        except ZeroDivisionError:
+            print("ZeroDivisionError: float division by zero.")
+        while True:
+            try:
+                R = nx.gnm_random_graph(n, e)
+                randavgpathl += nx.average_shortest_path_length(R)
+            except nx.NetworkXError:
+                print("NetworkXError: Graph not connected.")
+            else:
+                break
+    try:
+        randcluster = randcluster / c
+    except:
+        randcluster = "NaN"
+    randavgpathl = randavgpathl / 1000
+    return randavgpathl, randcluster
 
 
+def dramavis(datadir):
+    dramas = read_dramas(datadir)
+    for ID, drama in dramas.items():
+    # yields parsed dramas dicts
+        filepath = os.path.join(outputdir, str(ID))
+        title = (drama.get("metadata").get("title"))
+        if os.path.isfile(filepath+title+"graph.csv"):
+            continue
+        print(title)
+        speakers = drama.get("speakers")
+        personae = drama.get("personae")
+        G = create_graph(speakers, personae)
+        
+        graph_metrics = analyze_graph(G)
+        graph_metrics["ID"] = ID
+        graph_metrics["average_path_length_random"], graph_metrics["clustering_coefficient_random"] = randomize_graph(graph_metrics.get("charcount"), graph_metrics.get("edgecount"))
+        graph_metrics["year"] = drama.get("metadata").get("date_print")
+        graph_metrics["author"] = drama.get("metadata").get("author")
+        graph_metrics["title"] = title
+        graph_metrics["filename"] = drama.get("metadata").get("filename")
+        graph_metrics["genretitle"] = drama.get("metadata").get("genretitle")
+        graph_metrics["scenecount"] = drama.get("metadata").get("scenecount")
+        character_metrics = analyze_characters(G)
+        
+        export_dict(graph_metrics, filepath+title+"graph.csv")
+        export_dicts(character_metrics, filepath+title+"chars.csv")
+        plotGraph(G, filename=os.path.join(outputdir, str(ID)+title+".svg"))
 
-if __name__ == "__main__":
-    main()
+
+def plotGraph(G, figsize=(8, 8), filename=None):
+    
+    labels = {n:n for n in G.nodes()}
+    
+    d = nx.degree_centrality(G)
+    
+    layout=nx.spring_layout
+    pos=layout(G)
+    
+    plt.figure(figsize=figsize)
+    plt.subplots_adjust(left=0,right=1,bottom=0,top=0.95,wspace=0.01,hspace=0.01)
+    
+    nx.draw_networkx_nodes(G,pos,
+                            nodelist=G.nodes(),
+                            node_color="steelblue",
+                            node_size=[v * 250 for v in d.values()],
+                            alpha=0.8)
+    
+    weights = [G[u][v]['weight'] for u,v in G.edges()]
+    nx.draw_networkx_edges(G,pos,
+                           with_labels=False,
+                           edge_color="grey",
+                           width=weights
+                        )
+    
+    if G.order() < 1000:
+        nx.draw_networkx_labels(G,pos, labels)
+    plt.savefig(filename)
+
+
+def plot_superposter(datadir):
+    dramas = read_dramas(datadir)
+    size = len(dramas)
+    x = int(math.sqrt(size/2)*(16/9))
+    y = int(size/x)+1
+    
+    fig, axes = plt.subplots(x, y)
+    
+    i = 1
+    for ID, drama in dramas.items():
+        speakers = drama.get("speakers")
+        personae = drama.get("personae")
+        G = create_graph(speakers, personae)
+
+        d = nx.degree_centrality(G)
+        layout=nx.spring_layout
+        pos=layout(G)
+
+        
+        #These are subplot grid parameters encoded as a single integer. For example, "111" means "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot".
+        # Alternative form for add_subplot(111) is add_subplot(1, 1, 1).
+
+        ax = fig.add_subplot(x, y, i)
+        nx.draw_networkx_nodes(G,pos,
+                            nodelist=G.nodes(),
+                            node_color="steelblue",
+                            node_size=[v * 250 for v in d.values()],
+                            alpha=0.8)
+    
+        weights = [G[u][v]['weight'] for u,v in G.edges()]
+        nx.draw_networkx_edges(G,pos,
+                               with_labels=False,
+                               edge_color="grey",
+                               width=weights
+                            )
+        
+        i += 1
+        
+    for ax in fig.axes:
+        ax.set_frame_on(False)
+        ax.axes.get_yaxis().set_visible(False)
+        ax.axes.get_xaxis().set_visible(False)
+    
+    fig.set_size_inches(160, 90)
+    fig.savefig("supertest.svg")
