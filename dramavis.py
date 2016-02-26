@@ -1,16 +1,21 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
+__author__ = "Christopher Kittel"
+__copyright__ = "Copyright 2016"
+__license__ = "MIT"
+__version__ = "0.3"
+__maintainer__ = "Christopher Kittel"
+__email__ = "web@christopherkittel.eu"
+__status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
 from lxml import etree
 import os
 import glob
-from io import StringIO
 import networkx as nx
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import matplotlib.gridspec as gridspec
 import csv
 from itertools import chain
@@ -21,9 +26,9 @@ import argparse
 def parse_drama(tree, filename):
     root = tree.getroot()
     ID = root.attrib.get("id")
-    header = root.find("{http://lina.digital}header")
-    persons = root.find("{http://lina.digital}personae")
-    text = root.find("{http://lina.digital}text")
+    header = root.find("{*}header")
+    persons = root.find("{*}personae")
+    text = root.find("{*}text")
     metadata = extract_metadata(header)
     metadata["filename"] = filename
     personae = extract_personae(persons)
@@ -32,27 +37,27 @@ def parse_drama(tree, filename):
     return ID, {"metadata": metadata, "personae":personae, "speakers":speakers}
 
 def extract_metadata(header):
-    title = header.find("{http://lina.digital}title").text
+    title = header.find("{*}title").text
     try:
-        subtitle = header.find("{http://lina.digital}subtitle").text
+        subtitle = header.find("{*}subtitle").text
     except AttributeError:
         subtitle = ""
     try:
-        genretitle = header.find("{http://lina.digital}genretitle").text
+        genretitle = header.find("{*}genretitle").text
     except AttributeError:
         genretitle = ""
-    author = header.find("{http://lina.digital}author").text
-    pnd = header.find("{http://lina.digital}title").text
+    author = header.find("{*}author").text
+    pnd = header.find("{*}title").text
     try:
-        date_print = int(header.find("{http://lina.digital}date[@type='print']").attrib.get("when"))
+        date_print = int(header.find("{*}date[@type='print']").attrib.get("when"))
     except:
         date_print = None
     try:
-        date_written = int(header.find("{http://lina.digital}date[@type='written']").attrib.get("when"))
+        date_written = int(header.find("{*}date[@type='written']").attrib.get("when"))
     except:
         date_written = None
     try:
-        date_premiere = int(header.find("{http://lina.digital}date[@type='premiere']").attrib.get("when"))
+        date_premiere = int(header.find("{*}date[@type='premiere']").attrib.get("when"))
     except:
         date_premiere = None
     
@@ -69,7 +74,7 @@ def extract_metadata(header):
     elif date_written and not date_definite:
         date_definite = date_written        
         
-    source_textgrid = header.find("{http://lina.digital}source").text
+    source_textgrid = header.find("{*}source").text
     
     metadata = {
         "title":title,
@@ -88,8 +93,8 @@ def extract_metadata(header):
 def extract_personae(persons):
     personae = []
     for char in persons.getchildren():
-        name = char.find("{http://lina.digital}name").text
-        aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{http://lina.digital}alias")]
+        name = char.find("{*}name").text
+        aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{*}alias")]
         personae.append({name:aliases})
     return personae
 
@@ -98,17 +103,17 @@ def extract_speakers(text):
     scene_count = 0
     for c in text.getchildren():
         try:
-            act = c.find("{http://lina.digital}head").text
+            act = c.find("{*}head").text
         except:
             act = str(scene_count)
         acts[act] = {}
 
         for div in c.getchildren():
             try:
-                scene = div.find("{http://lina.digital}head").text
+                scene = div.find("{*}head").text
             except:
                 scene = str(scene_count)
-            sps = [sp.attrib.get("who").replace("#","").split() for sp in div.findall(".//{http://lina.digital}sp")]
+            sps = [sp.attrib.get("who").replace("#","").split() for sp in div.findall(".//{*}sp")]
             sps = list(chain.from_iterable(sps))
             if sps:
                 acts[act][scene] = sps
