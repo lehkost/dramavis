@@ -15,6 +15,7 @@ import matplotlib.gridspec as gridspec
 import csv
 from itertools import chain
 import math
+import argparse
 
 
 def parse_drama(tree, filename):
@@ -247,7 +248,7 @@ def randomize_graph(n,e):
             randcluster += nx.average_clustering(R)
             c += 1
         except ZeroDivisionError:
-            print("ZeroDivisionError: float division by zero.")
+            pass
         j = 0
         while True:
             j += 1
@@ -255,7 +256,7 @@ def randomize_graph(n,e):
                 R = nx.gnm_random_graph(n, e)
                 randavgpathl += nx.average_shortest_path_length(R)
             except:
-                print("NetworkXError: Graph not connected.")
+                pass
             else:
                 break
             if j > 50:
@@ -302,8 +303,9 @@ def plotGraph(G, figsize=(8, 8), filename=None):
     if G.order() < 1000:
         nx.draw_networkx_labels(G,pos, labels)
     plt.savefig(filename)
+    plt.close("all")
 
-def plot_superposter(datadir):
+def plot_superposter(datadir, outputdir):
     """
     Plot harmonically layoutted drama network subplots in 16:9 format.
     """
@@ -399,7 +401,8 @@ def plot_superposter(datadir):
         
         i += 1
     
-    fig.savefig("supertest.svg")
+    fig.savefig(os.path.join(outputdir,"superposter.svg"))
+    plt.close(fig)
 
 def dramavis(datadir, outputdir):
     dramas = read_dramas(datadir)
@@ -433,8 +436,21 @@ def dramavis(datadir, outputdir):
         plotGraph(G, filename=os.path.join(outputdir, str(ID)+title+".svg"))
         nx.write_edgelist(G, os.path.join(outputdir, str(ID)+title+"edgelist.csv"), delimiter=";", data=["weight"])
 
-def main():
-    pass
+def main(args):
+    inputfolder = args.inputfolder
+    outputfolder = args.outputfolder
+    if not os.path.isdir(outputfolder):
+        os.mkdir(outputfolder)
+    if args.action == "plotsuperposter":
+        plot_superposter(inputfolder, outputfolder)
+    if args.action == "dramavis":
+        dramavis(inputfolder, outputfolder)
+
+parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
+parser.add_argument('--input', dest='inputfolder', help='relative or absolute path of the input-xmls folder')
+parser.add_argument('--output', dest='outputfolder', help='relative or absolute path of the output folder')
+parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter or dramavis')
+args = parser.parse_args()
 
 if __name__ == '__main__':
-    main()
+    main(args)
