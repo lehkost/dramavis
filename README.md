@@ -1,4 +1,7 @@
-# dramavis, by Frank Fischer & Christopher Kittel
+# dramavis
+
+**by Frank Fischer & Christopher Kittel**
+
 Spaghetti-code version written in August, 2014; rewritten in June, 2015.
 Major rewrite in February, 2016:
 
@@ -25,3 +28,7 @@ python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action plotsup
 ```
 
 Running dramavis can take up to 30min, plotsuperposter up to 5.
+
+# Input Data
+
+You can download the lina-xmls from [here](LINK).
