@@ -24,6 +24,19 @@ import argparse
 
 
 def parse_drama(tree, filename):
+    """
+    Parses a single drama,
+    runs extractors for metadata, personae, speakers and scenes,
+    adds filename and scene count to metadata.
+    returns dictionary:
+    {ID:
+        {
+        "metadata":metadata,
+        "personae":personae,
+        "speakers":speakers
+        }
+    }
+    """
     root = tree.getroot()
     ID = root.attrib.get("id")
     header = root.find("{*}header")
@@ -37,6 +50,23 @@ def parse_drama(tree, filename):
     return ID, {"metadata": metadata, "personae":personae, "speakers":speakers}
 
 def extract_metadata(header):
+    """
+    Extracts metadata from the header-tag of a lina-xml,
+    returns dictionary:
+
+    metadata = {
+        "title":title,
+        "subtitle":subtitle,
+        "genretitle":genretitle,
+        "author":author,
+        "pnd":pnd,
+        "date_print":date_print,
+        "date_written":date_written,
+        "date_premiere":date_premiere,
+        "date_definite":date_definite,
+        "source_textgrid":source_textgrid
+    }
+    """
     title = header.find("{*}title").text
     try:
         subtitle = header.find("{*}subtitle").text
@@ -91,14 +121,37 @@ def extract_metadata(header):
     return metadata
 
 def extract_personae(persons):
+    """
+    Extracts persons and aliases from the personae-tag of a lina-xml,
+    returns list of dictionaries:
+    personae = [
+        {"charactername":["list", "of", "aliases"]},
+        {"charactername2":["list", "of", "aliases"]}
+    ]
+    """
     personae = []
     for char in persons.getchildren():
         name = char.find("{*}name").text
-        aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{*}alias")]
+        aliases = [alias.attrib.get('{*}id') for alias in char.findall("{*}alias")]
         personae.append({name:aliases})
     return personae
 
 def extract_speakers(text):
+    """
+    Extracts speakers that appear in the same scene,
+    returns a dict of dict of lists, and the overall scene count:
+    acts =
+    {"act1":
+        {"scene1":["speaker1", "speaker2"],
+        "scene2":["speaker2", "speaker3"]},
+     "act2":
+        {"scene1":["speaker3", "speaker2"],
+        "scene2":["speaker2", "speaker1"]}
+        }
+    }
+    scene_count = 4
+
+    """
     acts = {}
     scene_count = 0
     for c in text.getchildren():
@@ -121,6 +174,10 @@ def extract_speakers(text):
     return acts, scene_count
 
 def read_dramas(datadir):
+    """
+    Reads all XMLs in the inputfolder,
+    returns a list of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
+    """
     dramafiles = glob.glob(os.path.join(datadir, '*.xml'))
     dramas = {}
     for drama in dramafiles:
@@ -131,6 +188,16 @@ def read_dramas(datadir):
     return dramas
 
 def create_charmap(personae):
+    """
+    Maps aliases back to the definite personname,
+    returns a dictionary:
+    charmap = 
+    {"alias1_1":"PERSON1",
+     "alias1_2":"PERSON1",
+     "alias2_1":"PERSON2",
+     "alias2_2":"PERSON2"
+    }
+    """
     charmap = {}
     for person in personae:
         for charname, aliases in person.items():
@@ -139,6 +206,14 @@ def create_charmap(personae):
     return charmap
 
 def create_graph(speakerset, personae):
+    """
+    First creates a bipartite graph with scenes on the one hand,
+    and speakers in one scene on the other.
+    The graph is then projected into a unipartite graph of speakers,
+    which are linked if they appear in one scene together.
+
+    Returns a networkx weighted projected graph.
+    """
     charmap = create_charmap(personae)
 
     B = nx.Graph()
@@ -169,6 +244,23 @@ def create_graph(speakerset, personae):
     return G
 
 def analyze_graph(G):
+    """
+    Computes various network metrics for a graph G,
+    returns a dictionary:
+    values = 
+    {
+        "charcount" = len(G.nodes()),
+        "edgecount" = len(G.edges()),
+        "maxdegree" = max(G.degree().values()) or "NaN" if ValueError: max() arg is an empty sequence,
+        "avgdegree" = sum(G.degree().values())/len(G.nodes()) or "NaN" if ZeroDivisionError: division by zero,
+        "density" = nx.density(G) or "NaN",
+        "avgpathlength" = nx.average_shortest_path_length(G) or "NaN" if NetworkXError: Graph is not connected,
+                            then it tries to get the average_shortest_path_length from the giant component,
+        "avgpathlength" = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+                                except NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.'),
+        "clustering_coefficient" = nx.average_clustering(G) or "NaN" if ZeroDivisionError: float division by zero
+    }
+    """
     values = {}
     values["charcount"] = len(G.nodes())
     values["edgecount"] = len(G.edges())
@@ -202,6 +294,16 @@ def analyze_graph(G):
     return values
 
 def analyze_characters(G):
+    """
+    Computes per-character metrics of a graph G,
+    returns dictionary of dictionaries:
+    character_values = 
+    {
+        "betweenness" = nx.betweenness_centrality(G),
+        "degree" = nx.degree(G),
+        "closeness" = nx.closeness_centrality(G)
+    }
+    """
     character_values = {}
     character_values["betweenness"] = nx.betweenness_centrality(G)
     character_values["degree"] = nx.degree(G)
@@ -209,6 +311,10 @@ def analyze_characters(G):
     return character_values
 
 def transpose_dict(d):
+    """
+    Transpose dict of character-network metrics to an exportable dict,
+    essentially transposes rows and columns of the character.csv.
+    """
     td = {}
     try:
         for cent, chars in d.items():
@@ -243,6 +349,13 @@ def export_dicts(d, filepath):
             print("Empty values.")
 
 def randomize_graph(n,e):
+    """
+    Creates 1000 random graphs with networkx.gnm_random_graph(nodecount, edgecount),
+    and computes average_clustering_coefficient and average_shortest_path_length,
+    to compare with drama-graph.
+    Returns a tuple:
+    randavgpathl, randcluster = (float or "NaN", float or "NaN")
+    """
     randcluster = 0
     randavgpathl = 0
     c = 0
@@ -278,7 +391,10 @@ def randomize_graph(n,e):
     return randavgpathl, randcluster
 
 def plotGraph(G, figsize=(8, 8), filename=None):
-    
+    """
+    Plots an individual graph, node size by degree centrality,
+    edge size by edge weight.
+    """
     labels = {n:n for n in G.nodes()}
     
     d = nx.degree_centrality(G)
@@ -313,13 +429,15 @@ def plotGraph(G, figsize=(8, 8), filename=None):
 def plot_superposter(datadir, outputdir):
     """
     Plot harmonically layoutted drama network subplots in 16:9 format.
+    Node size by degree centrality,
+    edge size by log(weight+1).
     """
     dramas = read_dramas(datadir)
     size = len(dramas)
-    y = int(math.sqrt(size/2)*(14/9))
+    y = int(math.sqrt(size/2)*(16/9))
     x = int(size/y)+1
     
-    fig = plt.figure(figsize = (140,90))
+    fig = plt.figure(figsize = (160,90))
     gs = gridspec.GridSpec(x, y)
     gs.update(wspace=0.0, hspace=0.00) # set the spacing between axes. 
     i = 0
@@ -410,6 +528,14 @@ def plot_superposter(datadir, outputdir):
     plt.close(fig)
 
 def dramavis(datadir, outputdir):
+    """
+    Main function executing the pipeline from
+    reading and parsing lina-xmls,
+    creating and plotting drama-networks,
+    computing graph-metrics and random-graph-metrics,
+    exporting SVGs, CSVs and edgelists.
+    Can take a while.
+    """
     dramas = read_dramas(datadir)
     for ID, drama in dramas.items():
     # yields parsed dramas dicts
