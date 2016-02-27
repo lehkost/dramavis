@@ -3,12 +3,11 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
-__author__ = "Christopher Kittel"
+__author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <>"
 __copyright__ = "Copyright 2016"
 __license__ = "MIT"
 __version__ = "0.3"
-__maintainer__ = "Christopher Kittel"
-__email__ = "web@christopherkittel.eu"
+__maintainer__ = "Frank Fischer <>"
 __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
 from lxml import etree
