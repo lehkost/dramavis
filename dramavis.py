@@ -131,7 +131,7 @@ def extract_personae(persons):
     personae = []
     for char in persons.getchildren():
         name = char.find("{*}name").text
-        aliases = [alias.attrib.get('{*}id') for alias in char.findall("{*}alias")]
+        aliases = [alias.xpath('string(@xml:id)') for alias in char.findall("{*}alias")]
         personae.append({name:aliases})
     return personae
 
