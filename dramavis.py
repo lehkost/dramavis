@@ -161,23 +161,28 @@ def extract_speakers(text):
     """
     acts = {}
     scene_count = 0
-    for c in text.getchildren():
+    for act in text.getchildren():
         try:
-            act = c.find("{*}head").text
+            actname = act.find("{*}head").text
         except:
-            act = str(scene_count)
-        acts[act] = {}
+            actname = str(scene_count)
+        if not actname:
+            actname = str(scene_count)
+            scene_count += 1
+        acts[actname] = {}
 
-        for div in c.getchildren():
+        for scene in act.getchildren():
             try:
-                scene = div.find("{*}head").text
+                scenename = scene.find("{*}head").text
             except:
-                scene = str(scene_count)
-            sps = [sp.attrib.get("who").replace("#","").split() for sp in div.findall(".//{*}sp")]
-            sps = list(chain.from_iterable(sps))
-            if sps:
-                acts[act][scene] = sps
-                scene_count += 1
+                scenename = str(scene_count)
+            if not scenename:
+                scenename = str(scene_count)
+            speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in scene.findall(".//{*}sp")]
+            speakers = list(chain.from_iterable(speakers))
+            if speakers:
+                acts[actname][scenename] = speakers
+            scene_count += 1
     return acts, scene_count
 
 def read_dramas(datadir):
