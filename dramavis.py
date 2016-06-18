@@ -418,7 +418,11 @@ def plotGraph(G, figsize=(8, 8), filename=None):
     """
     labels = {n:n for n in G.nodes()}
 
-    d = nx.degree_centrality(G)
+    try:
+        d = nx.degree_centrality(G)
+        nodesize = [v * 250 for v in d.values()]
+    except:
+        nodesize = [1 * 250 for n in G.nodes()]
 
     layout=nx.spring_layout
     pos=layout(G)
@@ -430,7 +434,7 @@ def plotGraph(G, figsize=(8, 8), filename=None):
     nx.draw_networkx_nodes(G,pos,
                             nodelist=G.nodes(),
                             node_color="steelblue",
-                            node_size=[v * 250 for v in d.values()],
+                            node_size=nodesize,
                             alpha=0.8)
     try:
         weights = [G[u][v]['weight'] for u,v in G.edges()]
