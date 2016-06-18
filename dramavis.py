@@ -283,23 +283,30 @@ def analyze_graph(G):
     except:
         print("ValueError: max() arg is an empty sequence")
         values["maxdegree"] = "NaN"
+
     try:
         values["avgdegree"] = sum(G.degree().values())/len(G.nodes())
     except:
         print("ZeroDivisionError: division by zero")
         values["avgdegree"] = "NaN"
+
     try:
         values["density"] = nx.density(G)
     except:
         values["density"] = "NaN"
+
     try:
         values["avgpathlength"] = nx.average_shortest_path_length(G)
     except nx.NetworkXError:
         print("NetworkXError: Graph is not connected.")
-        values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+        try:
+            values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+        except:
+            values["avgpathlength"] = "NaN"
     except:
         print("NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.')")
         values["avgdegree"] = "NaN"
+
     try:
         values["clustering_coefficient"] = nx.average_clustering(G)
     except:
@@ -554,9 +561,9 @@ def dramavis(datadir, outputdir):
     for ID, drama in dramas.items():
     # yields parsed dramas dicts
         filepath = os.path.join(outputdir, str(ID))
-        if args.debug:
-            print(filepath)
-        title = (drama.get("metadata").get("title"))
+        title = drama.get("metadata").get("title")
+        if not title:
+            title = ID
         if args.debug:
             print(title)
         if os.path.isfile(os.path.join(outputdir, str(ID)+title+".svg")):
