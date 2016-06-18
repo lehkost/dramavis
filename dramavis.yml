@@ -1,0 +1,35 @@
+name: dramavis
+dependencies:
+- anaconda=custom=py34_0
+- openssl=1.0.2h=1
+- pip=8.1.2=py34_0
+- python=3.4.4=0
+- readline=6.2=2
+- setuptools=23.0.0=py34_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- wheel=0.29.0=py34_0
+- xz=5.0.5=1
+- zlib=1.2.8=3
+- pip:
+  - cycler==0.10.0
+  - decorator==4.0.10
+  - ecdsa==0.13
+  - fabric==1.11.1
+  - invoke==0.12.2
+  - jinja2==2.8
+  - lxml==3.6.0
+  - markupsafe==0.23
+  - matplotlib==1.5.1
+  - networkx==1.11
+  - numpy==1.11.0
+  - paramiko==1.17.0
+  - prettytable==0.7.2
+  - pycrypto==2.6.1
+  - pyparsing==2.1.5
+  - python-dateutil==2.5.3
+  - pytz==2016.4
+  - requests==2.10.0
+  - simplejson==3.8.2
+  - six==1.10.0
+  - streamparse==2.1.4

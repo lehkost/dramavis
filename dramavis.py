@@ -46,7 +46,8 @@ def parse_drama(tree, filename):
     personae = extract_personae(persons)
     speakers, scene_count = extract_speakers(text)
     metadata["scenecount"] = scene_count
-    return ID, {"metadata": metadata, "personae":personae, "speakers":speakers}
+    parsed_drama = (ID, {"metadata": metadata, "personae":personae, "speakers":speakers})
+    return parsed_drama
 
 def extract_metadata(header):
     """
@@ -89,7 +90,7 @@ def extract_metadata(header):
         date_premiere = int(header.find("{*}date[@type='premiere']").attrib.get("when"))
     except:
         date_premiere = None
-    
+
     if date_print and date_premiere:
         date_definite = min(date_print, date_premiere)
     elif date_premiere:
@@ -101,10 +102,10 @@ def extract_metadata(header):
         if date_definite - date_written > 10:
             date_definite = date_written
     elif date_written and not date_definite:
-        date_definite = date_written        
-        
+        date_definite = date_written
+
     source_textgrid = header.find("{*}source").text
-    
+
     metadata = {
         "title":title,
         "subtitle":subtitle,
@@ -131,8 +132,15 @@ def extract_personae(persons):
     personae = []
     for char in persons.getchildren():
         name = char.find("{*}name").text
-        aliases = [alias.attrib.get('{*}id') for alias in char.findall("{*}alias")]
-        personae.append({name:aliases})
+        aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{*}alias")]
+        if args.debug:
+            print(aliases)
+        if name:
+            personae.append({name:aliases})
+        else:
+            personae.append({aliases[0]:aliases})
+    if args.debug:
+        print(personae)
     return personae
 
 def extract_speakers(text):
@@ -153,23 +161,28 @@ def extract_speakers(text):
     """
     acts = {}
     scene_count = 0
-    for c in text.getchildren():
+    for act in text.getchildren():
         try:
-            act = c.find("{*}head").text
+            actname = act.find("{*}head").text
         except:
-            act = str(scene_count)
-        acts[act] = {}
+            actname = str(scene_count)
+        if not actname:
+            actname = str(scene_count)
+            scene_count += 1
+        acts[actname] = {}
 
-        for div in c.getchildren():
+        for scene in act.getchildren():
             try:
-                scene = div.find("{*}head").text
+                scenename = scene.find("{*}head").text
             except:
-                scene = str(scene_count)
-            sps = [sp.attrib.get("who").replace("#","").split() for sp in div.findall(".//{*}sp")]
-            sps = list(chain.from_iterable(sps))
-            if sps:
-                acts[act][scene] = sps
-                scene_count += 1
+                scenename = str(scene_count)
+            if not scenename:
+                scenename = str(scene_count)
+            speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in scene.findall(".//{*}sp")]
+            speakers = list(chain.from_iterable(speakers))
+            if speakers:
+                acts[actname][scenename] = speakers
+            scene_count += 1
     return acts, scene_count
 
 def read_dramas(datadir):
@@ -190,7 +203,7 @@ def create_charmap(personae):
     """
     Maps aliases back to the definite personname,
     returns a dictionary:
-    charmap = 
+    charmap =
     {"alias1_1":"PERSON1",
      "alias1_2":"PERSON1",
      "alias2_1":"PERSON2",
@@ -214,6 +227,8 @@ def create_graph(speakerset, personae):
     Returns a networkx weighted projected graph.
     """
     charmap = create_charmap(personae)
+    if args.debug:
+        print(charmap)
 
     B = nx.Graph()
     labels = {}
@@ -239,14 +254,14 @@ def create_graph(speakerset, personae):
     person_nodes = set(B) - scene_nodes
     nx.is_bipartite(B)
     G = nx.bipartite.weighted_projected_graph(B, person_nodes)
-    
+
     return G
 
 def analyze_graph(G):
     """
     Computes various network metrics for a graph G,
     returns a dictionary:
-    values = 
+    values =
     {
         "charcount" = len(G.nodes()),
         "edgecount" = len(G.edges()),
@@ -268,23 +283,30 @@ def analyze_graph(G):
     except:
         print("ValueError: max() arg is an empty sequence")
         values["maxdegree"] = "NaN"
+
     try:
         values["avgdegree"] = sum(G.degree().values())/len(G.nodes())
     except:
         print("ZeroDivisionError: division by zero")
         values["avgdegree"] = "NaN"
+
     try:
         values["density"] = nx.density(G)
     except:
         values["density"] = "NaN"
+
     try:
         values["avgpathlength"] = nx.average_shortest_path_length(G)
     except nx.NetworkXError:
         print("NetworkXError: Graph is not connected.")
-        values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+        try:
+            values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+        except:
+            values["avgpathlength"] = "NaN"
     except:
         print("NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.')")
         values["avgdegree"] = "NaN"
+
     try:
         values["clustering_coefficient"] = nx.average_clustering(G)
     except:
@@ -296,7 +318,7 @@ def analyze_characters(G):
     """
     Computes per-character metrics of a graph G,
     returns dictionary of dictionaries:
-    character_values = 
+    character_values =
     {
         "betweenness" = nx.betweenness_centrality(G),
         "degree" = nx.degree(G),
@@ -334,7 +356,7 @@ def export_dict(d, filepath):
         w = csv.DictWriter(f, d.keys())
         w.writeheader()
         w.writerow(d)
-        
+
 def export_dicts(d, filepath):
     with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
         w = csv.writer(f, delimiter=";")
@@ -358,7 +380,7 @@ def randomize_graph(n,e):
     randcluster = 0
     randavgpathl = 0
     c = 0
-    
+
     for i in range(0, 1000):
         R = nx.gnm_random_graph(n, e)
         try:
@@ -395,20 +417,24 @@ def plotGraph(G, figsize=(8, 8), filename=None):
     edge size by edge weight.
     """
     labels = {n:n for n in G.nodes()}
-    
-    d = nx.degree_centrality(G)
-    
+
+    try:
+        d = nx.degree_centrality(G)
+        nodesize = [v * 250 for v in d.values()]
+    except:
+        nodesize = [1 * 250 for n in G.nodes()]
+
     layout=nx.spring_layout
     pos=layout(G)
-    
+
     plt.figure(figsize=figsize)
     plt.subplots_adjust(left=0,right=1,bottom=0,top=0.95,wspace=0.01,hspace=0.01)
-    
+
     # nodes
     nx.draw_networkx_nodes(G,pos,
                             nodelist=G.nodes(),
                             node_color="steelblue",
-                            node_size=[v * 250 for v in d.values()],
+                            node_size=nodesize,
                             alpha=0.8)
     try:
         weights = [G[u][v]['weight'] for u,v in G.edges()]
@@ -419,7 +445,7 @@ def plotGraph(G, figsize=(8, 8), filename=None):
                            edge_color="grey",
                            width=weights
                         )
-    
+
     if G.order() < 1000:
         nx.draw_networkx_labels(G,pos, labels)
     plt.savefig(filename)
@@ -435,23 +461,23 @@ def plot_superposter(datadir, outputdir):
     size = len(dramas)
     y = int(math.sqrt(size/2)*(16/9))
     x = int(size/y)+1
-    
+
     fig = plt.figure(figsize = (160,90))
     gs = gridspec.GridSpec(x, y)
-    gs.update(wspace=0.0, hspace=0.00) # set the spacing between axes. 
+    gs.update(wspace=0.0, hspace=0.00) # set the spacing between axes.
     i = 0
-    
+
     # build rectangle in axis coords for text plotting
     left, width = .25, .5
     bottom, height = .25, .5
     right = left + width
     top = bottom + height
-    
+
     id2date = {ID:drama.get("metadata").get("date_definite") for ID, drama in dramas.items()}
-    
+
     # http://pythoncentral.io/how-to-sort-python-dictionaries-by-key-or-value/
     sorted_by_date = sorted(id2date, key=id2date.__getitem__)
-    
+
     for ID in sorted_by_date:
         drama = dramas.get(ID)
         print(drama.get("metadata").get("title"))
@@ -469,7 +495,7 @@ def plot_superposter(datadir, outputdir):
         ax.spines['top'].set_color('white')
         ax.spines['left'].set_color('white')
         ax.spines['right'].set_color('white')
-        
+
         if "Goethe" in drama.get("metadata").get("author"):
             ax.patch.set_facecolor('firebrick')
             ax.patch.set_alpha(0.2)
@@ -488,7 +514,7 @@ def plot_superposter(datadir, outputdir):
         if "Schnitzler" in drama.get("metadata").get("author"):
             ax.patch.set_facecolor('tomato')
             ax.patch.set_alpha(0.2)
-        
+
         sizes = [v * 110 for v in d.values()]
         node_color = "steelblue"
         nx.draw_networkx_nodes(G,pos,
@@ -496,33 +522,33 @@ def plot_superposter(datadir, outputdir):
                             node_color=node_color,
                             node_size=sizes,
                             alpha=0.8)
-    
+
         weights = [math.log(G[u][v]['weight']+1)  for u,v in G.edges()]
-        
+
         edge_color = "grey"
         nx.draw_networkx_edges(G,pos,
                                with_labels=False,
                                edge_color=edge_color,
                                width=weights
                             )
-        
+
         title_bark = "".join([w[0] for w in drama.get("metadata").get("title").split()])
         caption = ", ".join([drama.get("metadata").get("author").split(",")[0],
                              title_bark,
                              str(drama.get("metadata").get("date_definite"))])
-        
+
         ax.text(0.5*(left+right), 0*bottom, caption,
                 horizontalalignment='center',
                 verticalalignment='bottom',
                 fontsize=20, color='black',
                 transform=ax.transAxes)
-        
+
         ax.set_frame_on(True)
         ax.axes.get_yaxis().set_visible(False)
         ax.axes.get_xaxis().set_visible(False)
-        
+
         i += 1
-    
+
     fig.savefig(os.path.join(outputdir,"superposter.svg"))
     plt.close(fig)
 
@@ -539,14 +565,20 @@ def dramavis(datadir, outputdir):
     for ID, drama in dramas.items():
     # yields parsed dramas dicts
         filepath = os.path.join(outputdir, str(ID))
-        title = (drama.get("metadata").get("title"))
+        title = drama.get("metadata").get("title")
+        if not title:
+            title = ID
+        if args.debug:
+            print(title)
         if os.path.isfile(os.path.join(outputdir, str(ID)+title+".svg")):
             continue
-        print(title)
         speakers = drama.get("speakers")
         personae = drama.get("personae")
+        if args.debug:
+            print(personae)
+            print(speakers)
         G = create_graph(speakers, personae)
-        
+
         graph_metrics = analyze_graph(G)
         graph_metrics["ID"] = ID
         graph_metrics["average_path_length_random"], graph_metrics["clustering_coefficient_random"] = randomize_graph(graph_metrics.get("charcount"), graph_metrics.get("edgecount"))
@@ -557,7 +589,7 @@ def dramavis(datadir, outputdir):
         graph_metrics["genretitle"] = drama.get("metadata").get("genretitle")
         graph_metrics["scenecount"] = drama.get("metadata").get("scenecount")
         character_metrics = analyze_characters(G)
-        
+
         for i in range(0, 5):
             R = nx.gnm_random_graph(graph_metrics.get("charcount"), graph_metrics.get("edgecount"))
             plotGraph(R, filename=os.path.join(outputdir, str(ID)+"random"+str(i)+".svg"))
@@ -580,6 +612,7 @@ parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to 
 parser.add_argument('--input', dest='inputfolder', help='relative or absolute path of the input-xmls folder')
 parser.add_argument('--output', dest='outputfolder', help='relative or absolute path of the output folder')
 parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter or dramavis')
+parser.add_argument('--debug', dest='debug', help='print debug message or not', action="store_true")
 args = parser.parse_args()
 
 if __name__ == '__main__':

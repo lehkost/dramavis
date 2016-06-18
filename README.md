@@ -13,13 +13,21 @@
 * v0.0: Spaghetti-code version written in August, 2014 (never published);
 * v0.1: rewritten in June, 2015 (archived [here](https://github.com/lehkost/dramavis/tree/master/archive/v0.1));
 * v0.2: major rewrite in February, 2016.
+* v0.2.1: minor bugfixes and usability improvements
 
-## New in v0.2:
+## New in v0.2.1:
 
-* added superposter-plotter
-* added random graph metrics and plots
-* edgelist-export to csv
-* enabled command-line executability
+* added virtualenv file
+
+## Installation
+
+Depends on [Anacoda](https://www.continuum.io/downloads) for Python 3
+
+Prepare:
+```
+conda env create -f dramavis.yml
+source activate dramavis
+```
 
 Run:
 
@@ -32,7 +40,7 @@ or
 python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action plotsuperposter
 ```
 
-Running dramavis can take up to 30min, plotsuperposter up to 5.
+Running dramavis can take up to 4 seconds per play with an average of 2.5 seconds, this is mainly due to the network randomization for statistics. plotsuperposter takes around 1 second per play.
 
 ## Input data
 
