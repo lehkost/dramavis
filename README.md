@@ -40,7 +40,7 @@ or
 python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action plotsuperposter
 ```
 
-Running dramavis can take up to 30min, plotsuperposter up to 5.
+Running dramavis can take up to 4 seconds per play with an average of 2.5 seconds, this is mainly due to the network randomization for statistics. plotsuperposter takes around 1 second per play.
 
 ## Input data
 
