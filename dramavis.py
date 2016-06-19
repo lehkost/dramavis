@@ -98,6 +98,14 @@ def extract_metadata(header):
     else:
         date_definite = date_print
 
+    ## date is a string hotfix
+    if type(date_print) != int:
+        date_print = 9999
+    if type(date_written) != int:
+        date_print = 9999
+    if type(date_premiere) != int:
+        date_print = 9999
+
     if date_written and date_definite:
         if date_definite - date_written > 10:
             date_definite = date_written
@@ -419,6 +427,7 @@ def plotGraph(G, figsize=(8, 8), filename=None):
     labels = {n:n for n in G.nodes()}
 
     try:
+        # for networks with only one node
         d = nx.degree_centrality(G)
         nodesize = [v * 250 for v in d.values()]
     except:
@@ -474,18 +483,33 @@ def plot_superposter(datadir, outputdir):
     top = bottom + height
 
     id2date = {ID:drama.get("metadata").get("date_definite") for ID, drama in dramas.items()}
+    if args.debug:
+        print(id2date)
 
     # http://pythoncentral.io/how-to-sort-python-dictionaries-by-key-or-value/
     sorted_by_date = sorted(id2date, key=id2date.__getitem__)
 
     for ID in sorted_by_date:
         drama = dramas.get(ID)
-        print(drama.get("metadata").get("title"))
+
+        if args.debug:
+            print(drama.get("metadata"))
+
+        title = drama.get("metadata").get("title")
+        if title is None:
+            title = drama.get("metadata").get("filename")
+            print(title)
+
         speakers = drama.get("speakers")
         personae = drama.get("personae")
         G = create_graph(speakers, personae)
 
-        d = nx.degree_centrality(G)
+        try:
+            # for networks with only one node
+            d = nx.degree_centrality(G)
+            nodesize = [v * 110 for v in d.values()]
+        except:
+            nodesize = [1 * 110 for n in G.nodes()]
         layout=nx.spring_layout
         pos=layout(G)
 
@@ -515,12 +539,11 @@ def plot_superposter(datadir, outputdir):
             ax.patch.set_facecolor('tomato')
             ax.patch.set_alpha(0.2)
 
-        sizes = [v * 110 for v in d.values()]
         node_color = "steelblue"
         nx.draw_networkx_nodes(G,pos,
                             nodelist=G.nodes(),
                             node_color=node_color,
-                            node_size=sizes,
+                            node_size=nodesize,
                             alpha=0.8)
 
         weights = [math.log(G[u][v]['weight']+1)  for u,v in G.edges()]
@@ -532,7 +555,9 @@ def plot_superposter(datadir, outputdir):
                                width=weights
                             )
 
-        title_bark = "".join([w[0] for w in drama.get("metadata").get("title").split()])
+
+
+        title_bark = "".join([w[0] for w in title.split()])
         caption = ", ".join([drama.get("metadata").get("author").split(",")[0],
                              title_bark,
                              str(drama.get("metadata").get("date_definite"))])
