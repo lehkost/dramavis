@@ -48,3 +48,13 @@ You can download the dlina XMLs from [here](https://github.com/dlina/project/tre
 (should be 465 XML files); it might be easier to get hold of them if you ``git clone``
 our [DLINA project repository](https://github.com/dlina/project) and then extract the
 XMLs from the /zwischenformat/ folder.
+
+## Plans for v0.3 (December 2016)
+
+* main goal: introduce measures/formats for dynamic network analysis
+* planned minor enhancements:
+  * option to put labels on all nodes or a specific number of nodes per graph (based on node values like degree, average distance or betweenness centrality)
+  * reintroduce option for input of CSV files (like in v0.1)
+  * introduce option for output as CSV files (to further use them with Gephi, Cytoscape or the likes)
+  * option for choosing type of spring-embedder layout
+  * …
