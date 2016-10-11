@@ -57,4 +57,5 @@ XMLs from the /zwischenformat/ folder.
   * reintroduce option for input of CSV files (like in v0.1)
   * introduce option for output as CSV files (to further use them with Gephi, Cytoscape or the likes)
   * option for choosing type of spring-embedder layout
+  * collect centrality valus over time and check how they change (is the character with the highest betweenness centrality in the first act still the one with the highest BC at the end?)
   * …
