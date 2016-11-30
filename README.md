@@ -32,7 +32,7 @@ source activate dramavis
 Run:
 
 ```
-python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action dramavis
+python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action metrics
 ```
 or
 
