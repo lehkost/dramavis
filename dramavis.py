@@ -18,6 +18,7 @@ import csv
 from itertools import chain
 import argparse
 from superposter import plotGraph, plot_superposter
+import logging
 
 
 class LinaCorpus(object):
@@ -42,7 +43,7 @@ class LinaCorpus(object):
             drama = Lina(dramafile, self.outputfolder, metrics)
             yield drama
 
-    def get_metrics(self):
+    def get_plots(self, randomization=True):
         """
         Main function executing the pipeline from
         reading and parsing lina-xmls,
@@ -55,21 +56,36 @@ class LinaCorpus(object):
         # for ID, drama in dramas.items():
         for drama in dramas:
         # yields parsed dramas dicts
-            # if args.debug:
-            #     print(drama.title)
-            if os.path.isfile(os.path.join(self.outputfolder, str(drama.ID)+drama.title+".svg")):
+            if args.debug:
+                print("TITLE:", drama.title)
+            if os.path.isfile(os.path.join(self.outputfolder, "_".join([str(drama.ID),drama.title])+".svg")):
                 continue
-            speakers = drama.speakers
-            personae = drama.personae
-            # if args.debug:
-            #     print(personae)
-            #     print(speakers)
+            self.capture_fringe_cases(drama)
+            if randomization:
+                for i in range(0, 5):
+                    R = nx.gnm_random_graph(drama.graph_metrics.get("charcount"), drama.graph_metrics.get("edgecount"))
+                    plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
 
-            drama.write_output()
+    def get_metrics(self):
+        dramas = self.read_dramas()
+        header =    [
+                    'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
+                    'charcount', 'edgecount', 'maxdegree', 'avgdegree',
+                    'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
+                    'segment_count', 'count_type', 'all_in_index'
+                    ]
+        with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "w") as outfile:
+            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+            csvwriter.writerow(header)
+        with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "a") as outfile:
+            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+            for drama in dramas:
+                metrics = [drama.graph_metrics[m] for m in header]
+                csvwriter.writerow(metrics)
 
-            for i in range(0, 5):
-                R = nx.gnm_random_graph(drama.graph_metrics.get("charcount"), drama.graph_metrics.get("edgecount"))
-                plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
+    def capture_fringe_cases(self, drama):
+        if drama.graph_metrics.get("all_in_index") is None:
+            print(drama.title)
 
 
 class Lina(object):
@@ -82,6 +98,7 @@ class Lina(object):
         self.ID = ID
         self.metadata = metadata
         self.personae = personae
+        self.num_chars_total = len(personae)
         self.speakers = speakers
         self.filepath = os.path.join(self.outputfolder, str(self.ID))
         self.title = self.metadata.get("title", self.ID)
@@ -90,12 +107,22 @@ class Lina(object):
             self.graph_metrics = self.get_graph_metrics()
             self.character_metrics = self.get_character_metrics()
 
+    def get_characters_all_in_index(self):
+        appeared = set()
+        for i, speakers in enumerate(self.speakers):
+            for sp in speakers:
+                appeared.add(sp)
+            if len(appeared) >= self.num_chars_total:
+                i += 1
+                all_in_index = float(i/len(self.speakers))
+                # print(all_in_index, len(self.speakers), len(appeared), self.num_chars_total)
+                return all_in_index
 
     def write_output(self):
-        self.export_dict(self.graph_metrics, self.filepath+self.title+"graph.csv")
-        self.export_dicts(self.character_metrics, self.filepath+self.title+"chars.csv")
-        nx.write_edgelist(self.G, os.path.join(self.outputfolder, str(self.ID)+self.title+"edgelist.csv"), delimiter=";", data=["weight"])
-        plotGraph(self.G, filename=os.path.join(self.outputfolder, str(self.ID)+self.title+".svg"))
+        self.export_dict(self.graph_metrics, "_".join([self.filepath,self.title,"graph"])+".csv")
+        self.export_dicts(self.character_metrics, "_".join([self.filepath,self.title,"chars"])+".csv")
+        nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
+        plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
 
     def get_graph_metrics(self):
         graph_metrics = self.analyze_graph()
@@ -106,7 +133,10 @@ class Lina(object):
         graph_metrics["title"] = self.title
         graph_metrics["filename"] = self.metadata.get("filename")
         graph_metrics["genretitle"] = self.metadata.get("genretitle")
-        graph_metrics["scenecount"] = self.metadata.get("scenecount")
+        graph_metrics["subtitle"] = self.metadata.get("subtitle")
+        graph_metrics["segment_count"] = self.metadata.get("segment_count")
+        graph_metrics["count_type"] = self.metadata.get("count_type")
+        graph_metrics["all_in_index"] = self.get_characters_all_in_index()
         return graph_metrics
 
     def get_character_metrics(self):
@@ -123,7 +153,7 @@ class Lina(object):
             {
             "metadata":metadata,
             "personae":personae,
-            "speakers":speakers
+            "structure":structure
             }
         }
         """
@@ -135,11 +165,16 @@ class Lina(object):
         metadata = self.extract_metadata(header)
         metadata["filename"] = self.filename
         personae = self.extract_personae(persons)
-        speakers, scene_count = self.extract_speakers(text)
-        metadata["scenecount"] = scene_count
+        charmap = self.create_charmap(personae)
+        segments = self.extract_speakers(charmap)
+        metadata["segment_count"] = len(segments)
+        metadata["count_type"] = self.get_count_type()
         # parsed_drama = (ID, {"metadata": metadata, "personae":personae, "speakers":speakers})
         # return parsed_drama
-        return ID, metadata, personae, speakers
+
+        if args.debug:
+            print("SEGMENTS:", segments)
+        return ID, metadata, personae, segments
 
     def extract_metadata(self, header):
         """
@@ -192,12 +227,12 @@ class Lina(object):
             date_definite = date_print
 
         ## date is a string hotfix
-        if type(date_print) != int:
-            date_print = 9999
-        if type(date_written) != int:
-            date_print = 9999
-        if type(date_premiere) != int:
-            date_print = 9999
+        # if type(date_print) != int:
+        #     date_print = 9999
+        # if type(date_written) != int:
+        #     date_print = 9999
+        # if type(date_premiere) != int:
+        #     date_print = 9999
 
         if date_written and date_definite:
             if date_definite - date_written > 10:
@@ -234,89 +269,91 @@ class Lina(object):
         for char in persons.getchildren():
             name = char.find("{*}name").text
             aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{*}alias")]
-            # if args.debug:
-            #     print(aliases)
+            if args.debug:
+                print("ALIASES:", aliases)
             if name:
                 personae.append({name:aliases})
             else:
                 personae.append({aliases[0]:aliases})
-        # if args.debug:
-        #     print(personae)
+        if args.debug:
+            print("PERSONAE:", personae)
         return personae
 
     def extract_structure(self):
         text = self.tree.getroot().find("{*}text")
-        acts = dict()
-        scenes = dict()
         sps = text.findall(".//{*}sp")
-        scene_count = 1
-        act_count = 1
-        parents = set()
+        parentsegments = list()
         for sp in sps:
             parent = sp.getparent()
             head = parent.getchildren()[0]
-            # check if act (ends with (Akt/Akt./Aufzug/Aufzug.))
-            if head.text.endswith("kt") or head.text.endswith("kt.") or head.text.endswith("ug") or head.text.endswith("ug."):
-                # print(head.text)
-                if not head.text in acts:
-                    acts[act_count] = list()
-                    speaker = sp.attrib.get("who").replace("#","").split()
-                    acts[act_count].extend(speaker)
-                if parent not in parents:
-                    act_count += 1
+            if parent not in parentsegments:
+                parentsegments.append(parent)
             # check if scene (ends with "Szene/Szene./Auftritt/Auftritt.")
+        return parentsegments
+
+    def extract_speakers(self, charmap):
+        parentsegments = self.extract_structure()
+        segments = list()
+        for segment in parentsegments:
+            speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in segment.findall(".//{*}sp")]
+            speakers = list(chain.from_iterable(speakers))
+            speakers = [charmap[speaker] for speaker in speakers]
+            segments.append(list(set(speakers)))
+        return segments
+
+    def get_count_type(self):
+        text = self.tree.getroot().find("{*}text")
+        sps = text.findall(".//{*}sp")
+        count_type = "acts"
+        for sp in sps:
+            parent = sp.getparent()
+            head = parent.getchildren()[0]
             if head.text.endswith("ne") or head.text.endswith("ne.") or head.text.endswith("tt") or head.text.endswith("tt."):
+                count_type = "scenes"
                 # print(head.text)
-                if not head.text in scenes:
-                    scenes[scene_count] = list()
-                    speaker = sp.attrib.get("who").replace("#","").split()
-                    scenes[scene_count].extend(speaker)
-                if parent not in parents:
-                    scene_count += 1
-            parents.add(parent)
-        return acts, scenes
+        return count_type
 
-    def extract_speakers(self, text):
-        """
-        Extracts speakers that appear in the same scene,
-        returns a dict of dict of lists, and the overall scene count:
-        acts =
-        {"act1":
-            {"scene1":["speaker1", "speaker2"],
-            "scene2":["speaker2", "speaker3"]},
-         "act2":
-            {"scene1":["speaker3", "speaker2"],
-            "scene2":["speaker2", "speaker1"]}
-            }
-        }
-        scene_count = 4
-
-        """
-        acts = {}
-        scene_count = 0
-        for act in text.getchildren():
-            try:
-                actname = act.find("{*}head").text
-            except:
-                actname = str(scene_count)
-            if not actname:
-                actname = str(scene_count)
-                scene_count += 1
-            acts[actname] = {}
-
-            for scene in act.getchildren():
-                try:
-                    scenename = scene.find("{*}head").text
-                except:
-                    scenename = str(scene_count)
-                if not scenename:
-                    scenename = str(scene_count)
-                speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in scene.findall(".//{*}sp")]
-                speakers = list(chain.from_iterable(speakers))
-                if speakers:
-                    acts[actname][scenename] = speakers
-                scene_count += 1
-        return acts, scene_count
+    # def extract_speakers(self, text):
+    #     """
+    #     Extracts speakers that appear in the same scene,
+    #     returns a dict of dict of lists, and the overall scene count:
+    #     acts =
+    #     {"act1":
+    #         {"scene1":["speaker1", "speaker2"],
+    #         "scene2":["speaker2", "speaker3"]},
+    #      "act2":
+    #         {"scene1":["speaker3", "speaker2"],
+    #         "scene2":["speaker2", "speaker1"]}
+    #         }
+    #     }
+    #     scene_count = 4
+    #
+    #     """
+    #     acts = {}
+    #     scene_count = 0
+    #     for act in text.getchildren():
+    #         try:
+    #             actname = act.find("{*}head").text
+    #         except:
+    #             actname = str(scene_count)
+    #         if not actname:
+    #             actname = str(scene_count)
+    #             scene_count += 1
+    #         acts[actname] = {}
+    #
+    #         for scene in act.getchildren():
+    #             try:
+    #                 scenename = scene.find("{*}head").text
+    #             except:
+    #                 scenename = str(scene_count)
+    #             if not scenename:
+    #                 scenename = str(scene_count)
+    #             speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in scene.findall(".//{*}sp")]
+    #             speakers = list(chain.from_iterable(speakers))
+    #             if speakers:
+    #                 acts[actname][scenename] = speakers
+    #             scene_count += 1
+    #     return acts, scene_count
 
     def create_charmap(self, personae):
         """
@@ -347,30 +384,27 @@ class Lina(object):
         """
         speakerset = self.speakers
         personae = self.personae
-        charmap = self.create_charmap(personae)
-        # if args.debug:
-        #     print(charmap)
 
         B = nx.Graph()
         labels = {}
-        for act, scenes in speakerset.items():
-            for scene, speakers in scenes.items():
-                try:
-                    source = " ".join([act, scene])
-                except TypeError:
-                    source = " ".join([scene, scene])
-                targets = speakers
+        for i, speakers in enumerate(speakerset):
 
-                if not source in B.nodes():
-                    B.add_node(source, bipartite=0)
-                    labels[source] = source
+            source = str(i)
+            targets = speakers
+            if args.debug:
+                print("SOURCE, TARGET:", source, targets)
 
-                for target in targets:
-                    target = charmap.get(target)
-                    if not target in B.nodes():
-                        B.add_node(target, bipartite=1)
-                    B.add_edge(source, target)
+            if not source in B.nodes():
+                B.add_node(source, bipartite=0)
+                labels[source] = source
 
+            for target in targets:
+                if not target in B.nodes():
+                    B.add_node(target, bipartite=1)
+                B.add_edge(source, target)
+
+        if args.debug:
+            print("EDGES:", B.edges())
         scene_nodes = set(n for n,d in B.nodes(data=True) if d['bipartite']==0)
         person_nodes = set(B) - scene_nodes
         nx.is_bipartite(B)
@@ -426,7 +460,7 @@ class Lina(object):
                 values["avgpathlength"] = "NaN"
         except:
             print("NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.')")
-            values["avgdegree"] = "NaN"
+            values["avgpathlength"] = "NaN"
 
         try:
             values["clustering_coefficient"] = nx.average_clustering(G)
@@ -538,7 +572,7 @@ def main(args):
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "metrics":
-        corpus.get_metrics()
+        corpus.get_metrics(randomization=args.random)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
@@ -546,5 +580,6 @@ if __name__ == '__main__':
     parser.add_argument('--output', dest='outputfolder', help='relative or absolute path of the output folder')
     parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter or metrics')
     parser.add_argument('--debug', dest='debug', help='print debug message or not', action="store_true")
+    parser.add_argument('--randomization', dest='random', help='plot randomized graphs', action="store_true")
     args = parser.parse_args()
     main(args)
