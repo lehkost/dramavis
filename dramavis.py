@@ -43,7 +43,7 @@ class LinaCorpus(object):
             drama = Lina(dramafile, self.outputfolder, metrics)
             yield drama
 
-    def get_metrics(self, randomization=True):
+    def get_plots(self, randomization=True):
         """
         Main function executing the pipeline from
         reading and parsing lina-xmls,
@@ -60,13 +60,28 @@ class LinaCorpus(object):
                 print("TITLE:", drama.title)
             if os.path.isfile(os.path.join(self.outputfolder, "_".join([str(drama.ID),drama.title])+".svg")):
                 continue
-
-            drama.write_output()
             self.capture_fringe_cases(drama)
             if randomization:
                 for i in range(0, 5):
                     R = nx.gnm_random_graph(drama.graph_metrics.get("charcount"), drama.graph_metrics.get("edgecount"))
                     plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
+
+    def get_metrics(self):
+        dramas = self.read_dramas()
+        header =    [
+                    'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
+                    'charcount', 'edgecount', 'maxdegree', 'avgdegree',
+                    'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
+                    'segment_count', 'count_type', 'all_in_index'
+                    ]
+        with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "w") as outfile:
+            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+            csvwriter.writerow(header)
+        with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "a") as outfile:
+            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+            for drama in dramas:
+                metrics = [drama.graph_metrics[m] for m in header]
+                csvwriter.writerow(metrics)
 
     def capture_fringe_cases(self, drama):
         if drama.graph_metrics.get("all_in_index") is None:
@@ -118,7 +133,9 @@ class Lina(object):
         graph_metrics["title"] = self.title
         graph_metrics["filename"] = self.metadata.get("filename")
         graph_metrics["genretitle"] = self.metadata.get("genretitle")
-        graph_metrics["scenecount"] = self.metadata.get("scenecount")
+        graph_metrics["subtitle"] = self.metadata.get("subtitle")
+        graph_metrics["segment_count"] = self.metadata.get("segment_count")
+        graph_metrics["count_type"] = self.metadata.get("count_type")
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
         return graph_metrics
 
@@ -149,15 +166,15 @@ class Lina(object):
         metadata["filename"] = self.filename
         personae = self.extract_personae(persons)
         charmap = self.create_charmap(personae)
-        speakers, act_count, scene_count = self.extract_speakers(charmap)
-        metadata["scenecount"] = scene_count
-        metadata["actcount"] = act_count
+        segments = self.extract_speakers(charmap)
+        metadata["segment_count"] = len(segments)
+        metadata["count_type"] = self.get_count_type()
         # parsed_drama = (ID, {"metadata": metadata, "personae":personae, "speakers":speakers})
         # return parsed_drama
 
         if args.debug:
-            print("SPEAKERS:", speakers)
-        return ID, metadata, personae, speakers
+            print("SEGMENTS:", segments)
+        return ID, metadata, personae, segments
 
     def extract_metadata(self, header):
         """
@@ -264,42 +281,37 @@ class Lina(object):
 
     def extract_structure(self):
         text = self.tree.getroot().find("{*}text")
-        acts = list()
-        scenes = list()
         sps = text.findall(".//{*}sp")
-        scene_count = 1
-        act_count = 1
-        parentacts = list()
-        parentscenes = list()
+        parentsegments = list()
         for sp in sps:
             parent = sp.getparent()
             head = parent.getchildren()[0]
-            # check if act (ends with (Akt/Akt./Aufzug/Aufzug.))
-            if head.text.endswith("kt") or head.text.endswith("kt.") or head.text.endswith("ug") or head.text.endswith("ug."):
-                if parent not in parentacts:
-                    parentacts.append(parent)
+            if parent not in parentsegments:
+                parentsegments.append(parent)
             # check if scene (ends with "Szene/Szene./Auftritt/Auftritt.")
-            if head.text.endswith("ne") or head.text.endswith("ne.") or head.text.endswith("tt") or head.text.endswith("tt."):
-                if parent not in parentscenes:
-                    parentscenes.append(parent)
-                # print(head.text)
-        return parentacts, parentscenes
+        return parentsegments
 
     def extract_speakers(self, charmap):
-        parentacts, parentscenes = self.extract_structure()
-        act_count = len(parentacts)
-        scene_count = len(parentscenes)
-        if act_count > scene_count:
-            structure = parentacts
-        else:
-            structure = parentscenes
-        segments = []
-        for segment in structure:
+        parentsegments = self.extract_structure()
+        segments = list()
+        for segment in parentsegments:
             speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in segment.findall(".//{*}sp")]
             speakers = list(chain.from_iterable(speakers))
             speakers = [charmap[speaker] for speaker in speakers]
-            segments.append(speakers)
-        return segments, act_count, scene_count
+            segments.append(list(set(speakers)))
+        return segments
+
+    def get_count_type(self):
+        text = self.tree.getroot().find("{*}text")
+        sps = text.findall(".//{*}sp")
+        count_type = "acts"
+        for sp in sps:
+            parent = sp.getparent()
+            head = parent.getchildren()[0]
+            if head.text.endswith("ne") or head.text.endswith("ne.") or head.text.endswith("tt") or head.text.endswith("tt."):
+                count_type = "scenes"
+                # print(head.text)
+        return count_type
 
     # def extract_speakers(self, text):
     #     """
