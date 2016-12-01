@@ -74,7 +74,8 @@ class LinaCorpus(object):
                     'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
                     'charcount', 'edgecount', 'maxdegree', 'avgdegree',
                     'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                    'segment_count', 'count_type', 'all_in_index', 'main_character_entry_index', 'change_rate_mean', 'change_rate_std'
+                    'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
+                    'central_character', 'characters_last_in'
                     ]
         with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "w") as outfile:
             csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
@@ -111,6 +112,11 @@ class Lina(object):
             self.character_ranks = self.get_central_character()
             self.graph_metrics = self.get_graph_metrics()
 
+    def get_final_scene_size(self):
+        personae = set(list(chain.from_iterable(self.segments)))
+        last_scene_size = len(self.segments[-1])
+        return last_scene_size / len(personae)
+
     def get_drama_change_rate_metrics(self):
         change_rates = self.get_drama_change_rate()
         cr_mean = numpy.mean(change_rates)
@@ -134,8 +140,8 @@ class Lina(object):
         for i, segment in enumerate(self.segments):
              if main_character in segment:
                  i += 1
-                 main_character_entry_index = float(i/len(self.segments))
-                 return main_character_entry_index
+                 central_character_entry_index = float(i/len(self.segments))
+                 return central_character_entry_index
 
     def get_main_character(self):
         cc = sorted(self.character_ranks, key=self.character_ranks.__getitem__)
@@ -206,7 +212,7 @@ class Lina(object):
             csvwriter = csv.writer(f, delimiter=';')
             csvwriter.writerow(["segment", "change_rate"])
             for i, t in enumerate(t):
-                csvwriter.writerow([i, t])
+                csvwriter.writerow([i+1, t])
 
     def get_graph_metrics(self):
         graph_metrics = self.analyze_graph()
@@ -221,9 +227,16 @@ class Lina(object):
         graph_metrics["segment_count"] = self.metadata.get("segment_count")
         graph_metrics["count_type"] = self.metadata.get("count_type")
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
-        graph_metrics["main_character_entry_index"] = self.get_main_character_entry()
+        graph_metrics["central_character_entry_index"] = self.get_main_character_entry()
         graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
+        graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
+        graph_metrics["central_character"] = self.get_main_character()
+        graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return graph_metrics
+
+    def get_characters_last_in(self):
+        last_chars = self.segments[-1]
+        return ",".join(last_chars)
 
     def get_character_metrics(self):
         character_metrics = self.analyze_characters(self.G)
