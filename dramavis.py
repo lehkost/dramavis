@@ -16,6 +16,7 @@ import glob
 import networkx as nx
 import csv
 from itertools import chain
+from collections import Counter
 import argparse
 from superposter import plotGraph, plot_superposter
 import logging
@@ -82,6 +83,7 @@ class LinaCorpus(object):
             for drama in dramas:
                 metrics = [drama.graph_metrics[m] for m in header]
                 csvwriter.writerow(metrics)
+                drama.write_output()
 
     def capture_fringe_cases(self, drama):
         if drama.graph_metrics.get("all_in_index") is None:
@@ -94,33 +96,70 @@ class Lina(object):
         self.outputfolder = outputfolder
         self.tree = etree.parse(dramafile)
         self.filename = os.path.splitext(os.path.basename((dramafile)))[0]
-        ID, metadata, personae, speakers = self.parse_drama()
+        ID, metadata, personae, segments = self.parse_drama()
         self.ID = ID
         self.metadata = metadata
         self.personae = personae
         self.num_chars_total = len(personae)
-        self.speakers = speakers
+        self.segments = segments
         self.filepath = os.path.join(self.outputfolder, str(self.ID))
         self.title = self.metadata.get("title", self.ID)
         self.G = self.create_graph()
         if metrics:
             self.graph_metrics = self.get_graph_metrics()
             self.character_metrics = self.get_character_metrics()
+            self.character_ranks = self.get_central_character()
+
+    def get_character_frequencies(self):
+        frequencies = Counter(list(chain.from_iterable(self.segments)))
+        return frequencies
+
+    def get_character_ranks(self):
+        ranks = {}
+        personae = [list(p.keys())[0] for p in self.personae]
+        for person in personae:
+            ranks[person] = {}
+        ranked_metrics = {}
+        ranked_metrics['degree'] = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        for person in personae:
+            ranks[person]['degree'] = ranked_metrics['degree'].index(person)
+            ranks[person]['closeness'] = ranked_metrics['closeness'].index(person)
+            ranks[person]['betweenness'] = ranked_metrics['betweenness'].index(person)
+        centrality_ranks = {}
+        for person in personae:
+            centrality_ranks[person] = float(sum([ranks[person]['degree'],ranks[person]['closeness'],ranks[person]['betweenness']]) / 3.)
+        return centrality_ranks
+
+    def get_central_character(self):
+        frequencies = self.get_character_frequencies()
+        frequency_ranks = sorted(frequencies, key=frequencies.__getitem__, reverse=True)
+        centrality_ranks = self.get_character_ranks()
+        central_characters = {}
+        personae = [list(p.keys())[0] for p in self.personae]
+        for person in personae:
+            central_characters[person] = float(sum([frequency_ranks.index(person), centrality_ranks[person]]) / 2.)
+        return central_characters
+
 
     def get_characters_all_in_index(self):
         appeared = set()
-        for i, speakers in enumerate(self.speakers):
+        for i, speakers in enumerate(self.segments):
             for sp in speakers:
                 appeared.add(sp)
             if len(appeared) >= self.num_chars_total:
                 i += 1
-                all_in_index = float(i/len(self.speakers))
-                # print(all_in_index, len(self.speakers), len(appeared), self.num_chars_total)
+                all_in_index = float(i/len(self.segments))
+                # print(all_in_index, len(self.segments), len(appeared), self.num_chars_total)
                 return all_in_index
 
     def write_output(self):
         self.export_dict(self.graph_metrics, "_".join([self.filepath,self.title,"graph"])+".csv")
-        self.export_dicts(self.character_metrics, "_".join([self.filepath,self.title,"chars"])+".csv")
+        chars = self.character_metrics
+        chars['weighted_centralities_rank'] = self.get_character_ranks()
+        chars['central_character_rank'] = self.character_ranks
+        self.export_dicts(chars, "_".join([self.filepath,self.title,"chars"])+".csv")
         nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
         plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
 
@@ -382,7 +421,7 @@ class Lina(object):
 
         Returns a networkx weighted projected graph.
         """
-        speakerset = self.speakers
+        speakerset = self.segments
         personae = self.personae
 
         B = nx.Graph()
@@ -572,7 +611,7 @@ def main(args):
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "metrics":
-        corpus.get_metrics(randomization=args.random)
+        corpus.get_metrics()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
