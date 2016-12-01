@@ -110,6 +110,9 @@ class Lina(object):
             self.character_metrics = self.get_character_metrics()
             self.character_ranks = self.get_central_character()
 
+    def get_main_character(self):
+        pass
+
     def get_character_frequencies(self):
         frequencies = Counter(list(chain.from_iterable(self.segments)))
         return frequencies
