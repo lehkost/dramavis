@@ -153,7 +153,7 @@ class Lina(object):
 
     def get_character_ranks(self):
         ranks = {}
-        personae = [list(p.keys())[0] for p in self.personae]
+        personae = set(list(chain.from_iterable(self.segments)))
         for person in personae:
             ranks[person] = {}
         ranked_metrics = {}
@@ -174,7 +174,7 @@ class Lina(object):
         frequency_ranks = sorted(frequencies, key=frequencies.__getitem__, reverse=True)
         centrality_ranks = self.get_character_ranks()
         central_characters = {}
-        personae = [list(p.keys())[0] for p in self.personae]
+        personae = set(list(chain.from_iterable(self.segments)))
         for person in personae:
             central_characters[person] = float(sum([frequency_ranks.index(person)+1, centrality_ranks[person]]) / 2.)
         return central_characters
@@ -193,12 +193,20 @@ class Lina(object):
 
     def write_output(self):
         self.export_dict(self.graph_metrics, "_".join([self.filepath,self.title,"graph"])+".csv")
+        self.export_table(self.get_drama_change_rate(), "_".join([self.filepath, self.title,"change_rates"])+".csv")
         chars = self.character_metrics
         chars['weighted_centralities_rank'] = self.get_character_ranks()
         chars['central_character_rank'] = self.character_ranks
         self.export_dicts(chars, "_".join([self.filepath,self.title,"chars"])+".csv")
         nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
         plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
+
+    def export_table(self, t, filepath):
+        with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
+            csvwriter = csv.writer(f, delimiter=';')
+            csvwriter.writerow(["segment", "change_rate"])
+            for i, t in enumerate(t):
+                csvwriter.writerow([i, t])
 
     def get_graph_metrics(self):
         graph_metrics = self.analyze_graph()
@@ -613,6 +621,7 @@ class Lina(object):
         randcluster = 0
         randavgpathl = 0
         c = 0
+        a = 0
 
         for i in range(0, 1000):
             R = nx.gnm_random_graph(n, e)
@@ -627,6 +636,7 @@ class Lina(object):
                 try:
                     R = nx.gnm_random_graph(n, e)
                     randavgpathl += nx.average_shortest_path_length(R)
+                    a += 1
                 except:
                     pass
                 else:
@@ -639,7 +649,7 @@ class Lina(object):
         except:
             randcluster = "NaN"
         try:
-            randavgpathl = randavgpathl / 1000
+            randavgpathl = randavgpathl / a
         except:
             randavgpathl = "NaN"
         return randavgpathl, randcluster
