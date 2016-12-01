@@ -15,10 +15,12 @@ import os
 import glob
 import networkx as nx
 import csv
-from itertools import chain
+from itertools import chain, zip_longest
+from collections import Counter
 import argparse
 from superposter import plotGraph, plot_superposter
 import logging
+import numpy
 
 
 class LinaCorpus(object):
@@ -72,7 +74,7 @@ class LinaCorpus(object):
                     'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
                     'charcount', 'edgecount', 'maxdegree', 'avgdegree',
                     'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                    'segment_count', 'count_type', 'all_in_index'
+                    'segment_count', 'count_type', 'all_in_index', 'main_character_entry_index', 'change_rate_mean', 'change_rate_std'
                     ]
         with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "w") as outfile:
             csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
@@ -82,6 +84,7 @@ class LinaCorpus(object):
             for drama in dramas:
                 metrics = [drama.graph_metrics[m] for m in header]
                 csvwriter.writerow(metrics)
+                drama.write_output()
 
     def capture_fringe_cases(self, drama):
         if drama.graph_metrics.get("all_in_index") is None:
@@ -94,35 +97,116 @@ class Lina(object):
         self.outputfolder = outputfolder
         self.tree = etree.parse(dramafile)
         self.filename = os.path.splitext(os.path.basename((dramafile)))[0]
-        ID, metadata, personae, speakers = self.parse_drama()
+        ID, metadata, personae, segments = self.parse_drama()
         self.ID = ID
         self.metadata = metadata
         self.personae = personae
         self.num_chars_total = len(personae)
-        self.speakers = speakers
+        self.segments = segments
         self.filepath = os.path.join(self.outputfolder, str(self.ID))
         self.title = self.metadata.get("title", self.ID)
         self.G = self.create_graph()
         if metrics:
-            self.graph_metrics = self.get_graph_metrics()
             self.character_metrics = self.get_character_metrics()
+            self.character_ranks = self.get_central_character()
+            self.graph_metrics = self.get_graph_metrics()
+
+    def get_drama_change_rate_metrics(self):
+        change_rates = self.get_drama_change_rate()
+        cr_mean = numpy.mean(change_rates)
+        cr_std = numpy.std(change_rates)
+        return cr_mean, cr_std
+
+    def get_drama_change_rate(self):
+        change_rates = []
+        for x, y in zip_longest(self.segments[:-1], self.segments[1:]):
+            s = set(x)
+            t = set(y)
+            u = s.intersection(t)
+            cr = abs(len(s)-len(u)) + abs(len(u)-len(t))
+            cr_sum = len(s) + len(t)
+            change_rates.append(cr/cr_sum)
+        return change_rates
+
+
+    def get_main_character_entry(self):
+        main_character = self.get_main_character()
+        for i, segment in enumerate(self.segments):
+             if main_character in segment:
+                 i += 1
+                 main_character_entry_index = float(i/len(self.segments))
+                 return main_character_entry_index
+
+    def get_main_character(self):
+        cc = sorted(self.character_ranks, key=self.character_ranks.__getitem__)
+        cr = [self.character_ranks[c] for c in cc]
+        minrank = min(cr)
+        main_chars = [i for i, j in enumerate(cr) if j == minrank]
+        if len(main_chars) == 1:
+            return cc[main_chars[0]]
+        else:
+            return None
+
+    def get_character_frequencies(self):
+        frequencies = Counter(list(chain.from_iterable(self.segments)))
+        return frequencies
+
+    def get_character_ranks(self):
+        ranks = {}
+        personae = set(list(chain.from_iterable(self.segments)))
+        for person in personae:
+            ranks[person] = {}
+        ranked_metrics = {}
+        ranked_metrics['degree'] = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        for person in personae:
+            ranks[person]['degree'] = ranked_metrics['degree'].index(person)+1
+            ranks[person]['closeness'] = ranked_metrics['closeness'].index(person)+1
+            ranks[person]['betweenness'] = ranked_metrics['betweenness'].index(person)+1
+        centrality_ranks = {}
+        for person in personae:
+            centrality_ranks[person] = float(sum([ranks[person]['degree'],ranks[person]['closeness'],ranks[person]['betweenness']]) / 3.)
+        return centrality_ranks
+
+    def get_central_character(self):
+        frequencies = self.get_character_frequencies()
+        frequency_ranks = sorted(frequencies, key=frequencies.__getitem__, reverse=True)
+        centrality_ranks = self.get_character_ranks()
+        central_characters = {}
+        personae = set(list(chain.from_iterable(self.segments)))
+        for person in personae:
+            central_characters[person] = float(sum([frequency_ranks.index(person)+1, centrality_ranks[person]]) / 2.)
+        return central_characters
+
 
     def get_characters_all_in_index(self):
         appeared = set()
-        for i, speakers in enumerate(self.speakers):
+        for i, speakers in enumerate(self.segments):
             for sp in speakers:
                 appeared.add(sp)
             if len(appeared) >= self.num_chars_total:
                 i += 1
-                all_in_index = float(i/len(self.speakers))
-                # print(all_in_index, len(self.speakers), len(appeared), self.num_chars_total)
+                all_in_index = float(i/len(self.segments))
+                # print(all_in_index, len(self.segments), len(appeared), self.num_chars_total)
                 return all_in_index
 
     def write_output(self):
         self.export_dict(self.graph_metrics, "_".join([self.filepath,self.title,"graph"])+".csv")
-        self.export_dicts(self.character_metrics, "_".join([self.filepath,self.title,"chars"])+".csv")
+        self.export_table(self.get_drama_change_rate(), "_".join([self.filepath, self.title,"change_rates"])+".csv")
+        chars = self.character_metrics
+        chars['weighted_centralities_rank'] = self.get_character_ranks()
+        chars['central_character_rank'] = self.character_ranks
+        self.export_dicts(chars, "_".join([self.filepath,self.title,"chars"])+".csv")
         nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
         plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
+
+    def export_table(self, t, filepath):
+        with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
+            csvwriter = csv.writer(f, delimiter=';')
+            csvwriter.writerow(["segment", "change_rate"])
+            for i, t in enumerate(t):
+                csvwriter.writerow([i, t])
 
     def get_graph_metrics(self):
         graph_metrics = self.analyze_graph()
@@ -137,6 +221,8 @@ class Lina(object):
         graph_metrics["segment_count"] = self.metadata.get("segment_count")
         graph_metrics["count_type"] = self.metadata.get("count_type")
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
+        graph_metrics["main_character_entry_index"] = self.get_main_character_entry()
+        graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
         return graph_metrics
 
     def get_character_metrics(self):
@@ -382,7 +468,7 @@ class Lina(object):
 
         Returns a networkx weighted projected graph.
         """
-        speakerset = self.speakers
+        speakerset = self.segments
         personae = self.personae
 
         B = nx.Graph()
@@ -535,6 +621,7 @@ class Lina(object):
         randcluster = 0
         randavgpathl = 0
         c = 0
+        a = 0
 
         for i in range(0, 1000):
             R = nx.gnm_random_graph(n, e)
@@ -549,6 +636,7 @@ class Lina(object):
                 try:
                     R = nx.gnm_random_graph(n, e)
                     randavgpathl += nx.average_shortest_path_length(R)
+                    a += 1
                 except:
                     pass
                 else:
@@ -561,7 +649,7 @@ class Lina(object):
         except:
             randcluster = "NaN"
         try:
-            randavgpathl = randavgpathl / 1000
+            randavgpathl = randavgpathl / a
         except:
             randavgpathl = "NaN"
         return randavgpathl, randcluster
@@ -572,7 +660,7 @@ def main(args):
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "metrics":
-        corpus.get_metrics(randomization=args.random)
+        corpus.get_metrics()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
