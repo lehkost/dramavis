@@ -18,6 +18,7 @@ import csv
 from itertools import chain
 import argparse
 from superposter import plotGraph, plot_superposter
+import logging
 
 
 class LinaCorpus(object):
@@ -42,7 +43,7 @@ class LinaCorpus(object):
             drama = Lina(dramafile, self.outputfolder, metrics)
             yield drama
 
-    def get_metrics(self):
+    def get_metrics(self, randomization=True):
         """
         Main function executing the pipeline from
         reading and parsing lina-xmls,
@@ -57,16 +58,15 @@ class LinaCorpus(object):
         # yields parsed dramas dicts
             if args.debug:
                 print("TITLE:", drama.title)
-            if os.path.isfile(os.path.join(self.outputfolder, str(drama.ID)+drama.title+".svg")):
-                print("does not exist")
+            if os.path.isfile(os.path.join(self.outputfolder, "_".join([str(drama.ID),drama.title])+".svg")):
                 continue
 
             drama.write_output()
             self.capture_fringe_cases(drama)
-
-            for i in range(0, 5):
-                R = nx.gnm_random_graph(drama.graph_metrics.get("charcount"), drama.graph_metrics.get("edgecount"))
-                plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
+            if randomization:
+                for i in range(0, 5):
+                    R = nx.gnm_random_graph(drama.graph_metrics.get("charcount"), drama.graph_metrics.get("edgecount"))
+                    plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
 
     def capture_fringe_cases(self, drama):
         if drama.graph_metrics.get("all_in_index") is None:
@@ -560,7 +560,7 @@ def main(args):
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "metrics":
-        corpus.get_metrics()
+        corpus.get_metrics(randomization=args.random)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
@@ -568,5 +568,6 @@ if __name__ == '__main__':
     parser.add_argument('--output', dest='outputfolder', help='relative or absolute path of the output folder')
     parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter or metrics')
     parser.add_argument('--debug', dest='debug', help='print debug message or not', action="store_true")
+    parser.add_argument('--randomization', dest='random', help='plot randomized graphs', action="store_true")
     args = parser.parse_args()
     main(args)
