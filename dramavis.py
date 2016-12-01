@@ -3,11 +3,11 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
-__author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <frank.fischer at sub.uni-goettingen.de>"
+__author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
 __copyright__ = "Copyright 2016"
 __license__ = "MIT"
-__version__ = "0.2"
-__maintainer__ = "Frank Fischer <frank.fischer at sub.uni-goettingen.de>"
+__version__ = "0.3 (beta)"
+__maintainer__ = "Frank Fischer <ffischer at hse.ru>"
 __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
 from lxml import etree
@@ -204,7 +204,7 @@ class Lina(object):
         graph_metrics = self.analyze_graph()
         graph_metrics["ID"] = self.ID
         graph_metrics["average_path_length_random"], graph_metrics["clustering_coefficient_random"] = self.randomize_graph(graph_metrics.get("charcount"), graph_metrics.get("edgecount"))
-        graph_metrics["year"] = self.metadata.get("date_print")
+        graph_metrics["year"] = self.metadata.get("date_definite")
         graph_metrics["author"] = self.metadata.get("author")
         graph_metrics["title"] = self.title
         graph_metrics["filename"] = self.metadata.get("filename")
