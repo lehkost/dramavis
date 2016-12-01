@@ -128,7 +128,7 @@ class Lina(object):
         graph_metrics = self.analyze_graph()
         graph_metrics["ID"] = self.ID
         graph_metrics["average_path_length_random"], graph_metrics["clustering_coefficient_random"] = self.randomize_graph(graph_metrics.get("charcount"), graph_metrics.get("edgecount"))
-        graph_metrics["year"] = self.metadata.get("date_print")
+        graph_metrics["year"] = self.metadata.get("date_definite")
         graph_metrics["author"] = self.metadata.get("author")
         graph_metrics["title"] = self.title
         graph_metrics["filename"] = self.metadata.get("filename")
