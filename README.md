@@ -21,7 +21,7 @@
 
 ## Installation
 
-Depends on [Anacoda](https://www.continuum.io/downloads) for Python 3
+Depends on [Anaconda](https://www.continuum.io/downloads) for Python 3
 
 Prepare:
 ```
@@ -39,6 +39,10 @@ or
 ```
 python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action plotsuperposter
 ```
+
+* additional flags
+  * `--debug` prints alot of internal variables when running
+  * `--randomization` prints randomized graphs, takes longer to run
 
 Running dramavis can take up to 4 seconds per play with an average of 2.5 seconds, this is mainly due to the network randomization for statistics. plotsuperposter takes around 1 second per play.
 
