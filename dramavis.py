@@ -148,7 +148,7 @@ class Lina(object):
             t = set(y)
             u = s.intersection(t)
             cr = abs(len(s)-len(u)) + abs(len(u)-len(t))
-            cr_sum = len(s) + len(t)
+            cr_sum = len(s.union(t))
             change_rates.append(cr/cr_sum)
         return change_rates
 
