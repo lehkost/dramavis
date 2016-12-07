@@ -68,6 +68,24 @@ class LinaCorpus(object):
                     R = nx.gnm_random_graph(drama.graph_metrics.get("charcount"), drama.graph_metrics.get("edgecount"))
                     plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
 
+    def get_central_characters(self):
+        dramas = self.read_dramas(metrics=False)
+        header = [
+                    'author', 'title', 'year',
+                    'frequency', 'degree', 'betweenness', 'closeness',
+                    'central'
+                 ]
+        with open(os.path.join(self.outputfolder, "central_characters.csv"), "w") as outfile:
+            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+            csvwriter.writerow(header)
+        with open(os.path.join(self.outputfolder, "central_characters.csv"), "a") as outfile:
+            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+            for drama in dramas:
+                metadata = [drama.metadata.get('author'), drama.metadata.get('title'), drama.metadata.get('date_definite')]
+                chars = [drama.get_top_characters()[m] for m in header[3:]]
+                csvwriter.writerow(metadata+chars)
+
+
     def get_metrics(self):
         dramas = self.read_dramas()
         header =    [
@@ -107,9 +125,9 @@ class Lina(object):
         self.filepath = os.path.join(self.outputfolder, str(self.ID))
         self.title = self.metadata.get("title", self.ID)
         self.G = self.create_graph()
+        self.character_metrics = self.get_character_metrics()
+        self.character_centralities = self.get_central_characters()
         if metrics:
-            self.character_metrics = self.get_character_metrics()
-            self.character_ranks = self.get_central_character()
             self.graph_metrics = self.get_graph_metrics()
 
     def get_final_scene_size(self):
@@ -130,26 +148,25 @@ class Lina(object):
             t = set(y)
             u = s.intersection(t)
             cr = abs(len(s)-len(u)) + abs(len(u)-len(t))
-            cr_sum = len(s) + len(t)
+            cr_sum = len(s.union(t))
             change_rates.append(cr/cr_sum)
         return change_rates
 
-
-    def get_main_character_entry(self):
-        main_character = self.get_main_character()
+    def get_central_character_entry(self):
+        central_character = self.get_central_character()
         for i, segment in enumerate(self.segments):
-             if main_character in segment:
+             if central_character in segment:
                  i += 1
                  central_character_entry_index = float(i/len(self.segments))
                  return central_character_entry_index
 
-    def get_main_character(self):
-        cc = sorted(self.character_ranks, key=self.character_ranks.__getitem__)
-        cr = [self.character_ranks[c] for c in cc]
+    def get_central_character(self):
+        cc = sorted(self.character_centralities, key=self.character_centralities.__getitem__)
+        cr = [self.character_centralities[c] for c in cc]
         minrank = min(cr)
-        main_chars = [i for i, j in enumerate(cr) if j == minrank]
-        if len(main_chars) == 1:
-            return cc[main_chars[0]]
+        central_chars = [i for i, j in enumerate(cr) if j == minrank]
+        if len(central_chars) == 1:
+            return cc[central_chars[0]]
         else:
             return None
 
@@ -157,28 +174,47 @@ class Lina(object):
         frequencies = Counter(list(chain.from_iterable(self.segments)))
         return frequencies
 
+    def get_top_characters(self):
+        top_chars = {}
+        top_chars['frequency'] = self.get_character_frequencies().most_common(1)[0][0]
+        ranked_metrics = self.get_ranked_characters()
+        top_chars['degree'] = ranked_metrics['degree'][0]
+        top_chars['closeness'] = ranked_metrics['closeness'][0]
+        top_chars['betweenness'] = ranked_metrics['betweenness'][0]
+        top_chars['central'] = self.get_central_character()
+        return top_chars
+
+    def get_ranked_characters(self):
+        ranked_metrics = {}
+        ranked_metrics['degree'] = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        return ranked_metrics
+
     def get_character_ranks(self):
         ranks = {}
         personae = set(list(chain.from_iterable(self.segments)))
         for person in personae:
             ranks[person] = {}
-        ranked_metrics = {}
-        ranked_metrics['degree'] = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
-        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
-        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics = self.get_ranked_characters()
         for person in personae:
             ranks[person]['degree'] = ranked_metrics['degree'].index(person)+1
             ranks[person]['closeness'] = ranked_metrics['closeness'].index(person)+1
             ranks[person]['betweenness'] = ranked_metrics['betweenness'].index(person)+1
+        return ranks
+
+    def get_centrality_ranks(self):
+        ranks = self.get_character_ranks()
         centrality_ranks = {}
+        personae = set(list(chain.from_iterable(self.segments)))
         for person in personae:
             centrality_ranks[person] = float(sum([ranks[person]['degree'],ranks[person]['closeness'],ranks[person]['betweenness']]) / 3.)
         return centrality_ranks
 
-    def get_central_character(self):
+    def get_central_characters(self):
         frequencies = self.get_character_frequencies()
         frequency_ranks = sorted(frequencies, key=frequencies.__getitem__, reverse=True)
-        centrality_ranks = self.get_character_ranks()
+        centrality_ranks = self.get_centrality_ranks()
         central_characters = {}
         personae = set(list(chain.from_iterable(self.segments)))
         for person in personae:
@@ -202,7 +238,7 @@ class Lina(object):
         self.export_table(self.get_drama_change_rate(), "_".join([self.filepath, self.title,"change_rates"])+".csv")
         chars = self.character_metrics
         chars['weighted_centralities_rank'] = self.get_character_ranks()
-        chars['central_character_rank'] = self.character_ranks
+        chars['central_character_rank'] = self.character_centralities
         self.export_dicts(chars, "_".join([self.filepath,self.title,"chars"])+".csv")
         nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
         plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
@@ -227,10 +263,10 @@ class Lina(object):
         graph_metrics["segment_count"] = self.metadata.get("segment_count")
         graph_metrics["count_type"] = self.metadata.get("count_type")
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
-        graph_metrics["central_character_entry_index"] = self.get_main_character_entry()
+        graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
         graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
         graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
-        graph_metrics["central_character"] = self.get_main_character()
+        graph_metrics["central_character"] = self.get_central_character()
         graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return graph_metrics
 
@@ -412,48 +448,6 @@ class Lina(object):
                 # print(head.text)
         return count_type
 
-    # def extract_speakers(self, text):
-    #     """
-    #     Extracts speakers that appear in the same scene,
-    #     returns a dict of dict of lists, and the overall scene count:
-    #     acts =
-    #     {"act1":
-    #         {"scene1":["speaker1", "speaker2"],
-    #         "scene2":["speaker2", "speaker3"]},
-    #      "act2":
-    #         {"scene1":["speaker3", "speaker2"],
-    #         "scene2":["speaker2", "speaker1"]}
-    #         }
-    #     }
-    #     scene_count = 4
-    #
-    #     """
-    #     acts = {}
-    #     scene_count = 0
-    #     for act in text.getchildren():
-    #         try:
-    #             actname = act.find("{*}head").text
-    #         except:
-    #             actname = str(scene_count)
-    #         if not actname:
-    #             actname = str(scene_count)
-    #             scene_count += 1
-    #         acts[actname] = {}
-    #
-    #         for scene in act.getchildren():
-    #             try:
-    #                 scenename = scene.find("{*}head").text
-    #             except:
-    #                 scenename = str(scene_count)
-    #             if not scenename:
-    #                 scenename = str(scene_count)
-    #             speakers = [speaker.attrib.get("who").replace("#","").split() for speaker in scene.findall(".//{*}sp")]
-    #             speakers = list(chain.from_iterable(speakers))
-    #             if speakers:
-    #                 acts[actname][scenename] = speakers
-    #             scene_count += 1
-    #     return acts, scene_count
-
     def create_charmap(self, personae):
         """
         Maps aliases back to the definite personname,
@@ -623,7 +617,7 @@ class Lina(object):
             except:
                 print("Empty values.")
 
-    def randomize_graph(self, n,e):
+    def randomize_graph(self, n, e):
         """
         Creates 1000 random graphs with networkx.gnm_random_graph(nodecount, edgecount),
         and computes average_clustering_coefficient and average_shortest_path_length,
@@ -674,12 +668,14 @@ def main(args):
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "metrics":
         corpus.get_metrics()
+    if args.action == "char_ranks":
+        corpus.get_central_characters()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
     parser.add_argument('--input', dest='inputfolder', help='relative or absolute path of the input-xmls folder')
     parser.add_argument('--output', dest='outputfolder', help='relative or absolute path of the output folder')
-    parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter or metrics')
+    parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter, metrics, char_ranks')
     parser.add_argument('--debug', dest='debug', help='print debug message or not', action="store_true")
     parser.add_argument('--randomization', dest='random', help='plot randomized graphs', action="store_true")
     args = parser.parse_args()
