@@ -173,18 +173,24 @@ class Lina(object):
     def get_character_frequencies(self):
         frequencies = Counter(list(chain.from_iterable(self.segments)))
         return frequencies
-        
-    def get_top_ranked_chars(self):
-        char_centralities = {}
+
+    def get_ranks_with_chars(self):
+        ranks_with_chars = {}
         for metric in ['degree', 'closeness', 'betweenness']:
-            char_centralities[metric] = {n:[] for n in range(1, len(self.get_character_ranks())+1)}
+            ranks_with_chars[metric] = {n:[] for n in range(1, len(self.get_character_ranks())+1)}
             for char, metrics in self.get_character_ranks().items():
-                char_centralities[metric][metrics[metric]].append(char)
+                ranks_with_chars[metric][metrics[metric]].append(char)
+        return ranks_with_chars
+
+    def get_top_ranked_chars(self):
+        ranks_with_chars = self.get_ranks_with_chars()
         top_ranked = {}
         for metric in ['degree', 'closeness', 'betweenness']:
-            if len(char_centralities[metric][1]) == 1:
-                top_ranked[metric] = char_centralities[metric][1][0]
-            else:
+            top_char = ranks_with_chars[metric][1][0]
+            top_ranked[metric] = top_char
+            top_value = self.character_metrics[metric][top_char]
+            values = list(self.character_metrics[metric].values())
+            if values.count(top_value) != 1:
                 top_ranked[metric] = "SEVERAL"
         top_ranked['frequency'] = self.get_character_frequencies().most_common(1)[0][0]
         top_ranked['central'] = self.get_central_character()
