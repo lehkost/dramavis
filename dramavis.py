@@ -177,18 +177,46 @@ class Lina(object):
     def get_top_characters(self):
         top_chars = {}
         top_chars['frequency'] = self.get_character_frequencies().most_common(1)[0][0]
-        ranked_metrics = self.get_ranked_characters()
-        top_chars['degree'] = ranked_metrics['degree'][0]
-        top_chars['closeness'] = ranked_metrics['closeness'][0]
-        top_chars['betweenness'] = ranked_metrics['betweenness'][0]
+        ranked_metrics = self.get_top_ranked_chars()
+        top_chars['degree'] = ranked_metrics['degree']
+        top_chars['closeness'] = ranked_metrics['closeness']
+        top_chars['betweenness'] = ranked_metrics['betweenness']
         top_chars['central'] = self.get_central_character()
         return top_chars
+
+    def get_top_ranked_chars(self):
+        ranked_metrics = {}
+        dc = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        cc = sorted(self.character_metrics['closeness'], key=self.character_metrics['closeness'].__getitem__, reverse=True)
+        bc = sorted(self.character_metrics['betweenness'], key=self.character_metrics['betweenness'].__getitem__, reverse=True)
+        dr = [self.character_centralities[c] for c in dc]
+        cr = [self.character_centralities[c] for c in cc]
+        br = [self.character_centralities[c] for c in bc]
+        dr_minrank = min(dr)
+        cr_minrank = min(cr)
+        br_minrank = min(br)
+        dc_chars = [i for i, j in enumerate(dr) if j == dr_minrank]
+        cc_chars = [i for i, j in enumerate(cr) if j == cr_minrank]
+        bc_chars = [i for i, j in enumerate(br) if j == br_minrank]
+        if len(dc_chars) == 1:
+            ranked_metrics['degree'] = dc[dc_chars[0]]
+        else:
+            ranked_metrics['degree'] = "SEVERAL"
+        if len(cc_chars) == 1:
+            ranked_metrics['closeness'] = cc[cc_chars[0]]
+        else:
+            ranked_metrics['closeness'] = "SEVERAL"
+        if len(bc_chars) == 1:
+            ranked_metrics['betweenness'] = bc[bc_chars[0]]
+        else:
+            ranked_metrics['betweenness'] = "SEVERAL"
+        return ranked_metrics
 
     def get_ranked_characters(self):
         ranked_metrics = {}
         ranked_metrics['degree'] = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
-        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
-        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['degree'].__getitem__, reverse=True)
+        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['closeness'].__getitem__, reverse=True)
+        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['betweenness'].__getitem__, reverse=True)
         return ranked_metrics
 
     def get_character_ranks(self):
