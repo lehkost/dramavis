@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.rnc"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.sch"?>
+<play xmlns="http://lina.digital" id="88">
+  <header>
+    <title>Emilia Galotti</title>
+    <subtitle>Ein Trauerspiel in fünf Aufzügen</subtitle>
+    <genretitle>Trauerspiel</genretitle>
+    <author key="pnd:118572121">Lessing, Gotthold Ephraim</author>
+    <date type="print" when="1772"/>
+    <date type="premiere" when="1772"/>
+    <date type="written"/>
+    <source>https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:rksp.0/data</source>
+  </header>
+  <personae>
+    <character>
+      <name>DER PRINZ</name>
+      <alias xml:id="der_prinz">
+        <name>DER PRINZ</name>
+      </alias>
+    </character>
+    <character>
+      <name>DER KAMMERDIENER</name>
+      <alias xml:id="der_kammerdiener">
+        <name>DER KAMMERDIENER</name>
+      </alias>
+    </character>
+    <character>
+      <name>CONTI</name>
+      <alias xml:id="conti">
+        <name>CONTI</name>
+      </alias>
+    </character>
+    <character>
+      <name>MARINELLI</name>
+      <alias xml:id="marinelli">
+        <name>MARINELLI</name>
+      </alias>
+    </character>
+    <character>
+      <name>CAMILLO ROTA</name>
+      <alias xml:id="camillo_rota">
+        <name>CAMILLO ROTA</name>
+      </alias>
+    </character>
+    <character>
+      <name>PIRRO</name>
+      <alias xml:id="pirro">
+        <name>PIRRO</name>
+      </alias>
+    </character>
+    <character>
+      <name>ANGELO</name>
+      <alias xml:id="angelo">
+        <name>ANGELO</name>
+      </alias>
+    </character>
+    <character>
+      <name>CLAUDIA GALOTTI</name>
+      <alias xml:id="claudia_galotti">
+        <name>CLAUDIA GALOTTI</name>
+      </alias>
+      <alias xml:id="claudia">
+        <name>CLAUDIA</name>
+      </alias>
+    </character>
+    <character>
+      <name>EMILIA</name>
+      <alias xml:id="emilia">
+        <name>EMILIA</name>
+      </alias>
+    </character>
+    <character>
+      <name>APPIANI</name>
+      <alias xml:id="appiani">
+        <name>APPIANI</name>
+      </alias>
+    </character>
+    <character>
+      <name>BATTISTA</name>
+      <alias xml:id="battista">
+        <name>BATTISTA</name>
+      </alias>
+    </character>
+    <character>
+      <name>ORSINA</name>
+      <alias xml:id="orsina">
+        <name>ORSINA</name>
+      </alias>
+    </character>
+    <character>
+      <name>ODOARDO GALOTTI</name>
+      <alias xml:id="odoardo_galotti">
+        <name>ODOARDO GALOTTI</name>
+      </alias>
+      <alias xml:id="odoardo">
+        <name>ODOARDO</name>
+      </alias>
+    </character>
+  </personae>
+  <text>
+    <div>
+      <head>Personen</head>
+    </div>
+    <div>
+      <head>1. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="281" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="1545" unit="chars"/>
+          </sp>
+          <sp who="#der_kammerdiener">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="35" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="176" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="78" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="402" unit="chars"/>
+          </sp>
+          <sp who="#conti">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="90" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="486" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="121" unit="words"/>
+            <amount n="640" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#conti">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="568" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="3204" unit="chars"/>
+          </sp>
+          <sp who="#der_prinz">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="706" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="3768" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="136" unit="words"/>
+            <amount n="681" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="31" unit="speech_acts"/>
+            <amount n="941" unit="words"/>
+            <amount n="17" unit="lines"/>
+            <amount n="5110" unit="chars"/>
+          </sp>
+          <sp who="#der_prinz">
+            <amount n="31" unit="speech_acts"/>
+            <amount n="823" unit="words"/>
+            <amount n="15" unit="lines"/>
+            <amount n="4410" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="264" unit="words"/>
+            <amount n="1410" unit="chars"/>
+          </sp>
+          <sp who="#der_kammerdiener">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="2" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="13" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="121" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="663" unit="chars"/>
+          </sp>
+          <sp who="#camillo_rota">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="94" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="504" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>2. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#claudia">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="22" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="111" unit="chars"/>
+          </sp>
+          <sp who="#pirro">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="11" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="51" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt</head>
+          <sp who="#odoardo">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="101" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="528" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="90" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="498" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#pirro">
+            <amount n="20" unit="speech_acts"/>
+            <amount n="267" unit="words"/>
+            <amount n="13" unit="lines"/>
+            <amount n="1445" unit="chars"/>
+          </sp>
+          <sp who="#angelo">
+            <amount n="19" unit="speech_acts"/>
+            <amount n="349" unit="words"/>
+            <amount n="14" unit="lines"/>
+            <amount n="1824" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#odoardo">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="445" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="2352" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="163" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="908" unit="chars"/>
+          </sp>
+          <sp who="#pirro">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="3" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="13" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#claudia_galotti">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="73" unit="words"/>
+            <amount n="375" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#emilia">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="805" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="4135" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="526" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="2915" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt</head>
+          <sp who="#appiani">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="331" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="1754" unit="chars"/>
+          </sp>
+          <sp who="#emilia">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="217" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="1163" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="108" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="558" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#appiani">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="207" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="1075" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="53" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="284" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>9. Auftritt</head>
+        <div>
+          <head>Neunter Auftritt</head>
+          <sp who="#pirro">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="31" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="150" unit="chars"/>
+          </sp>
+          <sp who="#appiani">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="2" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="9" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="48" unit="words"/>
+            <amount n="252" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="13" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="68" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>10. Auftritt</head>
+        <div>
+          <head>Zehnter Auftritt</head>
+          <sp who="#appiani">
+            <amount n="27" unit="speech_acts"/>
+            <amount n="354" unit="words"/>
+            <amount n="21" unit="lines"/>
+            <amount n="1900" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="27" unit="speech_acts"/>
+            <amount n="405" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="2266" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>11. Auftritt</head>
+        <div>
+          <head>Eilfter Auftritt</head>
+          <sp who="#appiani">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="83" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="447" unit="chars"/>
+          </sp>
+          <sp who="#claudia">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="29" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="151" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>3. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="19" unit="speech_acts"/>
+            <amount n="616" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="3158" unit="chars"/>
+          </sp>
+          <sp who="#der_prinz">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="343" unit="words"/>
+            <amount n="13" unit="lines"/>
+            <amount n="1746" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="270" unit="words"/>
+            <amount n="8" unit="lines"/>
+            <amount n="1349" unit="chars"/>
+          </sp>
+          <sp who="#angelo">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="226" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="1168" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="206" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="1151" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="76" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="400" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="8" unit="speech_acts"/>
+            <amount n="265" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="1375" unit="chars"/>
+          </sp>
+          <sp who="#battista">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="21" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="108" unit="chars"/>
+          </sp>
+          <sp who="#emilia">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="253" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="1296" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="319" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="1717" unit="chars"/>
+          </sp>
+          <sp who="#emilia">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="88" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="453" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="91" unit="words"/>
+            <amount n="457" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#battista">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="108" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="560" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="140" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="729" unit="chars"/>
+          </sp>
+          <sp who="#claudia_galotti">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="7" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="38" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt</head>
+          <sp who="#claudia">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="51" unit="words"/>
+            <amount n="256" unit="chars"/>
+          </sp>
+          <sp who="#battista">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="39" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="208" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#claudia">
+            <amount n="13" unit="speech_acts"/>
+            <amount n="488" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="2533" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="193" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="1069" unit="chars"/>
+          </sp>
+          <sp who="#emilia">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="8" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="40" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>4. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="23" unit="speech_acts"/>
+            <amount n="480" unit="words"/>
+            <amount n="17" unit="lines"/>
+            <amount n="2514" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="23" unit="speech_acts"/>
+            <amount n="564" unit="words"/>
+            <amount n="14" unit="lines"/>
+            <amount n="2979" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt</head>
+          <sp who="#battista">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="8" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="32" unit="chars"/>
+          </sp>
+          <sp who="#der_prinz">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="138" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="758" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="127" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="669" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#orsina">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="958" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="5147" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="16" unit="speech_acts"/>
+            <amount n="153" unit="words"/>
+            <amount n="14" unit="lines"/>
+            <amount n="827" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="75" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="360" unit="chars"/>
+          </sp>
+          <sp who="#orsina">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="4" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="14" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="22" unit="speech_acts"/>
+            <amount n="196" unit="words"/>
+            <amount n="20" unit="lines"/>
+            <amount n="1057" unit="chars"/>
+          </sp>
+          <sp who="#orsina">
+            <amount n="22" unit="speech_acts"/>
+            <amount n="814" unit="words"/>
+            <amount n="12" unit="lines"/>
+            <amount n="4172" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#odoardo_galotti">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="6" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="29" unit="chars"/>
+          </sp>
+          <sp who="#orsina">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="102" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="567" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="176" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="986" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="95" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="526" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt</head>
+          <sp who="#orsina">
+            <amount n="15" unit="speech_acts"/>
+            <amount n="631" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="3472" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="14" unit="speech_acts"/>
+            <amount n="334" unit="words"/>
+            <amount n="8" unit="lines"/>
+            <amount n="1761" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#claudia">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="196" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="1061" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="204" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="1045" unit="chars"/>
+          </sp>
+          <sp who="#orsina">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="13" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="77" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>5. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="293" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="1545" unit="chars"/>
+          </sp>
+          <sp who="#der_prinz">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="84" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="454" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt</head>
+          <sp who="#odoardo_galotti">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="200" unit="words"/>
+            <amount n="1029" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#marinelli">
+            <amount n="13" unit="speech_acts"/>
+            <amount n="148" unit="words"/>
+            <amount n="10" unit="lines"/>
+            <amount n="759" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="135" unit="words"/>
+            <amount n="10" unit="lines"/>
+            <amount n="667" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#odoardo_galotti">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="174" unit="words"/>
+            <amount n="893" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="20" unit="speech_acts"/>
+            <amount n="532" unit="words"/>
+            <amount n="11" unit="lines"/>
+            <amount n="2968" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="25" unit="speech_acts"/>
+            <amount n="561" unit="words"/>
+            <amount n="17" unit="lines"/>
+            <amount n="3111" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="16" unit="speech_acts"/>
+            <amount n="309" unit="words"/>
+            <amount n="10" unit="lines"/>
+            <amount n="1723" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#odoardo_galotti">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="163" unit="words"/>
+            <amount n="771" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt</head>
+          <sp who="#emilia">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="612" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="3174" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="318" unit="words"/>
+            <amount n="12" unit="lines"/>
+            <amount n="1616" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#der_prinz">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="92" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="479" unit="chars"/>
+          </sp>
+          <sp who="#odoardo">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="158" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="847" unit="chars"/>
+          </sp>
+          <sp who="#marinelli">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="2" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="8" unit="chars"/>
+          </sp>
+          <sp who="#emilia">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="26" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="115" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+  </text>
+</play>

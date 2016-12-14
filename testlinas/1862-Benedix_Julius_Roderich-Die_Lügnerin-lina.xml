@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.rnc"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.sch"?>
+<play xmlns="http://lina.digital" id="354">
+  <header>
+    <title>Die Lügnerin</title>
+    <subtitle>Lustspiel in einem Aufzuge</subtitle>
+    <genretitle>Lustspiel</genretitle>
+    <author key="pnd:118658166">Benedix, Julius Roderich</author>
+    <date when="1862" type="print"/>
+    <source>https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:kjfz.0/data</source>
+  </header>
+  <personae>
+    <character>
+      <name>LANGENBERG</name>
+      <alias xml:id="langenberg">
+        <name>LANGENBERG</name>
+      </alias>
+    </character>
+    <character>
+      <name>CONSTANZE</name>
+      <alias xml:id="constanze">
+        <name>CONSTANZE</name>
+      </alias>
+    </character>
+    <character>
+      <name>GUSTCHEN</name>
+      <alias xml:id="gustchen">
+        <name>GUSTCHEN</name>
+      </alias>
+    </character>
+    <character>
+      <name>BACKES</name>
+      <alias xml:id="backes">
+        <name>BACKES</name>
+      </alias>
+    </character>
+    <character>
+      <name>HAHNENBEIN</name>
+      <alias xml:id="hahnenbein">
+        <name>HAHNENBEIN</name>
+      </alias>
+    </character>
+    <character>
+      <name>MORITZ</name>
+      <alias xml:id="moritz">
+        <name>MORITZ</name>
+      </alias>
+    </character>
+    <character>
+      <name>FR. GREINER</name>
+      <alias xml:id="fr">
+        <name>FR</name>
+      </alias>
+    </character>
+    <character>
+      <name>HAUPTMANN</name>
+      <alias xml:id="hauptmann">
+        <name>HAUPTMANN</name>
+      </alias>
+    </character>
+  </personae>
+  <text>
+    <div>
+      <head>Personen</head>
+    </div>
+    <div>
+      <head>1. Auftritt</head>
+      <div>
+        <head>Erster Auftritt.</head>
+        <sp who="#langenberg">
+          <amount n="20" unit="speech_acts"/>
+          <amount n="472" unit="words"/>
+          <amount n="12" unit="lines"/>
+          <amount n="2637" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="20" unit="speech_acts"/>
+          <amount n="361" unit="words"/>
+          <amount n="12" unit="lines"/>
+          <amount n="2008" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>2. Auftritt</head>
+      <div>
+        <head>Zweiter Auftritt.</head>
+        <sp who="#gustchen">
+          <amount n="9" unit="speech_acts"/>
+          <amount n="181" unit="words"/>
+          <amount n="5" unit="lines"/>
+          <amount n="973" unit="chars"/>
+        </sp>
+        <sp who="#langenberg">
+          <amount n="4" unit="speech_acts"/>
+          <amount n="65" unit="words"/>
+          <amount n="2" unit="lines"/>
+          <amount n="373" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="7" unit="speech_acts"/>
+          <amount n="285" unit="words"/>
+          <amount n="2" unit="lines"/>
+          <amount n="1466" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>3. Auftritt</head>
+      <div>
+        <head>Dritter Auftritt.</head>
+        <sp who="#constanze">
+          <amount n="15" unit="speech_acts"/>
+          <amount n="158" unit="words"/>
+          <amount n="13" unit="lines"/>
+          <amount n="836" unit="chars"/>
+        </sp>
+        <sp who="#backes">
+          <amount n="10" unit="speech_acts"/>
+          <amount n="113" unit="words"/>
+          <amount n="7" unit="lines"/>
+          <amount n="639" unit="chars"/>
+        </sp>
+        <sp who="#hahnenbein">
+          <amount n="12" unit="speech_acts"/>
+          <amount n="166" unit="words"/>
+          <amount n="8" unit="lines"/>
+          <amount n="951" unit="chars"/>
+        </sp>
+        <sp who="#gustchen">
+          <amount n="10" unit="speech_acts"/>
+          <amount n="84" unit="words"/>
+          <amount n="7" unit="lines"/>
+          <amount n="436" unit="chars"/>
+        </sp>
+        <sp who="#moritz">
+          <amount n="12" unit="speech_acts"/>
+          <amount n="334" unit="words"/>
+          <amount n="6" unit="lines"/>
+          <amount n="1864" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>4. Auftritt</head>
+      <div>
+        <head>Vierter Auftritt.</head>
+        <sp who="#moritz">
+          <amount n="21" unit="speech_acts"/>
+          <amount n="661" unit="words"/>
+          <amount n="9" unit="lines"/>
+          <amount n="3630" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="23" unit="speech_acts"/>
+          <amount n="268" unit="words"/>
+          <amount n="18" unit="lines"/>
+          <amount n="1476" unit="chars"/>
+        </sp>
+        <sp who="#gustchen">
+          <amount n="3" unit="speech_acts"/>
+          <amount n="29" unit="words"/>
+          <amount n="1" unit="lines"/>
+          <amount n="163" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>5. Auftritt</head>
+      <div>
+        <head>Fünfter Auftritt.</head>
+        <sp who="#fr">
+          <amount n="8" unit="speech_acts"/>
+          <amount n="199" unit="words"/>
+          <amount n="4" unit="lines"/>
+          <amount n="1096" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="13" unit="speech_acts"/>
+          <amount n="161" unit="words"/>
+          <amount n="9" unit="lines"/>
+          <amount n="869" unit="chars"/>
+        </sp>
+        <sp who="#moritz">
+          <amount n="7" unit="speech_acts"/>
+          <amount n="82" unit="words"/>
+          <amount n="6" unit="lines"/>
+          <amount n="421" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>6. Auftritt</head>
+      <div>
+        <head>Sechster Auftritt.</head>
+        <sp who="#gustchen">
+          <amount n="5" unit="speech_acts"/>
+          <amount n="42" unit="words"/>
+          <amount n="3" unit="lines"/>
+          <amount n="246" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="9" unit="speech_acts"/>
+          <amount n="73" unit="words"/>
+          <amount n="8" unit="lines"/>
+          <amount n="394" unit="chars"/>
+        </sp>
+        <sp who="#moritz">
+          <amount n="18" unit="speech_acts"/>
+          <amount n="257" unit="words"/>
+          <amount n="13" unit="lines"/>
+          <amount n="1408" unit="chars"/>
+        </sp>
+        <sp who="#backes">
+          <amount n="11" unit="speech_acts"/>
+          <amount n="149" unit="words"/>
+          <amount n="8" unit="lines"/>
+          <amount n="791" unit="chars"/>
+        </sp>
+        <sp who="#hahnenbein">
+          <amount n="6" unit="speech_acts"/>
+          <amount n="93" unit="words"/>
+          <amount n="5" unit="lines"/>
+          <amount n="530" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>7. Auftritt</head>
+      <div>
+        <head>Siebenter Auftritt.</head>
+        <sp who="#hauptmann">
+          <amount n="21" unit="speech_acts"/>
+          <amount n="273" unit="words"/>
+          <amount n="18" unit="lines"/>
+          <amount n="1535" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="19" unit="speech_acts"/>
+          <amount n="245" unit="words"/>
+          <amount n="15" unit="lines"/>
+          <amount n="1462" unit="chars"/>
+        </sp>
+        <sp who="#gustchen">
+          <amount n="3" unit="speech_acts"/>
+          <amount n="3" unit="words"/>
+          <amount n="1" unit="lines"/>
+          <amount n="21" unit="chars"/>
+        </sp>
+        <sp who="#backes">
+          <amount n="2" unit="speech_acts"/>
+          <amount n="2" unit="words"/>
+          <amount n="1" unit="lines"/>
+          <amount n="7" unit="chars"/>
+        </sp>
+        <sp who="#hahnenbein">
+          <amount n="1" unit="speech_acts"/>
+        </sp>
+        <sp who="#moritz">
+          <amount n="4" unit="speech_acts"/>
+          <amount n="37" unit="words"/>
+          <amount n="2" unit="lines"/>
+          <amount n="178" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>8. Auftritt</head>
+      <div>
+        <head>Achter Auftritt.</head>
+        <sp who="#langenberg">
+          <amount n="17" unit="speech_acts"/>
+          <amount n="191" unit="words"/>
+          <amount n="12" unit="lines"/>
+          <amount n="1088" unit="chars"/>
+        </sp>
+        <sp who="#constanze">
+          <amount n="23" unit="speech_acts"/>
+          <amount n="259" unit="words"/>
+          <amount n="18" unit="lines"/>
+          <amount n="1444" unit="chars"/>
+        </sp>
+        <sp who="#moritz">
+          <amount n="11" unit="speech_acts"/>
+          <amount n="367" unit="words"/>
+          <amount n="7" unit="lines"/>
+          <amount n="2039" unit="chars"/>
+        </sp>
+        <sp who="#hauptmann">
+          <amount n="22" unit="speech_acts"/>
+          <amount n="302" unit="words"/>
+          <amount n="15" unit="lines"/>
+          <amount n="1626" unit="chars"/>
+        </sp>
+        <sp who="#backes">
+          <amount n="6" unit="speech_acts"/>
+          <amount n="37" unit="words"/>
+          <amount n="5" unit="lines"/>
+          <amount n="184" unit="chars"/>
+        </sp>
+        <sp who="#hahnenbein">
+          <amount n="4" unit="speech_acts"/>
+          <amount n="29" unit="words"/>
+          <amount n="4" unit="lines"/>
+          <amount n="159" unit="chars"/>
+        </sp>
+        <sp who="#gustchen">
+          <amount n="2" unit="speech_acts"/>
+        </sp>
+      </div>
+    </div>
+  </text>
+</play>

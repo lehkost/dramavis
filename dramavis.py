@@ -82,7 +82,7 @@ class LinaCorpus(object):
             csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
             for drama in dramas:
                 metadata = [drama.metadata.get('author'), drama.metadata.get('title'), drama.metadata.get('date_definite')]
-                chars = [drama.get_top_characters()[m] for m in header[3:]]
+                chars = [drama.get_top_ranked_chars()[m] for m in header[3:]]
                 csvwriter.writerow(metadata+chars)
 
 
@@ -173,50 +173,27 @@ class Lina(object):
     def get_character_frequencies(self):
         frequencies = Counter(list(chain.from_iterable(self.segments)))
         return frequencies
-
-    def get_top_characters(self):
-        top_chars = {}
-        top_chars['frequency'] = self.get_character_frequencies().most_common(1)[0][0]
-        ranked_metrics = self.get_top_ranked_chars()
-        top_chars['degree'] = ranked_metrics['degree']
-        top_chars['closeness'] = ranked_metrics['closeness']
-        top_chars['betweenness'] = ranked_metrics['betweenness']
-        top_chars['central'] = self.get_central_character()
-        return top_chars
-
+        
     def get_top_ranked_chars(self):
-        ranked_metrics = {}
-        dc = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
-        cc = sorted(self.character_metrics['closeness'], key=self.character_metrics['closeness'].__getitem__, reverse=True)
-        bc = sorted(self.character_metrics['betweenness'], key=self.character_metrics['betweenness'].__getitem__, reverse=True)
-        dr = [self.character_centralities[c] for c in dc]
-        cr = [self.character_centralities[c] for c in cc]
-        br = [self.character_centralities[c] for c in bc]
-        dr_minrank = min(dr)
-        cr_minrank = min(cr)
-        br_minrank = min(br)
-        dc_chars = [i for i, j in enumerate(dr) if j == dr_minrank]
-        cc_chars = [i for i, j in enumerate(cr) if j == cr_minrank]
-        bc_chars = [i for i, j in enumerate(br) if j == br_minrank]
-        if len(dc_chars) == 1:
-            ranked_metrics['degree'] = dc[dc_chars[0]]
-        else:
-            ranked_metrics['degree'] = "SEVERAL"
-        if len(cc_chars) == 1:
-            ranked_metrics['closeness'] = cc[cc_chars[0]]
-        else:
-            ranked_metrics['closeness'] = "SEVERAL"
-        if len(bc_chars) == 1:
-            ranked_metrics['betweenness'] = bc[bc_chars[0]]
-        else:
-            ranked_metrics['betweenness'] = "SEVERAL"
-        return ranked_metrics
+        char_centralities = {}
+        for metric in ['degree', 'closeness', 'betweenness']:
+            char_centralities[metric] = {n:[] for n in range(1, len(self.get_character_ranks())+1)}
+            for char, metrics in self.get_character_ranks().items():
+                char_centralities[metric][metrics[metric]].append(char)
+        top_ranked = {}
+        for metric in ['degree', 'closeness', 'betweenness']:
+            if len(char_centralities[metric][1]) == 1:
+                top_ranked[metric] = char_centralities[metric][1][0]
+            else:
+                top_ranked[metric] = "SEVERAL"
+        top_ranked['frequency'] = self.get_character_frequencies().most_common(1)[0][0]
+        top_ranked['central'] = self.get_central_character()
+        return top_ranked
 
     def get_ranked_characters(self):
         ranked_metrics = {}
-        ranked_metrics['degree'] = sorted(self.character_metrics['degree'], key=self.character_metrics['degree'].__getitem__, reverse=True)
-        ranked_metrics['closeness'] = sorted(self.character_metrics['closeness'], key=self.character_metrics['closeness'].__getitem__, reverse=True)
-        ranked_metrics['betweenness'] = sorted(self.character_metrics['betweenness'], key=self.character_metrics['betweenness'].__getitem__, reverse=True)
+        for metric in ['degree', 'closeness', 'betweenness']:
+            ranked_metrics[metric] = sorted(self.character_metrics[metric], key=self.character_metrics[metric].__getitem__, reverse=True)
         return ranked_metrics
 
     def get_character_ranks(self):
@@ -226,9 +203,8 @@ class Lina(object):
             ranks[person] = {}
         ranked_metrics = self.get_ranked_characters()
         for person in personae:
-            ranks[person]['degree'] = ranked_metrics['degree'].index(person)+1
-            ranks[person]['closeness'] = ranked_metrics['closeness'].index(person)+1
-            ranks[person]['betweenness'] = ranked_metrics['betweenness'].index(person)+1
+            for metric in ['degree', 'closeness', 'betweenness']:
+                ranks[person][metric] = ranked_metrics[metric].index(person)+1
         return ranks
 
     def get_centrality_ranks(self):
@@ -248,7 +224,6 @@ class Lina(object):
         for person in personae:
             central_characters[person] = float(sum([frequency_ranks.index(person)+1, centrality_ranks[person]]) / 2.)
         return central_characters
-
 
     def get_characters_all_in_index(self):
         appeared = set()

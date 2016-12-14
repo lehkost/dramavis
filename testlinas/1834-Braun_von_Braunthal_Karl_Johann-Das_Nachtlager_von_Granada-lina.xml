@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.rnc"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.sch"?>
+<play xmlns="http://lina.digital" id="202">
+  <header>
+    <title>Das Nachtlager von Granada</title>
+    <subtitle>Romantische Oper in zwei Aufzügen</subtitle>
+    <genretitle>Oper</genretitle>
+    <author key="pnd:116428384">Braun von Braunthal, Karl Johann</author>
+    <date type="print"/>
+    <date type="premiere" when="1834">1834</date>
+    <date type="written"/>
+    <source>https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:kq6g.0/data</source>
+  </header>
+  <personae>
+    <character>
+      <name>GABRIELE</name>
+      <alias xml:id="gabriele">
+        <name>GABRIELE</name>
+      </alias>
+    </character>
+    <character>
+      <name>GOMEZ</name>
+      <alias xml:id="gomez">
+        <name>GOMEZ</name>
+      </alias>
+    </character>
+    <character>
+      <name>JÄGER</name>
+      <alias xml:id="jäger">
+        <name>JÄGER</name>
+      </alias>
+      <alias xml:id="chor_der_jäger">
+        <name>CHOR DER JÄGER</name>
+      </alias>
+    </character>
+    <character>
+      <name>VASCO</name>
+      <alias xml:id="vasco">
+        <name>VASCO</name>
+      </alias>
+    </character>
+    <character>
+      <name>DIE DREI HIRTEN</name>
+      <alias xml:id="die_drei_hirten">
+        <name>DIE DREI HIRTEN</name>
+      </alias>
+      <alias xml:id="chor_der_hirten">
+        <name>CHOR DER HIRTEN</name>
+      </alias>
+    </character>
+    <character>
+      <name>PEDRO</name>
+      <alias xml:id="pedro">
+        <name>PEDRO</name>
+      </alias>
+    </character>
+    <character>
+      <name>AMBROSIO</name>
+      <alias xml:id="ambrosio">
+        <name>AMBROSIO</name>
+      </alias>
+    </character>
+    <character>
+      <name>CHOR</name>
+      <alias xml:id="chor">
+        <name>CHOR</name>
+      </alias>
+    </character>
+    <character>
+      <name>OTTO</name>
+      <alias xml:id="otto">
+        <name>OTTO</name>
+      </alias>
+    </character>
+  </personae>
+  <text>
+    <div>
+      <head>Personen</head>
+    </div>
+    <div>
+      <head>1. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt.</head>
+          <sp who="#gabriele">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="190" unit="words"/>
+            <amount n="33" unit="lines"/>
+            <amount n="971" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt.</head>
+          <sp who="#gomez">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="265" unit="words"/>
+            <amount n="48" unit="lines"/>
+            <amount n="1403" unit="chars"/>
+          </sp>
+          <sp who="#gabriele">
+            <amount n="15" unit="speech_acts"/>
+            <amount n="168" unit="words"/>
+            <amount n="30" unit="lines"/>
+            <amount n="901" unit="chars"/>
+          </sp>
+          <sp who="#gomez #gabriele">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="30" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="154" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt.</head>
+          <sp who="#gabriele">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="165" unit="words"/>
+            <amount n="27" unit="lines"/>
+            <amount n="881" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt.</head>
+          <sp who="#jäger">
+            <amount n="15" unit="speech_acts"/>
+            <amount n="370" unit="words"/>
+            <amount n="49" unit="lines"/>
+            <amount n="1935" unit="chars"/>
+          </sp>
+          <sp who="#gabriele">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="178" unit="words"/>
+            <amount n="25" unit="lines"/>
+            <amount n="942" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt.</head>
+          <sp who="#jäger">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="79" unit="words"/>
+            <amount n="10" unit="lines"/>
+            <amount n="364" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt.</head>
+          <sp who="#gabriele">
+            <amount n="26" unit="speech_acts"/>
+            <amount n="352" unit="words"/>
+            <amount n="59" unit="lines"/>
+            <amount n="1913" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="25" unit="speech_acts"/>
+            <amount n="361" unit="words"/>
+            <amount n="64" unit="lines"/>
+            <amount n="1918" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt.</head>
+          <sp who="#vasco">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="208" unit="words"/>
+            <amount n="38" unit="lines"/>
+            <amount n="1065" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="184" unit="words"/>
+            <amount n="29" unit="lines"/>
+            <amount n="973" unit="chars"/>
+          </sp>
+          <sp who="#pedro #ambrosio">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="5" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="26" unit="chars"/>
+          </sp>
+          <sp who="#die_drei_hirten">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="35" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="168" unit="chars"/>
+          </sp>
+          <sp who="#pedro">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="2" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="13" unit="chars"/>
+          </sp>
+          <sp who="#ambrosio">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="26" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="144" unit="chars"/>
+          </sp>
+          <sp who="#gabriele">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="125" unit="words"/>
+            <amount n="22" unit="lines"/>
+            <amount n="688" unit="chars"/>
+          </sp>
+          <sp who="#ambrosio #pedro">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="113" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="568" unit="chars"/>
+          </sp>
+          <sp who="#gabriele #jäger">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="33" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="176" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt.</head>
+          <sp who="#chor_der_hirten #die_drei_hirten">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="140" unit="words"/>
+            <amount n="30" unit="lines"/>
+            <amount n="814" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="257" unit="words"/>
+            <amount n="50" unit="lines"/>
+            <amount n="1427" unit="chars"/>
+          </sp>
+          <sp who="#jäger #chor">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="21" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="113" unit="chars"/>
+          </sp>
+          <sp who="#gabriele">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="239" unit="words"/>
+            <amount n="50" unit="lines"/>
+            <amount n="1335" unit="chars"/>
+          </sp>
+          <sp who="#gabriele #chor">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="42" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="263" unit="chars"/>
+          </sp>
+          <sp who="#ambrosio">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="6" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="38" unit="chars"/>
+          </sp>
+          <sp who="#gabriele #chor_der_hirten #die_drei_hirten">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="65" unit="words"/>
+            <amount n="14" unit="lines"/>
+            <amount n="373" unit="chars"/>
+          </sp>
+          <sp who="#vasco">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="90" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="475" unit="chars"/>
+          </sp>
+          <sp who="#pedro #ambrosio">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="65" unit="words"/>
+            <amount n="12" unit="lines"/>
+            <amount n="357" unit="chars"/>
+          </sp>
+          <sp who="#ambrosio #pedro">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="23" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="115" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>2. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt.</head>
+          <sp who="#gomez">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="126" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="678" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweiter Auftritt.</head>
+          <sp who="#otto #chor_der_jäger">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="79" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="430" unit="chars"/>
+          </sp>
+          <sp who="#gomez">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="114" unit="words"/>
+            <amount n="20" unit="lines"/>
+            <amount n="642" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt.</head>
+          <sp who="#vasco">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="143" unit="words"/>
+            <amount n="22" unit="lines"/>
+            <amount n="806" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt.</head>
+          <sp who="#gabriele">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="248" unit="words"/>
+            <amount n="41" unit="lines"/>
+            <amount n="1333" unit="chars"/>
+          </sp>
+          <sp who="#vasco">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="240" unit="words"/>
+            <amount n="37" unit="lines"/>
+            <amount n="1273" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt.</head>
+          <sp who="#vasco">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="81" unit="words"/>
+            <amount n="11" unit="lines"/>
+            <amount n="411" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="29" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="148" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt.</head>
+          <sp who="#jäger">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="287" unit="words"/>
+            <amount n="38" unit="lines"/>
+            <amount n="1469" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebenter Auftritt.</head>
+          <sp who="#gabriele">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="154" unit="words"/>
+            <amount n="27" unit="lines"/>
+            <amount n="864" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="15" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="72" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt.</head>
+          <sp who="#jäger">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="97" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="526" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>9. Auftritt</head>
+        <div>
+          <head>Neunter Auftritt.</head>
+          <sp who="#pedro">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="10" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="44" unit="chars"/>
+          </sp>
+          <sp who="#vasco">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="154" unit="words"/>
+            <amount n="23" unit="lines"/>
+            <amount n="789" unit="chars"/>
+          </sp>
+          <sp who="#ambrosio">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="16" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="92" unit="chars"/>
+          </sp>
+          <sp who="#ambrosio #pedro">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="40" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="244" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="101" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="548" unit="chars"/>
+          </sp>
+          <sp who="#die_drei_hirten">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="4" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="26" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>10. Auftritt</head>
+        <div>
+          <head>Zehnter Auftritt.</head>
+          <sp who="#jäger">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="18" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="93" unit="chars"/>
+          </sp>
+          <sp who="#gabriele">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="23" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="125" unit="chars"/>
+          </sp>
+          <sp who="#gomez">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="5" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="29" unit="chars"/>
+          </sp>
+          <sp who="#chor_der_hirten #die_drei_hirten">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="29" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="153" unit="chars"/>
+          </sp>
+          <sp who="#chor_der_jäger">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="73" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="405" unit="chars"/>
+          </sp>
+          <sp who="#gabriele #gomez">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="8" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="35" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>11. Auftritt</head>
+        <div>
+          <head>Elfter Auftritt.</head>
+          <sp who="#otto">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="4" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="23" unit="chars"/>
+          </sp>
+          <sp who="#otto #jäger #chor_der_hirten #die_drei_hirten #gabriele #gomez #chor_der_jäger">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="38" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="221" unit="chars"/>
+          </sp>
+          <sp who="#jäger">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="295" unit="words"/>
+            <amount n="46" unit="lines"/>
+            <amount n="1518" unit="chars"/>
+          </sp>
+          <sp who="#chor_der_hirten #die_drei_hirten">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="24" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="119" unit="chars"/>
+          </sp>
+          <sp who="#gabriele #gomez">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="113" unit="words"/>
+            <amount n="18" unit="lines"/>
+            <amount n="522" unit="chars"/>
+          </sp>
+          <sp who="#chor_der_jäger">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="12" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="57" unit="chars"/>
+          </sp>
+          <sp who="#gabriele">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="47" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="213" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+  </text>
+</play>

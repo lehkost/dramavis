@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://raw.githubusercontent.com/DLiNa/project/master/rules/lina.rnc"?>
+<?xml-model href="http://raw.githubusercontent.com/DLiNa/project/master/rules/lina.sch"?>
+<play xmlns="http://lina.digital" id="194">
+  <header>
+    <title>Philotas</title>
+    <subtitle>Ein Trauerspiel</subtitle>
+    <genretitle>Trauerspiel</genretitle>
+    <author key="pnd:118572121">Lessing, Gotthold Ephraim</author>
+    <date type="print" when="1759">1759</date>
+    <date type="premiere"/>
+    <date type="written" when="1774">1774</date>
+    <source>https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:rjqs.0/data</source>
+  </header>
+  <personae>
+    <character>
+      <name>PHILOTAS</name>
+      <alias xml:id="philotas">
+        <name>PHILOTAS</name>
+      </alias>
+    </character>
+    <character>
+      <name>STRATO</name>
+      <alias xml:id="strato">
+        <name>STRATO</name>
+      </alias>
+    </character>
+    <character>
+      <name>ARIDÄUS</name>
+      <alias xml:id="aridäus">
+        <name>ARIDÄUS</name>
+      </alias>
+    </character>
+    <character>
+      <name>PARMENIO</name>
+      <alias xml:id="parmenio">
+        <name>PARMENIO</name>
+      </alias>
+    </character>
+  </personae>
+  <text>
+    <div>
+      <head>Personen</head>
+    </div>
+    <div>
+      <head>1. Auftritt</head>
+      <div>
+        <head>Erster Auftritt</head>
+        <sp who="#philotas">
+          <amount n="1" unit="speech_acts"/>
+          <amount n="256" unit="words"/>
+          <amount n="1350" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>2. Auftritt</head>
+      <div>
+        <head>Zweiter Auftritt</head>
+        <sp who="#strato">
+          <amount n="10" unit="speech_acts"/>
+          <amount n="158" unit="words"/>
+          <amount n="7" unit="lines"/>
+          <amount n="845" unit="chars"/>
+        </sp>
+        <sp who="#philotas">
+          <amount n="9" unit="speech_acts"/>
+          <amount n="995" unit="words"/>
+          <amount n="4" unit="lines"/>
+          <amount n="5492" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>3. Auftritt</head>
+      <div>
+        <head>Dritter Auftritt</head>
+        <sp who="#aridäus">
+          <amount n="9" unit="speech_acts"/>
+          <amount n="473" unit="words"/>
+          <amount n="3" unit="lines"/>
+          <amount n="2672" unit="chars"/>
+        </sp>
+        <sp who="#philotas">
+          <amount n="8" unit="speech_acts"/>
+          <amount n="239" unit="words"/>
+          <amount n="5" unit="lines"/>
+          <amount n="1334" unit="chars"/>
+        </sp>
+        <sp who="#strato">
+          <amount n="2" unit="speech_acts"/>
+          <amount n="124" unit="words"/>
+          <amount n="1" unit="lines"/>
+          <amount n="708" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>4. Auftritt</head>
+      <div>
+        <head>Vierter Auftritt</head>
+        <sp who="#philotas">
+          <amount n="1" unit="speech_acts"/>
+          <amount n="868" unit="words"/>
+          <amount n="4691" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>5. Auftritt</head>
+      <div>
+        <head>Fünfter Auftritt</head>
+        <sp who="#philotas">
+          <amount n="33" unit="speech_acts"/>
+          <amount n="1158" unit="words"/>
+          <amount n="17" unit="lines"/>
+          <amount n="6199" unit="chars"/>
+        </sp>
+        <sp who="#parmenio">
+          <amount n="32" unit="speech_acts"/>
+          <amount n="1045" unit="words"/>
+          <amount n="12" unit="lines"/>
+          <amount n="5519" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>6. Auftritt</head>
+      <div>
+        <head>Sechster Auftritt</head>
+        <sp who="#philotas">
+          <amount n="1" unit="speech_acts"/>
+          <amount n="316" unit="words"/>
+          <amount n="1657" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>7. Auftritt</head>
+      <div>
+        <head>Siebenter Auftritt</head>
+        <sp who="#aridäus">
+          <amount n="15" unit="speech_acts"/>
+          <amount n="400" unit="words"/>
+          <amount n="8" unit="lines"/>
+          <amount n="2244" unit="chars"/>
+        </sp>
+        <sp who="#philotas">
+          <amount n="14" unit="speech_acts"/>
+          <amount n="538" unit="words"/>
+          <amount n="10" unit="lines"/>
+          <amount n="2969" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+    <div>
+      <head>8. Auftritt</head>
+      <div>
+        <head>Achter Auftritt</head>
+        <sp who="#strato">
+          <amount n="12" unit="speech_acts"/>
+          <amount n="263" unit="words"/>
+          <amount n="9" unit="lines"/>
+          <amount n="1327" unit="chars"/>
+        </sp>
+        <sp who="#aridäus">
+          <amount n="18" unit="speech_acts"/>
+          <amount n="359" unit="words"/>
+          <amount n="15" unit="lines"/>
+          <amount n="1846" unit="chars"/>
+        </sp>
+        <sp who="#philotas">
+          <amount n="16" unit="speech_acts"/>
+          <amount n="567" unit="words"/>
+          <amount n="6" unit="lines"/>
+          <amount n="2956" unit="chars"/>
+        </sp>
+      </div>
+    </div>
+  </text>
+</play>

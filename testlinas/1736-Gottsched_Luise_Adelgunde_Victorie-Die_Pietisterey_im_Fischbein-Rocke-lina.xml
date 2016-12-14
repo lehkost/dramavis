@@ -1,0 +1,1055 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.rnc"?>
+<?xml-model href="https://raw.githubusercontent.com/DLiNa/project/master/rules/lina.sch"?>
+<play xmlns="http://lina.digital" id="462">
+  <header>
+    <title>Die Pietisterey im Fischbein-Rocke</title>
+    <subtitle/>
+    <genretitle/>
+    <author key="pnd:118696734">Gottsched, Luise Adelgunde Victorie</author>
+    <date type="print" when="1736">1736</date>
+    <date type="premiere"/>
+    <date type="written"/>
+    <source>https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:nm2b.0/data</source>
+  </header>
+  <personae>
+    <character>
+      <name>JUNGFER LUISCHEN</name>
+      <alias xml:id="jungfer_luischen">
+        <name>JUNGFER LUISCHEN</name>
+      </alias>
+      <alias xml:id="luischen">
+        <name>LUISCHEN</name>
+      </alias>
+    </character>
+    <character>
+      <name>CATHRINE</name>
+      <alias xml:id="cathrine">
+        <name>CATHRINE</name>
+      </alias>
+    </character>
+    <character>
+      <name>FRAU GLAUBELEICHTIN</name>
+      <alias xml:id="frau_glaubeleichtin">
+        <name>FRAU GLAUBELEICHTIN</name>
+      </alias>
+    </character>
+    <character>
+      <name>JUNGFER DORCHEN</name>
+      <alias xml:id="jungfer_dorchen">
+        <name>JUNGFER DORCHEN</name>
+      </alias>
+    </character>
+    <character>
+      <name>HERR WACKERMANN</name>
+      <alias xml:id="herr_wackermann">
+        <name>HERR WACKERMANN</name>
+      </alias>
+    </character>
+    <character>
+      <name>HERR LIEBMANN</name>
+      <alias xml:id="herr_liebmann">
+        <name>HERR LIEBMANN</name>
+      </alias>
+    </character>
+    <character>
+      <name>HERR SCHEINFROMM</name>
+      <alias xml:id="herr_scheinfromm">
+        <name>HERR SCHEINFROMM</name>
+      </alias>
+    </character>
+    <character>
+      <name>FRAU BETTELSACKIN</name>
+      <alias xml:id="frau_bettelsackin">
+        <name>FRAU BETTELSACKIN</name>
+      </alias>
+    </character>
+    <character>
+      <name>HERR VON MUCKERSDORFF</name>
+      <alias xml:id="herr_von_muckersdorff">
+        <name>HERR VON MUCKERSDORFF</name>
+      </alias>
+    </character>
+    <character>
+      <name>FRAU ZANCKENHEIMIN</name>
+      <alias xml:id="frau_zanckenheimin">
+        <name>FRAU ZANCKENHEIMIN</name>
+      </alias>
+    </character>
+    <character>
+      <name>FRAU SEUFFZERIN</name>
+      <alias xml:id="frau_seuffzerin">
+        <name>FRAU SEUFFZERIN</name>
+      </alias>
+    </character>
+    <character>
+      <name>DER DIENER</name>
+      <alias xml:id="der_diener">
+        <name>DER DIENER</name>
+      </alias>
+    </character>
+    <character>
+      <name>FRAU EHRLICHEN</name>
+      <alias xml:id="frau_ehrlichen">
+        <name>FRAU EHRLICHEN</name>
+      </alias>
+    </character>
+    <character>
+      <name>JACOB</name>
+      <alias xml:id="jacob">
+        <name>JACOB</name>
+      </alias>
+    </character>
+    <character>
+      <name>HERR GLAUBELEICHT</name>
+      <alias xml:id="herr_glaubeleicht">
+        <name>HERR GLAUBELEICHT</name>
+      </alias>
+    </character>
+    <character>
+      <name>DER ADVOCAT</name>
+      <alias xml:id="der_advocat">
+        <name>DER ADVOCAT</name>
+      </alias>
+    </character>
+  </personae>
+  <text>
+    <div>
+      <head>Personen</head>
+    </div>
+    <div>
+      <head>1. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#jungfer_luischen">
+            <amount n="16" unit="speech_acts"/>
+            <amount n="435" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="2424" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="16" unit="speech_acts"/>
+            <amount n="725" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="4102" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>noName</head>
+          <div>
+            <head>Zweyter Auftritt</head>
+            <sp who="#frau_glaubeleichtin">
+              <amount n="14" unit="speech_acts"/>
+              <amount n="286" unit="words"/>
+              <amount n="9" unit="lines"/>
+              <amount n="1606" unit="chars"/>
+            </sp>
+            <sp who="#cathrine">
+              <amount n="12" unit="speech_acts"/>
+              <amount n="292" unit="words"/>
+              <amount n="6" unit="lines"/>
+              <amount n="1891" unit="chars"/>
+            </sp>
+            <sp who="#jungfer_dorchen">
+              <amount n="5" unit="speech_acts"/>
+              <amount n="36" unit="words"/>
+              <amount n="5" unit="lines"/>
+              <amount n="190" unit="chars"/>
+            </sp>
+            <sp who="#jungfer_luischen">
+              <amount n="2" unit="speech_acts"/>
+              <amount n="15" unit="words"/>
+              <amount n="2" unit="lines"/>
+              <amount n="80" unit="chars"/>
+            </sp>
+          </div>
+          <div>
+            <head>Fußnoten</head>
+          </div>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#jungfer_dorchen">
+            <amount n="8" unit="speech_acts"/>
+            <amount n="171" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="955" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="245" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="1424" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#herr_wackermann">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="336" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="1932" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="245" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="1373" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="15" unit="speech_acts"/>
+            <amount n="368" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="2124" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="162" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="787" unit="chars"/>
+          </sp>
+          <sp who="#herr_wackermann">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="91" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="484" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#herr_wackermann">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="530" unit="words"/>
+            <amount n="8" unit="lines"/>
+            <amount n="3129" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="15" unit="speech_acts"/>
+            <amount n="451" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="2551" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="294" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="1715" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>2. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#cathrine">
+            <amount n="10" unit="speech_acts"/>
+            <amount n="148" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="815" unit="chars"/>
+          </sp>
+          <sp who="#herr_liebmann">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="110" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="617" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweyter Auftritt</head>
+          <sp who="#herr_scheinfromm">
+            <amount n="29" unit="speech_acts"/>
+            <amount n="650" unit="words"/>
+            <amount n="15" unit="lines"/>
+            <amount n="3617" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="29" unit="speech_acts"/>
+            <amount n="435" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="2429" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#jungfer_luischen">
+            <amount n="14" unit="speech_acts"/>
+            <amount n="193" unit="words"/>
+            <amount n="12" unit="lines"/>
+            <amount n="1120" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="371" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="2140" unit="chars"/>
+          </sp>
+          <sp who="#herr_liebmann">
+            <amount n="12" unit="speech_acts"/>
+            <amount n="147" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="830" unit="chars"/>
+          </sp>
+          <sp who="#luischen">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="6" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="27" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="83" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="442" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="31" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="159" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#herr_scheinfromm">
+            <amount n="22" unit="speech_acts"/>
+            <amount n="379" unit="words"/>
+            <amount n="15" unit="lines"/>
+            <amount n="2218" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="21" unit="speech_acts"/>
+            <amount n="312" unit="words"/>
+            <amount n="15" unit="lines"/>
+            <amount n="1793" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="44" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="239" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="51" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="303" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebender Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="19" unit="speech_acts"/>
+            <amount n="563" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="3109" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="190" unit="words"/>
+            <amount n="15" unit="lines"/>
+            <amount n="1038" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#cathrine">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="88" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="497" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="62" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="353" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>3. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#cathrine">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="115" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="667" unit="chars"/>
+          </sp>
+          <sp who="#frau_bettelsackin">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="83" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="432" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweyter Auftritt</head>
+          <sp who="#frau_bettelsackin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="341" unit="words"/>
+            <amount n="2039" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="13" unit="speech_acts"/>
+            <amount n="177" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="942" unit="chars"/>
+          </sp>
+          <sp who="#frau_bettelsackin">
+            <amount n="13" unit="speech_acts"/>
+            <amount n="385" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="2182" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="12" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="69" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="28" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="159" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#herr_scheinfromm">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="122" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="694" unit="chars"/>
+          </sp>
+          <sp who="#herr_von_muckersdorff">
+            <amount n="9" unit="speech_acts"/>
+            <amount n="75" unit="words"/>
+            <amount n="8" unit="lines"/>
+            <amount n="374" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="100" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="549" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#herr_von_muckersdorff">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="177" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="936" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="90" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="542" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="175" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="1001" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="18" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="89" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="52" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="253" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebender Auftritt</head>
+          <sp who="#jungfer_dorchen">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="151" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="796" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="103" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="568" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#herr_liebmann">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="282" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="1668" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_dorchen">
+            <amount n="17" unit="speech_acts"/>
+            <amount n="266" unit="words"/>
+            <amount n="11" unit="lines"/>
+            <amount n="1374" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>9. Auftritt</head>
+        <div>
+          <head>Neunter Auftritt</head>
+          <sp who="#herr_wackermann">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="188" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="1008" unit="chars"/>
+          </sp>
+          <sp who="#herr_liebmann">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="136" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="749" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>4. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="25" unit="speech_acts"/>
+            <amount n="360" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="2097" unit="chars"/>
+          </sp>
+          <sp who="#frau_zanckenheimin">
+            <amount n="21" unit="speech_acts"/>
+            <amount n="235" unit="words"/>
+            <amount n="17" unit="lines"/>
+            <amount n="1506" unit="chars"/>
+          </sp>
+          <sp who="#frau_seuffzerin">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="411" unit="words"/>
+            <amount n="12" unit="lines"/>
+            <amount n="2347" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Zweyter Auftritt</head>
+          <sp who="#herr_scheinfromm">
+            <amount n="26" unit="speech_acts"/>
+            <amount n="378" unit="words"/>
+            <amount n="21" unit="lines"/>
+            <amount n="1867" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="171" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="927" unit="chars"/>
+          </sp>
+          <sp who="#frau_zanckenheimin">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="159" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="894" unit="chars"/>
+          </sp>
+          <sp who="#frau_seuffzerin">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="237" unit="words"/>
+            <amount n="15" unit="lines"/>
+            <amount n="1375" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin #frau_zanckenheimin #frau_seuffzerin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="3" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="22" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#der_diener">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="37" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="197" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="4" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="25" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="16" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="91" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#frau_ehrlichen">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="386" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="1943" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="6" unit="speech_acts"/>
+            <amount n="92" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="525" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="15" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="95" unit="chars"/>
+          </sp>
+          <sp who="#frau_seuffzerin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="18" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="92" unit="chars"/>
+          </sp>
+          <sp who="#frau_zanckenheimin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="38" unit="words"/>
+            <amount n="212" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="85" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="489" unit="chars"/>
+          </sp>
+          <sp who="#frau_seuffzerin">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="44" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="261" unit="chars"/>
+          </sp>
+          <sp who="#frau_zanckenheimin">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="64" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="351" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="1296" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="8563" unit="chars"/>
+          </sp>
+          <sp who="#jacob">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="164" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="968" unit="chars"/>
+          </sp>
+          <sp who="#frau_seuffzerin">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="143" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="909" unit="chars"/>
+          </sp>
+          <sp who="#frau_zanckenheimin">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="176" unit="words"/>
+            <amount n="1028" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebender Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="130" unit="words"/>
+            <amount n="10" unit="lines"/>
+            <amount n="806" unit="chars"/>
+          </sp>
+          <sp who="#herr_wackermann">
+            <amount n="16" unit="speech_acts"/>
+            <amount n="413" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="2348" unit="chars"/>
+          </sp>
+          <sp who="#frau_seuffzerin">
+            <amount n="8" unit="speech_acts"/>
+            <amount n="85" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="502" unit="chars"/>
+          </sp>
+          <sp who="#frau_zanckenheimin">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="56" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="321" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="259" unit="words"/>
+            <amount n="16" unit="lines"/>
+            <amount n="1469" unit="chars"/>
+          </sp>
+          <sp who="#herr_wackermann">
+            <amount n="18" unit="speech_acts"/>
+            <amount n="368" unit="words"/>
+            <amount n="12" unit="lines"/>
+            <amount n="2026" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+    <div>
+      <head>5. Akt</head>
+      <div>
+        <head>1. Auftritt</head>
+        <div>
+          <head>Erster Auftritt</head>
+          <sp who="#jungfer_luischen">
+            <amount n="8" unit="speech_acts"/>
+            <amount n="108" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="567" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="7" unit="speech_acts"/>
+            <amount n="132" unit="words"/>
+            <amount n="5" unit="lines"/>
+            <amount n="687" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>2. Auftritt</head>
+        <div>
+          <head>Anderer Auftritt</head>
+          <sp who="#jungfer_luischen">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="34" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="181" unit="chars"/>
+          </sp>
+          <sp who="#herr_glaubeleicht">
+            <amount n="3" unit="speech_acts"/>
+            <amount n="71" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="391" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="11" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="54" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>3. Auftritt</head>
+        <div>
+          <head>Dritter Auftritt</head>
+          <sp who="#herr_glaubeleicht">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="101" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="596" unit="chars"/>
+          </sp>
+          <sp who="#herr_wackermann">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="288" unit="words"/>
+            <amount n="1619" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>4. Auftritt</head>
+        <div>
+          <head>Vierter Auftritt</head>
+          <sp who="#herr_scheinfromm">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="209" unit="words"/>
+            <amount n="6" unit="lines"/>
+            <amount n="1233" unit="chars"/>
+          </sp>
+          <sp who="#der_advocat">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="87" unit="words"/>
+            <amount n="10" unit="lines"/>
+            <amount n="472" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>5. Auftritt</head>
+        <div>
+          <head>Fünfter Auftritt</head>
+          <sp who="#herr_wackermann">
+            <amount n="15" unit="speech_acts"/>
+            <amount n="317" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="1822" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="11" unit="speech_acts"/>
+            <amount n="129" unit="words"/>
+            <amount n="9" unit="lines"/>
+            <amount n="770" unit="chars"/>
+          </sp>
+          <sp who="#herr_von_muckersdorff">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="31" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="100" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>6. Auftritt</head>
+        <div>
+          <head>Sechster Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="25" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="151" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="6" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="39" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="4" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="17" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>7. Auftritt</head>
+        <div>
+          <head>Siebender Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="24" unit="speech_acts"/>
+            <amount n="391" unit="words"/>
+            <amount n="19" unit="lines"/>
+            <amount n="2214" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_luischen">
+            <amount n="5" unit="speech_acts"/>
+            <amount n="66" unit="words"/>
+            <amount n="4" unit="lines"/>
+            <amount n="363" unit="chars"/>
+          </sp>
+          <sp who="#herr_von_muckersdorff">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="26" unit="words"/>
+            <amount n="2" unit="lines"/>
+            <amount n="151" unit="chars"/>
+          </sp>
+          <sp who="#herr_wackermann">
+            <amount n="20" unit="speech_acts"/>
+            <amount n="549" unit="words"/>
+            <amount n="32" unit="lines"/>
+            <amount n="3037" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="59" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="350" unit="chars"/>
+          </sp>
+          <sp who="#herr_scheinfromm">
+            <amount n="19" unit="speech_acts"/>
+            <amount n="260" unit="words"/>
+            <amount n="13" unit="lines"/>
+            <amount n="1393" unit="chars"/>
+          </sp>
+          <sp who="#der_advocat">
+            <amount n="4" unit="speech_acts"/>
+            <amount n="126" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="709" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>8. Auftritt</head>
+        <div>
+          <head>Achter Auftritt</head>
+          <sp who="#herr_wackermann">
+            <amount n="8" unit="speech_acts"/>
+            <amount n="353" unit="words"/>
+            <amount n="3" unit="lines"/>
+            <amount n="2160" unit="chars"/>
+          </sp>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="8" unit="speech_acts"/>
+            <amount n="96" unit="words"/>
+            <amount n="7" unit="lines"/>
+            <amount n="537" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+      <div>
+        <head>9. Auftritt</head>
+        <div>
+          <head>Neunter Auftritt</head>
+          <sp who="#frau_glaubeleichtin">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="16" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="98" unit="chars"/>
+          </sp>
+          <sp who="#herr_glaubeleicht">
+            <amount n="2" unit="speech_acts"/>
+            <amount n="100" unit="words"/>
+            <amount n="577" unit="chars"/>
+          </sp>
+          <sp who="#herr_liebmann">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="10" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="59" unit="chars"/>
+          </sp>
+          <sp who="#jungfer_dorchen">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="7" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="41" unit="chars"/>
+          </sp>
+          <sp who="#cathrine">
+            <amount n="1" unit="speech_acts"/>
+            <amount n="14" unit="words"/>
+            <amount n="1" unit="lines"/>
+            <amount n="96" unit="chars"/>
+          </sp>
+        </div>
+      </div>
+    </div>
+  </text>
+</play>
