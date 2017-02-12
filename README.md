@@ -12,12 +12,17 @@
 
 * v0.0: Spaghetti-code version written in August, 2014 (never published);
 * v0.1: rewritten in June, 2015 (archived [here](https://github.com/lehkost/dramavis/tree/master/archive/v0.1));
-* v0.2: major rewrite in February, 2016.
-* v0.2.1: minor bugfixes and usability improvements
+* v0.2: major rewrite in February, 2016;
+* v0.2.1: minor bugfixes and usability improvements;
+* v0.3: object-oriented restructurations of code base, introduced measures for dynamic network changes; December, 2016.
 
 ## New in v0.2.1:
 
 * added virtualenv file
+
+## New in v0.3:
+
+* introduced values to describe dynamic changes in character networks for plot analysis, cf. [our paper for DHd2017 in Bern/CH](https://dlina.github.io/presentations/2017-bern/) (in German)
 
 ## Installation
 
