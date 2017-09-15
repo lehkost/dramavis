@@ -1,0 +1,19 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+SARAZENENKÖNIG;0.6071428571428571;12.666666666666668;{'closeness': 13, 'degree': 12, 'betweenness': 12};7;0.0
+ALMERINE;0.7391304347826086;8.333333333333334;{'closeness': 6, 'degree': 6, 'betweenness': 8};11;0.025350140056022413
+CURIO;0.68;5.833333333333333;{'closeness': 10, 'degree': 10, 'betweenness': 9};9;0.017244397759103643
+ALLE KASTILIER;0.6071428571428571;15.0;{'closeness': 15, 'degree': 15, 'betweenness': 18};7;0.0
+DON FERNANDO;0.4857142857142857;15.666666666666666;{'closeness': 18, 'degree': 17, 'betweenness': 14};4;0.0
+MALVIZINO;0.8947368421052632;3.5;{'closeness': 2, 'degree': 2, 'betweenness': 2};15;0.09546568627450981
+LILLA;0.7727272727272727;3.333333333333333;{'closeness': 4, 'degree': 4, 'betweenness': 3};12;0.0586484593837535
+PRINZ ZIFALDO;0.8095238095238095;4.666666666666667;{'closeness': 3, 'degree': 3, 'betweenness': 4};13;0.05238095238095238
+ISABELLA;0.7083333333333334;9.166666666666666;{'closeness': 8, 'degree': 8, 'betweenness': 6};10;0.031022408963585435
+INFANTIN;0.7391304347826086;7.666666666666667;{'closeness': 7, 'degree': 7, 'betweenness': 11};11;0.016981792717086833
+EIN MANN;0.5666666666666667;15.833333333333332;{'closeness': 16, 'degree': 16, 'betweenness': 15};5;0.0
+GRISALDO;0.9444444444444444;1.0;{'closeness': 1, 'degree': 1, 'betweenness': 1};16;0.15113795518207285
+BASTIANO;0.7083333333333334;6.166666666666667;{'closeness': 9, 'degree': 9, 'betweenness': 7};10;0.026505602240896358
+SALUZZO;0.53125;17.0;{'closeness': 17, 'degree': 18, 'betweenness': 16};3;0.0
+KÖNIG;0.6296296296296297;13.166666666666668;{'closeness': 12, 'degree': 14, 'betweenness': 17};7;0.0
+EIN KASTILIER;0.6071428571428571;15.666666666666668;{'closeness': 14, 'degree': 13, 'betweenness': 13};7;0.0
+BALLONA;0.7727272727272727;6.5;{'closeness': 5, 'degree': 5, 'betweenness': 5};12;0.052135854341736676
+TRUFFALDINO;0.68;9.833333333333332;{'closeness': 11, 'degree': 11, 'betweenness': 10};9;0.017244397759103643

@@ -1,0 +1,20 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+LOTTCHEN;0.6923076923076923;5.666666666666666;{'closeness': 7, 'degree': 7, 'betweenness': 5};10;0.059881730469965776
+FRITZ;0.5;15.333333333333332;{'closeness': 15, 'degree': 15, 'betweenness': 14};3;0.0
+ADJUTANT;0.5454545454545454;12.5;{'closeness': 14, 'degree': 13, 'betweenness': 12};4;0.0
+DROMER;0.75;3.5;{'closeness': 3, 'degree': 3, 'betweenness': 3};12;0.0879240585122938
+FERDINAND;0.6666666666666666;8.0;{'closeness': 8, 'degree': 8, 'betweenness': 8};9;0.012480547774665422
+DER BAUER;0.4864864864864865;14.0;{'closeness': 16, 'degree': 16, 'betweenness': 13};2;0.0
+HAUSVATER;0.8571428571428571;1.0;{'closeness': 1, 'degree': 1, 'betweenness': 1};15;0.2722377840024899
+MALER;0.6666666666666666;7.5;{'closeness': 9, 'degree': 9, 'betweenness': 9};9;0.011982570806100218
+KARL;0.8181818181818182;2.0;{'closeness': 2, 'degree': 2, 'betweenness': 2};14;0.13934018051665115
+ANNE;0.5625;12.666666666666668;{'closeness': 13, 'degree': 14, 'betweenness': 16};4;0.0
+GRÄFIN AMALDI;0.72;6.833333333333334;{'closeness': 5, 'degree': 5, 'betweenness': 4};11;0.0675692499221911
+DAS KIND;0.5806451612903226;13.5;{'closeness': 12, 'degree': 12, 'betweenness': 15};6;0.0
+EIN BEDIENTER;0.6428571428571429;10.0;{'closeness': 10, 'degree': 10, 'betweenness': 10};8;0.0028322440087145966
+DIE BEDIENTE;0.45;17.333333333333336;{'closeness': 19, 'degree': 17, 'betweenness': 17};2;0.0
+KAMMERJUNGFER;0.5806451612903226;13.0;{'closeness': 11, 'degree': 11, 'betweenness': 11};6;0.0
+BEDIENTER;0.47368421052631576;18.0;{'closeness': 18, 'degree': 18, 'betweenness': 18};2;0.0
+SOPHIE;0.75;3.8333333333333335;{'closeness': 4, 'degree': 4, 'betweenness': 6};12;0.051416122004357294
+GRAF MONHEIM;0.72;6.666666666666666;{'closeness': 6, 'degree': 6, 'betweenness': 7};11;0.019825708061002176
+AMTMANN;0.4864864864864865;18.666666666666664;{'closeness': 17, 'degree': 19, 'betweenness': 19};2;0.0

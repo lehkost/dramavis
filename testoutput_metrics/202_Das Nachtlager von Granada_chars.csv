@@ -1,0 +1,10 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+PEDRO;0.8;5.0;{'closeness': 4, 'degree': 4, 'betweenness': 4};6;0.0
+JÄGER;1.0;1.0;{'closeness': 1, 'degree': 1, 'betweenness': 1};8;0.09523809523809523
+AMBROSIO;0.8;6.0;{'closeness': 5, 'degree': 5, 'betweenness': 5};6;0.0
+OTTO;0.6666666666666666;7.666666666666666;{'closeness': 8, 'degree': 8, 'betweenness': 6};4;0.0
+GOMEZ;0.6666666666666666;6.166666666666667;{'closeness': 9, 'degree': 9, 'betweenness': 7};4;0.0
+VASCO;0.8;4.833333333333334;{'closeness': 6, 'degree': 6, 'betweenness': 8};6;0.0
+GABRIELE;1.0;2.0;{'closeness': 2, 'degree': 2, 'betweenness': 2};8;0.09523809523809523
+CHOR;0.8;8.333333333333334;{'closeness': 7, 'degree': 7, 'betweenness': 9};6;0.0
+DIE DREI HIRTEN;1.0;4.0;{'closeness': 3, 'degree': 3, 'betweenness': 3};8;0.09523809523809523

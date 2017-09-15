@@ -1,0 +1,24 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+JÖRG;0.45187165775401067;8.0;{'closeness': 5, 'degree': 5, 'betweenness': 11};9;0.0
+KÖNIGIN;0.32007575757575757;16.333333333333332;{'closeness': 13, 'degree': 19, 'betweenness': 12};3;0.0
+DIE AFTERMUSE;0.09090909090909091;18.5;{'closeness': 21, 'degree': 20, 'betweenness': 13};2;0.0
+DIE HOFMEISTERIN;0.1893939393939394;18.333333333333336;{'closeness': 19, 'degree': 17, 'betweenness': 14};4;0.0
+KÖNIG;0.36580086580086585;9.5;{'closeness': 11, 'degree': 11, 'betweenness': 5};5;0.003968253968253968
+PRINZESSIN;0.36580086580086585;10.5;{'closeness': 12, 'degree': 12, 'betweenness': 6};5;0.003968253968253968
+BENJAMIN;0.4801136363636364;3.0;{'closeness': 4, 'degree': 4, 'betweenness': 4};10;0.0183982683982684
+JACOB;0.5487012987012988;1.1666666666666665;{'closeness': 1, 'degree': 1, 'betweenness': 2};12;0.04942279942279943
+ZWEITER KAVALIER;0.1893939393939394;19.333333333333336;{'closeness': 20, 'degree': 18, 'betweenness': 15};4;0.0
+ERSTE DAME;0.22727272727272727;12.333333333333332;{'closeness': 15, 'degree': 13, 'betweenness': 7};5;0.0010822510822510823
+DOKTOR PFEFFER;0.45187165775401067;8.166666666666668;{'closeness': 8, 'degree': 8, 'betweenness': 21};9;0.0
+DER JÄGER;0.45187165775401067;11.666666666666668;{'closeness': 6, 'degree': 6, 'betweenness': 16};9;0.0
+DER DICHTER;0.09090909090909091;21.0;{'closeness': 22, 'degree': 21, 'betweenness': 17};2;0.0
+ERSTER KAVALIER;0.22727272727272727;14.333333333333332;{'closeness': 17, 'degree': 15, 'betweenness': 9};5;0.0010822510822510823
+BARBARA;0.3072727272727273;15.0;{'closeness': 14, 'degree': 22, 'betweenness': 18};2;0.0
+DIE MUSE;0.09090909090909091;22.333333333333336;{'closeness': 23, 'degree': 23, 'betweenness': 19};2;0.0
+BLOCK;0.45187165775401067;8.166666666666668;{'closeness': 7, 'degree': 7, 'betweenness': 20};9;0.0
+DRITTE DAME;0.22727272727272727;14.333333333333332;{'closeness': 16, 'degree': 14, 'betweenness': 8};5;0.0010822510822510823
+SCHLÜTER;0.45187165775401067;9.666666666666668;{'closeness': 9, 'degree': 9, 'betweenness': 22};9;0.0
+KILIAN;0.45187165775401067;8.666666666666668;{'closeness': 10, 'degree': 10, 'betweenness': 23};9;0.0
+DER GRAF;0.5121212121212122;5.0;{'closeness': 3, 'degree': 3, 'betweenness': 3};11;0.0202020202020202
+ZWEITE DAME;0.22727272727272727;15.833333333333332;{'closeness': 18, 'degree': 16, 'betweenness': 10};5;0.0010822510822510823
+PRINZ;0.5487012987012988;4.833333333333333;{'closeness': 2, 'degree': 2, 'betweenness': 1};12;0.05555555555555556

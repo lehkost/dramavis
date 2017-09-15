@@ -1,0 +1,17 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+FRAU EHRLICHEN;0.5769230769230769;14.166666666666668;{'closeness': 13, 'degree': 13, 'betweenness': 14};4;0.0
+DER DIENER;0.5357142857142857;13.666666666666668;{'closeness': 15, 'degree': 15, 'betweenness': 10};2;0.0
+HERR WACKERMANN;0.75;3.833333333333333;{'closeness': 2, 'degree': 2, 'betweenness': 4};10;0.05873015873015872
+HERR SCHEINFROMM;0.75;2.833333333333333;{'closeness': 3, 'degree': 3, 'betweenness': 2};10;0.08492063492063492
+FRAU ZANCKENHEIMIN;0.625;6.333333333333334;{'closeness': 7, 'degree': 7, 'betweenness': 6};6;0.011904761904761906
+DER ADVOCAT;0.625;11.0;{'closeness': 8, 'degree': 8, 'betweenness': 11};6;0.0
+FRAU SEUFFZERIN;0.625;7.666666666666667;{'closeness': 9, 'degree': 9, 'betweenness': 7};6;0.011904761904761906
+JUNGFER DORCHEN;0.6;10.0;{'closeness': 12, 'degree': 12, 'betweenness': 12};5;0.0
+FRAU BETTELSACKIN;0.5357142857142857;13.5;{'closeness': 16, 'degree': 16, 'betweenness': 13};2;0.0
+HERR LIEBMANN;0.625;9.333333333333332;{'closeness': 10, 'degree': 10, 'betweenness': 9};6;0.001904761904761905
+FRAU GLAUBELEICHTIN;1.0;1.0;{'closeness': 1, 'degree': 1, 'betweenness': 1};15;0.3773015873015874
+HERR GLAUBELEICHT;0.625;8.833333333333334;{'closeness': 6, 'degree': 6, 'betweenness': 8};6;0.001904761904761905
+JACOB;0.5555555555555556;15.166666666666668;{'closeness': 14, 'degree': 14, 'betweenness': 15};3;0.0
+CATHRINE;0.75;2.833333333333333;{'closeness': 4, 'degree': 4, 'betweenness': 3};10;0.06380952380952382
+HERR VON MUCKERSDORFF;0.625;11.333333333333332;{'closeness': 11, 'degree': 11, 'betweenness': 16};6;0.0
+JUNGFER LUISCHEN;0.7142857142857143;4.5;{'closeness': 5, 'degree': 5, 'betweenness': 5};9;0.025714285714285714
