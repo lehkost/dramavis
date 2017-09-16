@@ -102,6 +102,7 @@ class DramaAnalyzer(Lina):
         super(DramaAnalyzer, self).__init__(dramafile, outputfolder)
         self.n_personae = len(self.personae)
         self.centralities = pd.DataFrame(index = [p for p in self.personae])
+        self.centralities.index.name = "name"
         self.metrics = pd.DataFrame()
         self.G = self.create_graph()
         self.analyze_characters()
@@ -110,12 +111,6 @@ class DramaAnalyzer(Lina):
         self.get_centrality_ranks()
         self.get_central_characters()
         self.graph_metrics = self.get_graph_metrics()
-        # self.get_metrics()
-
-    def get_metrics(self):
-        self.G = self.create_graph()
-        self.analyze_characters()
-        self.character_centralities = self.get_central_characters()
 
     def get_final_scene_size(self):
         last_scene_size = len(self.segments[-1])
@@ -147,28 +142,22 @@ class DramaAnalyzer(Lina):
                 return central_character_entry_index
 
     def get_central_character(self):
-        cc = sorted(self.character_centralities, key=self.character_centralities.__getitem__)
-        cr = [self.character_centralities[c] for c in cc]
-        minrank = min(cr)
-        central_chars = [i for i, j in enumerate(cr) if j == minrank]
+        # either that or hardcode
+        ranks = [c for c in self.centralities.columns if c.endswith("rank")]
+        # sum up all rank values per character, divide by nr. of rank metrics
+        avg_ranks = self.centralities[ranks].sum(axis=1)/len(ranks)
+        min_rank = min(avg_ranks)
+        central_chars = avg_ranks[avg_ranks == min_rank].index.tolist()
         if len(central_chars) == 1:
-            return cc[central_chars[0]]
+            return central_chars[0]
         else:
-            return None
+            return "SEVERAL"
 
     def get_character_frequencies(self):
         self.centralities['frequency'] = 0
         frequencies = Counter(list(chain.from_iterable(self.segments)))
         for char, freq in frequencies.items():
             self.centralities.loc[char, 'frequency'] = freq
-
-    def get_ranks_with_chars(self):
-        ranks_with_chars = {}
-        for metric in ['degree', 'closeness', 'betweenness']:
-            ranks_with_chars[metric] = {n:[] for n in range(1, len(self.get_character_ranks())+1)}
-            for char, metrics in self.get_character_ranks().items():
-                ranks_with_chars[metric][metrics[metric]].append(char)
-        return ranks_with_chars
 
     def get_top_ranked_chars(self):
         top_ranked = {}
@@ -216,10 +205,11 @@ class DramaAnalyzer(Lina):
     def write_output(self):
         self.export_dict(self.graph_metrics, "_".join([self.filepath,self.title,"graph"])+".csv")
         self.export_table(self.get_drama_change_rate(), "_".join([self.filepath, self.title,"change_rates"])+".csv")
-        chars = self.character_metrics
-        chars['weighted_centralities_rank'] = self.get_character_ranks()
-        chars['central_character_rank'] = self.character_centralities
-        self.export_dicts(chars, "_".join([self.filepath,self.title,"chars"])+".csv")
+        self.centralities.to_csv(
+            os.path.join(
+                        self.outputfolder,
+                        "%s_%s_chars.csv" % (self.ID, self.title)
+                        ))
         nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
         plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
 
@@ -245,9 +235,9 @@ class DramaAnalyzer(Lina):
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
         graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
         graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
-        # graph_metrics["central_character"] = self.get_central_character()
-        # graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
-        # graph_metrics["characters_last_in"] = self.get_characters_last_in()
+        graph_metrics["central_character"] = self.get_central_character()
+        graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
+        graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return graph_metrics
 
     def get_characters_last_in(self):
