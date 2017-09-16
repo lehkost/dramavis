@@ -22,6 +22,7 @@ import argparse
 from superposter import plotGraph, plot_superposter
 import logging
 import numpy
+from tqdm import tqdm
 
 from linacorpus import LinaCorpus, Lina
 
@@ -37,15 +38,13 @@ class CorpusAnalyzer(LinaCorpus):
         returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
         """
         # dramas = {}
-        for dramafile in self.dramafiles:
+        for dramafile in tqdm(self.dramafiles, desc="Dramas"):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder)
             yield drama
 
-
     def get_central_characters(self):
-        dramas = self.analyze_dramas(metrics=True)
         header = [
                     'author', 'title', 'year',
                     'frequency', 'degree', 'betweenness', 'closeness',
@@ -62,7 +61,7 @@ class CorpusAnalyzer(LinaCorpus):
         #         csvwriter.writerow(metadata+chars)
         dfs = []
         for drama in dramas:
-            temp_df = pd.DataFrame.from_dict(drama.graph_metrics, orient="index").T
+            temp_df = drama.graph_metrics.copy()
             for m in header[:2]:
                 temp_df[m] = drama.metadata.get(m)
             temp_df['year'] = drama.metadata.get('date_definite')
@@ -73,9 +72,9 @@ class CorpusAnalyzer(LinaCorpus):
         df = df[header]
         return df
 
-
     def get_metrics(self):
         dramas = self.analyze_dramas()
+        df = pd.concat([d.graph_metrics for d in dramas])
         header =    [
                     'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
                     'charcount', 'edgecount', 'maxdegree', 'avgdegree',
@@ -84,16 +83,7 @@ class CorpusAnalyzer(LinaCorpus):
                     'central_character', 'characters_last_in',
                     'connected_components'
                     ]
-        with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "w") as outfile:
-            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
-            csvwriter.writerow(header)
-        with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "a") as outfile:
-            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
-            for drama in dramas:
-                metrics = [drama.graph_metrics[m] for m in header]
-                csvwriter.writerow(metrics)
-                drama.write_output()
-
+        df.to_csv(os.path.join(self.outputfolder, "corpus_metrics"), sep=";")
 
 
 class DramaAnalyzer(Lina):
@@ -238,7 +228,7 @@ class DramaAnalyzer(Lina):
         graph_metrics["central_character"] = self.get_central_character()
         graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
         graph_metrics["characters_last_in"] = self.get_characters_last_in()
-        return graph_metrics
+        return pd.DataFrame.from_dict(graph_metrics, orient='index').T
 
     def get_characters_last_in(self):
         last_chars = self.segments[-1]
