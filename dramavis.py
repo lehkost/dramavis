@@ -58,8 +58,8 @@ class LinaCorpus(object):
         # for ID, drama in dramas.items():
         for drama in dramas:
         # yields parsed dramas dicts
-            if args.debug:
-                print("TITLE:", drama.title)
+            # if args.debug:
+            #     print("TITLE:", drama.title)
             if os.path.isfile(os.path.join(self.outputfolder, "_".join([str(drama.ID),drama.title])+".svg")):
                 continue
             self.capture_fringe_cases(drama)
@@ -93,7 +93,8 @@ class LinaCorpus(object):
                     'charcount', 'edgecount', 'maxdegree', 'avgdegree',
                     'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                     'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
-                    'central_character', 'characters_last_in'
+                    'central_character', 'characters_last_in',
+                    'connected_components'
                     ]
         with open(os.path.join(self.outputfolder, "corpus_metrics.csv"), "w") as outfile:
             csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
@@ -155,10 +156,10 @@ class Lina(object):
     def get_central_character_entry(self):
         central_character = self.get_central_character()
         for i, segment in enumerate(self.segments):
-             if central_character in segment:
-                 i += 1
-                 central_character_entry_index = float(i/len(self.segments))
-                 return central_character_entry_index
+            if central_character in segment:
+                i += 1
+                central_character_entry_index = float(i/len(self.segments))
+                return central_character_entry_index
 
     def get_central_character(self):
         cc = sorted(self.character_centralities, key=self.character_centralities.__getitem__)
@@ -316,8 +317,8 @@ class Lina(object):
         # parsed_drama = (ID, {"metadata": metadata, "personae":personae, "speakers":speakers})
         # return parsed_drama
 
-        if args.debug:
-            print("SEGMENTS:", segments)
+        # if args.debug:
+        #     print("SEGMENTS:", segments)
         return ID, metadata, personae, segments
 
     def extract_metadata(self, header):
@@ -413,14 +414,14 @@ class Lina(object):
         for char in persons.getchildren():
             name = char.find("{*}name").text
             aliases = [alias.attrib.get('{http://www.w3.org/XML/1998/namespace}id') for alias in char.findall("{*}alias")]
-            if args.debug:
-                print("ALIASES:", aliases)
+            # if args.debug:
+            #     print("ALIASES:", aliases)
             if name:
                 personae.append({name:aliases})
             else:
                 personae.append({aliases[0]:aliases})
-        if args.debug:
-            print("PERSONAE:", personae)
+        # if args.debug:
+        #     print("PERSONAE:", personae)
         return personae
 
     def extract_structure(self):
@@ -493,8 +494,8 @@ class Lina(object):
 
             source = str(i)
             targets = speakers
-            if args.debug:
-                print("SOURCE, TARGET:", source, targets)
+            # if args.debug:
+            #     print("SOURCE, TARGET:", source, targets)
 
             if not source in B.nodes():
                 B.add_node(source, bipartite=0)
@@ -505,8 +506,8 @@ class Lina(object):
                     B.add_node(target, bipartite=1)
                 B.add_edge(source, target)
 
-        if args.debug:
-            print("EDGES:", B.edges())
+        # if args.debug:
+        #     print("EDGES:", B.edges())
         scene_nodes = set(n for n,d in B.nodes(data=True) if d['bipartite']==0)
         person_nodes = set(B) - scene_nodes
         nx.is_bipartite(B)
@@ -569,6 +570,7 @@ class Lina(object):
         except:
             print("ZeroDivisionError: float division by zero")
             values["clustering_coefficient"] = "NaN"
+        values["connected_components"] = nx.number_connected_components(G)
         return values
 
     def analyze_characters(self, G):
@@ -669,6 +671,21 @@ class Lina(object):
         except:
             randavgpathl = "NaN"
         return randavgpathl, randcluster
+
+
+class Character(object):
+    """
+    Holds character-centric attributes and metrics.
+    """
+    # give attributes:
+    # name, id, aliases
+    # central character flag: boolean
+    # appearance frequency
+    # centralities: degree, closeness, betweenness
+    # ranks: degree, closeness, betweenness
+    #
+    pass
+
 
 
 def main(args):
