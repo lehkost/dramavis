@@ -13,6 +13,7 @@ __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 from lxml import etree
 import os
 import glob
+import pandas as pd
 import networkx as nx
 import csv
 from itertools import chain, zip_longest
@@ -69,22 +70,33 @@ class LinaCorpus(object):
                     plotGraph(R, filename=os.path.join(self.outputfolder, str(drama.ID)+"random"+str(i)+".svg"))
 
     def get_central_characters(self):
-        dramas = self.read_dramas(metrics=False)
+        dramas = self.read_dramas(metrics=True)
         header = [
                     'author', 'title', 'year',
                     'frequency', 'degree', 'betweenness', 'closeness',
                     'central'
                  ]
-        with open(os.path.join(self.outputfolder, "central_characters.csv"), "w") as outfile:
-            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
-            csvwriter.writerow(header)
-        with open(os.path.join(self.outputfolder, "central_characters.csv"), "a") as outfile:
-            csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
-            for drama in dramas:
-                metadata = [drama.metadata.get('author'), drama.metadata.get('title'), drama.metadata.get('date_definite')]
-                chars = [drama.get_top_ranked_chars()[m] for m in header[3:]]
-                csvwriter.writerow(metadata+chars)
-
+        # with open(os.path.join(self.outputfolder, "central_characters.csv"), "w") as outfile:
+        #     csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+        #     csvwriter.writerow(header)
+        # with open(os.path.join(self.outputfolder, "central_characters.csv"), "a") as outfile:
+        #     csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
+        #     for drama in dramas:
+        #         metadata = [drama.metadata.get('author'), drama.metadata.get('title'), drama.metadata.get('date_definite')]
+        #         chars = [drama.get_top_ranked_chars()[m] for m in header[3:]]
+        #         csvwriter.writerow(metadata+chars)
+        dfs = []
+        for drama in dramas:
+            temp_df = pd.DataFrame.from_dict(drama.graph_metrics, orient="index").T
+            for m in header[:2]:
+                temp_df[m] = drama.metadata.get(m)
+            temp_df['year'] = drama.metadata.get('date_definite')
+            for m in header[3:]:
+                temp_df[m] = drama.get_top_ranked_chars()[m]
+            dfs.append(temp_df)
+        df = pd.concat(dfs)
+        df = df[header]
+        return df
 
     def get_metrics(self):
         dramas = self.read_dramas()
@@ -695,7 +707,8 @@ def main(args):
     if args.action == "metrics":
         corpus.get_metrics()
     if args.action == "char_ranks":
-        corpus.get_central_characters()
+        cc = corpus.get_central_characters()
+        cc.to_csv(os.path.join(args.outputfolder, "central_characters.csv"), sep=";")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')

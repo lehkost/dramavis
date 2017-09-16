@@ -25,4 +25,15 @@ class CharMetricsTestCase(unittest.TestCase):
         number_dramas = len(list(self.LC.read_dramas(metrics=False)))
         self.assertEqual(number_dramas, 11)
 
+    def test_central_characters(self):
+        true_df = pd.read_csv("testoutput_chars/central_characters.csv", sep=";")
+        test_df = self.LC.get_central_characters()
+        true_df.reset_index(inplace=True)
+        test_df.reset_index(inplace=True)
+        true_df.fillna("", inplace=True)
+        test_df.fillna("", inplace=True)
+        true_df.drop('index', axis=1, inplace=True)
+        test_df.drop('index', axis=1, inplace=True)
+        assert_frame_equal(test_df, true_df)
+
     
