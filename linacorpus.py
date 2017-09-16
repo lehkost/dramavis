@@ -34,7 +34,7 @@ class Lina(object):
         self.outputfolder = outputfolder
         self.tree = etree.parse(dramafile)
         self.filename = os.path.splitext(os.path.basename((dramafile)))[0]
-        self.ID, self.metadata, self.personae, self.segments = self.parse_drama()
+        self.parse_drama()
         self.num_chars_total = len(self.personae)
         self.filepath = os.path.join(self.outputfolder, str(self.ID))
         self.title = self.metadata.get("title", self.ID)
@@ -55,23 +55,22 @@ class Lina(object):
         }
         """
         root = self.tree.getroot()
-        ID = root.attrib.get("id")
+        self.ID = root.attrib.get("id")
         header = root.find("{*}header")
         persons = root.find("{*}personae")
         text = root.find("{*}text")
-        metadata = self.extract_metadata(header)
-        metadata["filename"] = self.filename
-        personae = self.extract_personae(persons)
-        charmap = self.create_charmap(personae)
-        segments = self.extract_speakers(charmap)
-        metadata["segment_count"] = len(segments)
-        metadata["count_type"] = self.get_count_type()
+        self.metadata = self.extract_metadata(header)
+        self.metadata["filename"] = self.filename
+        self.personae = self.extract_personae(persons)
+        self.charmap = self.create_charmap()
+        self.segments = self.extract_speakers()
+        self.metadata["segment_count"] = len(self.segments)
+        self.metadata["count_type"] = self.get_count_type()
         # parsed_drama = (ID, {"metadata": metadata, "personae":personae, "speakers":speakers})
         # return parsed_drama
 
         # if args.debug:
         #     print("SEGMENTS:", segments)
-        return ID, metadata, personae, segments
 
     def extract_metadata(self, header):
         """
@@ -157,9 +156,9 @@ class Lina(object):
     def extract_personae(self, persons):
         """
         Extracts persons and aliases from the personae-tag of a lina-xml,
-        returns list of Character objects:
+        returns dict of Character objects, {name:Character}:
         """
-        personae = []
+        personae = {}
         for char in persons.getchildren():
             name = char.find("{*}name").text
             aliases = [alias.attrib
@@ -168,9 +167,10 @@ class Lina(object):
             # if args.debug:
             #     print("ALIASES:", aliases)
             if name:
-                personae.append(Character(name, aliases))
+                personae[name] = Character(name, aliases)
             else:
-                personae.append(Character(aliases[0], aliases))
+                name = aliases[0]
+                personae[name] = Character(name, aliases)
         # if args.debug:
         #     print("PERSONAE:", personae)
         return personae
@@ -188,7 +188,7 @@ class Lina(object):
             # check if scene (ends with "Szene/Szene./Auftritt/Auftritt.")
         return parentsegments
 
-    def extract_speakers(self, charmap):
+    def extract_speakers(self):
         """ e.g.
         [['CONSTANZE', 'LANGENBERG'],
          ['GUSTCHEN', 'CONSTANZE', 'LANGENBERG'],
@@ -197,22 +197,19 @@ class Lina(object):
          ['FR. GREINER', 'CONSTANZE', 'MORITZ'],
          ['BACKES', 'HAHNENBEIN', 'GUSTCHEN', 'CONSTANZE', 'MORITZ'],
          ['HAHNENBEIN', 'CONSTANZE', 'BACKES', 'GUSTCHEN', 'MORITZ', 'HAUPTMANN'],
-         ['HAHNENBEIN',
-          'CONSTANZE',
-          'BACKES',
-          'GUSTCHEN',
-          'MORITZ',
-          'HAUPTMANN',
-          'LANGENBERG']]
+         ['HAHNENBEIN', 'CONSTANZE', 'BACKES', 'GUSTCHEN', 'MORITZ', 'HAUPTMANN', 'LANGENBERG']]
         """
         parentsegments = self.extract_structure()
         segments = list()
-        for segment in parentsegments:
+        for i, segment in enumerate(parentsegments):
             speakers = [speaker.attrib.get("who").replace("#", "").split()
                         for speaker in segment.findall(".//{*}sp")]
             speakers = list(chain.from_iterable(speakers))
-            speakers = [charmap[speaker] for speaker in speakers]
-            segments.append(list(set(speakers)))
+            speakers = [self.charmap[speaker] for speaker in speakers]
+            speakers = list(set(speakers))
+            for name in speakers:
+                self.personae[name].appears_in.add(i)
+            segments.append(speakers)
         return segments
 
     def get_count_type(self):
@@ -233,7 +230,7 @@ class Lina(object):
                 # print(head.text)
         return count_type
 
-    def create_charmap(self, personae):
+    def create_charmap(self):
         """
         Maps aliases back to the definite personname,
         returns a dictionary:
@@ -245,7 +242,7 @@ class Lina(object):
         }
         """
         charmap = {}
-        for person in personae:
+        for person in self.personae.values():
             for alias in person.aliases:
                 charmap[alias] = person.name
         return charmap
@@ -257,4 +254,5 @@ class Character(object):
         super(Character, self).__init__()
         self.name = name
         self.aliases = aliases
+        self.appears_in = set() # which segments
         self.data = pd.DataFrame()

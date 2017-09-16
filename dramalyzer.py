@@ -100,22 +100,26 @@ class DramaAnalyzer(Lina):
 
     def __init__(self, dramafile, outputfolder):
         super(DramaAnalyzer, self).__init__(dramafile, outputfolder)
+        self.n_personae = len(self.personae)
+        self.centralities = pd.DataFrame(index = [p for p in self.personae])
+        self.metrics = pd.DataFrame()
         self.G = self.create_graph()
-        self.get_graph_metrics()
-        self.get_metrics()
+        self.analyze_characters()
+        self.get_character_frequencies()
+        self.get_character_ranks()
+        self.get_centrality_ranks()
+        self.get_central_characters()
+        self.graph_metrics = self.get_graph_metrics()
+        # self.get_metrics()
 
     def get_metrics(self):
         self.G = self.create_graph()
+        self.analyze_characters()
         self.character_centralities = self.get_central_characters()
-        self.character_metrics = self.get_character_metrics()
-
-    def get_graph_metrics(self):
-        self.graph_metrics = self.get_graph_metrics()
 
     def get_final_scene_size(self):
-        personae = set(list(chain.from_iterable(self.segments)))
         last_scene_size = len(self.segments[-1])
-        return last_scene_size / len(personae)
+        return last_scene_size / self.n_personae
 
     def get_drama_change_rate_metrics(self):
         change_rates = self.get_drama_change_rate()
@@ -153,8 +157,10 @@ class DramaAnalyzer(Lina):
             return None
 
     def get_character_frequencies(self):
+        self.centralities['frequency'] = 0
         frequencies = Counter(list(chain.from_iterable(self.segments)))
-        return frequencies
+        for char, freq in frequencies.items():
+            self.centralities.loc[char, 'frequency'] = freq
 
     def get_ranks_with_chars(self):
         ranks_with_chars = {}
@@ -165,53 +171,36 @@ class DramaAnalyzer(Lina):
         return ranks_with_chars
 
     def get_top_ranked_chars(self):
-        ranks_with_chars = self.get_ranks_with_chars()
         top_ranked = {}
-        for metric in ['degree', 'closeness', 'betweenness']:
-            top_char = ranks_with_chars[metric][1][0]
-            top_ranked[metric] = top_char
-            top_value = self.character_metrics[metric][top_char]
-            values = list(self.character_metrics[metric].values())
-            if values.count(top_value) != 1:
+        # check whether metric should be sorted ascending(min) or descending(max)
+        for metric in ['degree', 'closeness', 'betweenness', 'frequency']:
+            cent_max = self.centralities[metric].max()
+            top_char = self.centralities[self.centralities['closeness'] == cent_max].index.tolist()
+            if len(top_char) != 1:
                 top_ranked[metric] = "SEVERAL"
-        top_ranked['frequency'] = self.get_character_frequencies().most_common(1)[0][0]
+            else:
+                top_ranked[metric] = top_char[0]
         top_ranked['central'] = self.get_central_character()
         return top_ranked
 
-    def get_ranked_characters(self):
-        ranked_metrics = {}
-        for metric in ['degree', 'closeness', 'betweenness']:
-            ranked_metrics[metric] = sorted(self.character_metrics[metric], key=self.character_metrics[metric].__getitem__, reverse=True)
-        return ranked_metrics
-
     def get_character_ranks(self):
-        ranks = {}
-        personae = set(list(chain.from_iterable(self.segments)))
-        for person in personae:
-            ranks[person] = {}
-        ranked_metrics = self.get_ranked_characters()
-        for person in personae:
-            for metric in ['degree', 'closeness', 'betweenness']:
-                ranks[person][metric] = ranked_metrics[metric].index(person)+1
-        return ranks
+        for metric in ['degree', 'closeness', 'betweenness', 'frequency']:
+            # ascending: False for ranks by high (1) to low (N)
+            # check ascending value for each metric
+            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='dense', ascending=False)
 
     def get_centrality_ranks(self):
-        ranks = self.get_character_ranks()
-        centrality_ranks = {}
-        personae = set(list(chain.from_iterable(self.segments)))
-        for person in personae:
-            centrality_ranks[person] = float(sum([ranks[person]['degree'],ranks[person]['closeness'],ranks[person]['betweenness']]) / 3.)
-        return centrality_ranks
+        self.centralities['avg_centrality_rank'] = self.centralities.apply(
+                                            lambda x: (x['degree_rank'] +
+                                                       x['closeness_rank'] +
+                                                       x['betweenness_rank'])/3,
+                                            axis=1)
 
     def get_central_characters(self):
-        frequencies = self.get_character_frequencies()
-        frequency_ranks = sorted(frequencies, key=frequencies.__getitem__, reverse=True)
-        centrality_ranks = self.get_centrality_ranks()
-        central_characters = {}
-        personae = set(list(chain.from_iterable(self.segments)))
-        for person in personae:
-            central_characters[person] = float(sum([frequency_ranks.index(person)+1, centrality_ranks[person]]) / 2.)
-        return central_characters
+        self.centralities['composite_centrality'] = self.centralities.apply(
+                                        lambda x: (x['frequency_rank'] +
+                                                   x['avg_centrality_rank'])/2,
+                                        axis=1)
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -256,18 +245,14 @@ class DramaAnalyzer(Lina):
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
         graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
         graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
-        graph_metrics["central_character"] = self.get_central_character()
-        graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
-        graph_metrics["characters_last_in"] = self.get_characters_last_in()
+        # graph_metrics["central_character"] = self.get_central_character()
+        # graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
+        # graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return graph_metrics
 
     def get_characters_last_in(self):
         last_chars = self.segments[-1]
         return ",".join(last_chars)
-
-    def get_character_metrics(self):
-        character_metrics = self.analyze_characters(self.G)
-        return character_metrics
 
     def create_graph(self):
         """
@@ -279,12 +264,11 @@ class DramaAnalyzer(Lina):
         Returns a networkx weighted projected graph.
         """
         speakerset = self.segments
-        personae = self.personae
 
         B = nx.Graph()
         labels = {}
         for i, speakers in enumerate(speakerset):
-
+            # speakers are Character objects
             source = str(i)
             targets = speakers
             # if args.debug:
@@ -366,7 +350,7 @@ class DramaAnalyzer(Lina):
         values["connected_components"] = nx.number_connected_components(G)
         return values
 
-    def analyze_characters(self, G):
+    def analyze_characters(self):
         """
         Computes per-character metrics of a graph G,
         returns dictionary of dictionaries:
@@ -377,11 +361,14 @@ class DramaAnalyzer(Lina):
             "closeness" = nx.closeness_centrality(G)
         }
         """
-        character_values = {}
-        character_values["betweenness"] = nx.betweenness_centrality(G)
-        character_values["degree"] = nx.degree(G)
-        character_values["closeness"] = nx.closeness_centrality(G)
-        return character_values
+        for metric in ['betweenness', 'degree', 'closeness']:
+            self.centralities[metric] = 0
+        for char, metric in nx.betweenness_centrality(self.G).items():
+            self.centralities.loc[char, 'betweenness'] = metric
+        for char, metric in nx.degree(self.G).items():
+            self.centralities.loc[char, 'degree'] = metric
+        for char, metric in nx.closeness_centrality(self.G).items():
+            self.centralities.loc[char, 'closeness'] = metric
 
     def transpose_dict(self, d):
         """
