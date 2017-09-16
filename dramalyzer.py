@@ -464,10 +464,3 @@ class DramaAnalyzer(Lina):
         except:
             randavgpathl = "NaN"
         return randavgpathl, randcluster
-
-
-class Character(object):
-    """docstring for Character"""
-    def __init__(self, arg):
-        super(Character, self).__init__()
-        self.arg = arg

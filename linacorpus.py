@@ -14,6 +14,7 @@ import os
 import glob
 from lxml import etree
 from itertools import chain
+import pandas as pd
 
 
 class LinaCorpus(object):
@@ -74,22 +75,23 @@ class Lina(object):
 
     def extract_metadata(self, header):
         """
-
         Extracts metadata from the header-tag of a lina-xml,
         returns dictionary:
 
         metadata = {
-            "title":title,
-            "subtitle":subtitle,
-            "genretitle":genretitle,
-            "author":author,
-            "pnd":pnd,
-            "date_print":date_print,
-            "date_written":date_written,
-            "date_premiere":date_premiere,
-            "date_definite":date_definite,
-            "source_textgrid":source_textgrid
-        }
+             'author': 'Benedix, Julius Roderich',
+             'count_type': 'scenes',
+             'date_definite': 1862,
+             'date_premiere': None,
+             'date_print': 1862,
+             'date_written': None,
+             'filename': '1862-Benedix_Julius_Roderich-Die_Lügnerin-lina',
+             'genretitle': 'Lustspiel',
+             'pnd': 'Die Lügnerin',
+             'segment_count': 8,
+             'source_textgrid': 'https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:kjfz.0/data',
+             'subtitle': 'Lustspiel in einem Aufzuge',
+             'title': 'Die Lügnerin'}
         """
         title = header.find("{*}title").text
         try:
@@ -155,11 +157,7 @@ class Lina(object):
     def extract_personae(self, persons):
         """
         Extracts persons and aliases from the personae-tag of a lina-xml,
-        returns list of dictionaries:
-        personae = [
-            {"charactername":["list", "of", "aliases"]},
-            {"charactername2":["list", "of", "aliases"]}
-        ]
+        returns list of Character objects:
         """
         personae = []
         for char in persons.getchildren():
@@ -170,14 +168,15 @@ class Lina(object):
             # if args.debug:
             #     print("ALIASES:", aliases)
             if name:
-                personae.append({name:aliases})
+                personae.append(Character(name, aliases))
             else:
-                personae.append({aliases[0]:aliases})
+                personae.append(Character(aliases[0], aliases))
         # if args.debug:
         #     print("PERSONAE:", personae)
         return personae
 
     def extract_structure(self):
+        """Returns list of etree-elements"""
         text = self.tree.getroot().find("{*}text")
         speakers = text.findall(".//{*}sp")
         parentsegments = list()
@@ -190,6 +189,22 @@ class Lina(object):
         return parentsegments
 
     def extract_speakers(self, charmap):
+        """ e.g.
+        [['CONSTANZE', 'LANGENBERG'],
+         ['GUSTCHEN', 'CONSTANZE', 'LANGENBERG'],
+         ['BACKES', 'HAHNENBEIN', 'CONSTANZE', 'GUSTCHEN', 'MORITZ'],
+         ['CONSTANZE', 'GUSTCHEN', 'MORITZ'],
+         ['FR. GREINER', 'CONSTANZE', 'MORITZ'],
+         ['BACKES', 'HAHNENBEIN', 'GUSTCHEN', 'CONSTANZE', 'MORITZ'],
+         ['HAHNENBEIN', 'CONSTANZE', 'BACKES', 'GUSTCHEN', 'MORITZ', 'HAUPTMANN'],
+         ['HAHNENBEIN',
+          'CONSTANZE',
+          'BACKES',
+          'GUSTCHEN',
+          'MORITZ',
+          'HAUPTMANN',
+          'LANGENBERG']]
+        """
         parentsegments = self.extract_structure()
         segments = list()
         for segment in parentsegments:
@@ -201,6 +216,9 @@ class Lina(object):
         return segments
 
     def get_count_type(self):
+        """
+        type of segment counting, default: acts, else scenes
+        """
         text = self.tree.getroot().find("{*}text")
         speakers = text.findall(".//{*}sp")
         count_type = "acts"
@@ -228,7 +246,15 @@ class Lina(object):
         """
         charmap = {}
         for person in personae:
-            for charname, aliases in person.items():
-                for alias in aliases:
-                    charmap[alias] = charname
+            for alias in person.aliases:
+                charmap[alias] = person.name
         return charmap
+
+
+class Character(object):
+    """docstring for Character"""
+    def __init__(self, name, aliases):
+        super(Character, self).__init__()
+        self.name = name
+        self.aliases = aliases
+        self.data = pd.DataFrame()
