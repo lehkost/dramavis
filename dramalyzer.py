@@ -21,7 +21,7 @@ from collections import Counter
 import argparse
 from superposter import plotGraph, plot_superposter
 import logging
-import numpy
+import numpy as np
 from tqdm import tqdm
 
 from linacorpus import LinaCorpus, Lina
@@ -85,9 +85,9 @@ class CorpusAnalyzer(LinaCorpus):
                 'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
                 'charcount', 'edgecount', 'maxdegree', 'avgdegree',
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
-                'central_character', 'characters_last_in',
-                'connected_components'
+                'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
+                'characters_last_in',
+                'connected_components', 'kendall_tau_avg', 'kendall_tau_std'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -111,7 +111,7 @@ class CorpusAnalyzer(LinaCorpus):
                 temp_df[m] = drama.get_top_ranked_chars()[m]
             temp_df['ID'] = drama.ID
             char_dfs.append(temp_df)
-            graph_dfs.append(d.graph_metrics)
+            graph_dfs.append(drama.graph_metrics)
         df = pd.concat(char_dfs)
         df = df[header]
         df.index = df['ID']
@@ -124,13 +124,13 @@ class CorpusAnalyzer(LinaCorpus):
                 'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
                 'charcount', 'edgecount', 'maxdegree', 'avgdegree',
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
-                'central_character', 'characters_last_in',
-                'connected_components'
+                'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
+                'characters_last_in',
+                'connected_components', 'kendall_tau_avg', 'kendall_tau_std'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
-        df[header].to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
+        df.to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
 
 
 class DramaAnalyzer(Lina):
@@ -169,8 +169,16 @@ class DramaAnalyzer(Lina):
             self.get_character_ranks()
             self.get_centrality_ranks()
             self.get_ranking_stability_measures()
+            self.add_ranking_stability_metrics()
             self.export_char_metrics()
             self.export_graph_metrics()
+
+    def add_ranking_stability_metrics(self):
+        self.graph_metrics["kendall_tau_avg"] = self.ranking_stability.stack().mean()
+        self.graph_metrics["kendall_tau_std"] = self.ranking_stability.stack().std()
+        (self.graph_metrics["top_rank_char_count"],
+         self.graph_metrics["top_rank_char_avg"],
+         self.graph_metrics["top_rank_char_std"]) = self.get_top_ranked_char_count()
 
     def get_final_scene_size(self):
         last_scene_size = len(self.segments[-1])
@@ -178,8 +186,8 @@ class DramaAnalyzer(Lina):
 
     def get_drama_change_rate_metrics(self):
         change_rates = self.get_drama_change_rate()
-        cr_mean = numpy.mean(change_rates)
-        cr_std = numpy.std(change_rates)
+        cr_mean = np.mean(change_rates)
+        cr_std = np.std(change_rates)
         return cr_mean, cr_std
 
     def get_drama_change_rate(self):
@@ -230,13 +238,19 @@ class DramaAnalyzer(Lina):
         # check whether metric should be sorted ascending(min) or descending(max)
         for metric in ['degree', 'closeness', 'betweenness', 'frequency']:
             cent_max = self.centralities[metric].max()
-            top_char = self.centralities[self.centralities['closeness'] == cent_max].index.tolist()
+            top_char = self.centralities[self.centralities[metric] == cent_max].index.tolist()
             if len(top_char) != 1:
                 top_ranked[metric] = "SEVERAL"
             else:
                 top_ranked[metric] = top_char[0]
         # top_ranked['central'] = self.get_central_character()
         return top_ranked
+
+    def get_top_ranked_char_count(self):
+        avg_min = self.centralities['centrality_rank_avg'].min()
+        top_chars = self.centralities[self.centralities['centrality_rank_avg'] == avg_min].index.tolist()
+        top_std = self.centralities[self.centralities['centrality_rank_avg'] == avg_min]['centrality_rank_std']
+        return len(top_chars), avg_min, top_std
 
     def get_character_ranks(self):
         for metric in ['degree', 'closeness', 'betweenness',
@@ -253,15 +267,11 @@ class DramaAnalyzer(Lina):
         for metric in ['centrality_rank_avg', 'centrality_rank_std']:
             self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
 
-    def get_central_characters(self):
-        self.centralities['composite_centrality'] = self.centralities.apply(
-                                        lambda x: (x['frequency_rank'] +
-                                                   x['avg_centrality_rank'])/2,
-                                        axis=1)
-
     def get_ranking_stability_measures(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")][:8]
         self.ranking_stability = self.centralities[ranks].corr(method='kendall')
+        np.fill_diagonal(self.ranking_stability.values, np.nan)
+        self.ranking_stability.index.name = "rank_name"
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -332,8 +342,6 @@ class DramaAnalyzer(Lina):
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
         graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
         graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
-        # graph_metrics["central_character"] = self.get_central_character()
-        # graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
         graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return pd.DataFrame.from_dict(graph_metrics, orient='index').T
 
