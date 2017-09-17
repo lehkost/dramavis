@@ -58,8 +58,7 @@ class CorpusAnalyzer(LinaCorpus):
         dramas = self.analyze_dramas(action="char_metrics")
         header = [
                     'ID', 'author', 'title', 'year',
-                    'frequency', 'degree', 'betweenness', 'closeness',
-                    'central'
+                    'frequency', 'degree', 'betweenness', 'closeness'
                  ]
         dfs = []
         for drama in dramas:
@@ -115,12 +114,23 @@ class DramaAnalyzer(Lina):
         if action == "char_metrics":
             self.analyze_characters()
             self.get_character_frequencies()
+            self.get_character_speech_amounts()
             self.get_character_ranks()
             self.get_centrality_ranks()
-            self.get_central_characters()
+            # self.get_central_characters()
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
+            self.export_graph_metrics()
+        if action == "both":
+            self.graph_metrics = self.get_graph_metrics()
+            self.analyze_characters()
+            self.get_character_frequencies()
+            self.get_character_speech_amounts()
+            self.get_character_ranks()
+            self.get_centrality_ranks()
+            # self.get_central_characters()
+            self.export_char_metrics()
             self.export_graph_metrics()
 
     def get_final_scene_size(self):
@@ -170,6 +180,12 @@ class DramaAnalyzer(Lina):
         for char, freq in frequencies.items():
             self.centralities.loc[char, 'frequency'] = freq
 
+    def get_character_speech_amounts(self):
+        for amount in ["speech_acts", "words", "lines", "chars"]:
+            self.centralities[amount] = 0
+            for name, person in self.personae.items():
+                self.centralities.loc[person.name, amount] = person.amounts.get(amount)
+
     def get_top_ranked_chars(self):
         top_ranked = {}
         # check whether metric should be sorted ascending(min) or descending(max)
@@ -180,27 +196,32 @@ class DramaAnalyzer(Lina):
                 top_ranked[metric] = "SEVERAL"
             else:
                 top_ranked[metric] = top_char[0]
-        top_ranked['central'] = self.get_central_character()
+        # top_ranked['central'] = self.get_central_character()
         return top_ranked
 
     def get_character_ranks(self):
-        for metric in ['degree', 'closeness', 'betweenness', 'frequency']:
+        for metric in ['degree', 'closeness', 'betweenness',
+                       'strength', 'eigenvector_centrality',
+                       'frequency', 'speech_acts', 'words']:
             # ascending: False for ranks by high (1) to low (N)
             # check ascending value for each metric
-            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='dense', ascending=False)
+            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
 
     def get_centrality_ranks(self):
-        self.centralities['avg_centrality_rank'] = self.centralities.apply(
-                                            lambda x: (x['degree_rank'] +
-                                                       x['closeness_rank'] +
-                                                       x['betweenness_rank'])/3,
-                                            axis=1)
+        ranks = [c for c in self.centralities.columns if c.endswith("rank")]
+        self.centralities['avg_centrality_rank'] = self.centralities[ranks].sum(axis=1)/len(ranks)
+        self.centralities['std_centrality_rank'] = self.centralities[ranks].std(axis=1)/len(ranks)
+        for metric in ['avg_centrality_rank', 'std_centrality_rank']:
+            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
 
     def get_central_characters(self):
         self.centralities['composite_centrality'] = self.centralities.apply(
                                         lambda x: (x['frequency_rank'] +
                                                    x['avg_centrality_rank'])/2,
                                         axis=1)
+
+    def get_ranking_stability_measures(self):
+
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -266,8 +287,8 @@ class DramaAnalyzer(Lina):
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
         graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
         graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
-        graph_metrics["central_character"] = self.get_central_character()
-        graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
+        # graph_metrics["central_character"] = self.get_central_character()
+        # graph_metrics["central_character_entry_index"] = self.get_central_character_entry()
         graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return pd.DataFrame.from_dict(graph_metrics, orient='index').T
 
@@ -385,14 +406,26 @@ class DramaAnalyzer(Lina):
             "closeness" = nx.closeness_centrality(G)
         }
         """
-        for metric in ['betweenness', 'degree', 'closeness']:
+        # initialize columns with 0
+        for metric in ['betweenness', 'degree', 'closeness', 'strength',
+                       'eigenvector_centrality']:
             self.centralities[metric] = 0
         for char, metric in nx.betweenness_centrality(self.G).items():
             self.centralities.loc[char, 'betweenness'] = metric
         for char, metric in nx.degree(self.G).items():
             self.centralities.loc[char, 'degree'] = metric
+        for char, metric in nx.degree(self.G, weight="weight").items():
+            self.centralities.loc[char, 'strength'] = metric
         for char, metric in nx.closeness_centrality(self.G).items():
             self.centralities.loc[char, 'closeness'] = metric
+        try:
+            for char, metric in nx.eigenvector_centrality(self.G,
+                                                max_iter=500).items():
+                self.centralities.loc[char, 'eigenvector_centrality'] = metric
+        except Exception as e:
+            self.logger.error("%s networkx.exception.NetworkXError: "
+                              "eigenvector_centrality(): power iteration "
+                              "failed to converge in 500 iterations." % self.ID)
 
     def transpose_dict(self, d):
         """

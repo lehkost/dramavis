@@ -205,6 +205,15 @@ class Lina(object):
             speakers = [speaker.attrib.get("who").replace("#", "").split()
                         for speaker in segment.findall(".//{*}sp")]
             speakers = list(chain.from_iterable(speakers))
+            for speaker in speakers:
+                for amount in ["speech_acts", "words", "lines", "chars"]:
+                    try:
+                        n = segment.findall(".//{*}sp[@who='#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
+                        n = int(n)
+                        if speaker.upper() in self.personae:
+                            self.personae[speaker.upper()].amounts[amount] += n
+                    except:
+                        continue
             speakers = [self.charmap[speaker]
                         for speaker in speakers
                         if speaker in self.charmap]
@@ -257,4 +266,8 @@ class Character(object):
         self.name = name
         self.aliases = aliases
         self.appears_in = set() # which segments
+        self.amounts = {"speech_acts":0,
+                        "words":0,
+                        "lines":0,
+                        "chars":0}
         self.data = pd.DataFrame()
