@@ -1,0 +1,5 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+PHILOTAS;1.0;1.0;{'closeness': 1, 'degree': 1, 'betweenness': 1};3;0.6666666666666666
+ARIDÄUS;0.75;2.166666666666667;{'closeness': 2, 'degree': 2, 'betweenness': 3};2;0.0
+PARMENIO;0.6;3.666666666666667;{'closeness': 4, 'degree': 4, 'betweenness': 2};1;0.0
+STRATO;0.75;3.166666666666667;{'closeness': 3, 'degree': 3, 'betweenness': 4};2;0.0

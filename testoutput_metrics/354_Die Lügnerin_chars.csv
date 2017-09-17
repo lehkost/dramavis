@@ -1,0 +1,9 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+HAUPTMANN;0.875;5.0;{'closeness': 3, 'degree': 3, 'betweenness': 3};6;0.0
+BACKES;0.875;4.5;{'closeness': 4, 'degree': 4, 'betweenness': 4};6;0.0
+MORITZ;1.0;1.5;{'closeness': 1, 'degree': 1, 'betweenness': 1};7;0.11904761904761904
+FR. GREINER;0.5833333333333334;7.5;{'closeness': 8, 'degree': 8, 'betweenness': 5};2;0.0
+HAHNENBEIN;0.875;4.666666666666666;{'closeness': 5, 'degree': 5, 'betweenness': 6};6;0.0
+GUSTCHEN;0.875;4.666666666666666;{'closeness': 6, 'degree': 6, 'betweenness': 7};6;0.0
+CONSTANZE;1.0;1.5;{'closeness': 2, 'degree': 2, 'betweenness': 2};7;0.11904761904761904
+LANGENBERG;0.875;6.666666666666666;{'closeness': 7, 'degree': 7, 'betweenness': 8};6;0.0

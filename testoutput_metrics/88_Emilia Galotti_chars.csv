@@ -1,0 +1,14 @@
+;closeness;central_character_rank;weighted_centralities_rank;degree;betweenness
+ODOARDO GALOTTI;0.6666666666666666;3.666666666666667;{'closeness': 3, 'degree': 4, 'betweenness': 3};6;0.05505050505050506
+ORSINA;0.6;6.166666666666666;{'closeness': 5, 'degree': 7, 'betweenness': 7};4;0.012121212121212123
+MARINELLI;0.8;1.1666666666666665;{'closeness': 1, 'degree': 1, 'betweenness': 2};9;0.24696969696969698
+CONTI;0.4444444444444444;10.833333333333332;{'closeness': 12, 'degree': 12, 'betweenness': 11};1;0.0
+DER KAMMERDIENER;0.4444444444444444;11.833333333333332;{'closeness': 13, 'degree': 13, 'betweenness': 12};1;0.0
+ANGELO;0.48;11.5;{'closeness': 10, 'degree': 10, 'betweenness': 13};2;0.0
+APPIANI;0.5217391304347826;7.833333333333333;{'closeness': 9, 'degree': 8, 'betweenness': 9};4;0.003787878787878788
+CLAUDIA GALOTTI;0.6;3.8333333333333335;{'closeness': 6, 'degree': 3, 'betweenness': 5};7;0.045454545454545456
+PIRRO;0.5454545454545454;7.333333333333334;{'closeness': 8, 'degree': 6, 'betweenness': 6};5;0.026515151515151516
+BATTISTA;0.6;8.5;{'closeness': 7, 'degree': 9, 'betweenness': 8};4;0.012121212121212123
+DER PRINZ;0.75;1.8333333333333335;{'closeness': 2, 'degree': 2, 'betweenness': 1};8;0.46717171717171724
+EMILIA;0.6666666666666666;4.666666666666666;{'closeness': 4, 'degree': 5, 'betweenness': 4};6;0.05505050505050505
+CAMILLO ROTA;0.4444444444444444;11.833333333333332;{'closeness': 11, 'degree': 11, 'betweenness': 10};1;0.0
