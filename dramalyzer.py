@@ -61,6 +61,7 @@ class CorpusAnalyzer(LinaCorpus):
                     'frequency', 'degree', 'betweenness', 'closeness'
                  ]
         dfs = []
+        quot_quot_dfs = []
         for drama in dramas:
             temp_df = pd.DataFrame(index=[drama.ID])
             for m in header[1:3]:
@@ -70,12 +71,18 @@ class CorpusAnalyzer(LinaCorpus):
                 temp_df[m] = drama.get_top_ranked_chars()[m]
             temp_df['ID'] = drama.ID
             dfs.append(temp_df)
+            quot_quot_dfs.append(drama.quartile_quot)
         df = pd.concat(dfs)
         df = df[header]
         df.index = df['ID']
         df.index.name = 'index'
         df.to_csv(os.path.join(self.outputfolder,
                                "central_characters.csv"), sep=";")
+        self.logger.info("Exporting corpus quartile metrics.")
+        df = pd.concat(quot_quot_dfs, axis=1).T
+        df.index.name = "index"
+        df.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
+
 
     def get_graph_metrics(self):
         self.logger.info("Exporting corpus metrics.")
@@ -102,6 +109,7 @@ class CorpusAnalyzer(LinaCorpus):
                  ]
         char_dfs = []
         graph_dfs = []
+        quot_quot_dfs = []
         for drama in dramas:
             temp_df = pd.DataFrame(index=[drama.ID])
             for m in header[1:3]:
@@ -112,6 +120,7 @@ class CorpusAnalyzer(LinaCorpus):
             temp_df['ID'] = drama.ID
             char_dfs.append(temp_df)
             graph_dfs.append(drama.graph_metrics)
+            quot_quot_dfs.append(drama.quartile_quot)
         df = pd.concat(char_dfs)
         df = df[header]
         df.index = df['ID']
@@ -131,6 +140,10 @@ class CorpusAnalyzer(LinaCorpus):
         df.index = df["ID"]
         df.index.name = "index"
         df.to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
+        self.logger.info("Exporting corpus quartile metrics.")
+        df = pd.concat(quot_quot_dfs, axis=1).T
+        df.index.name = "index"
+        df.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
 
 
 class DramaAnalyzer(Lina):
@@ -157,6 +170,7 @@ class DramaAnalyzer(Lina):
             self.get_character_ranks()
             self.get_centrality_ranks()
             self.get_ranking_stability_measures()
+            self.get_quartiles()
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
@@ -170,6 +184,7 @@ class DramaAnalyzer(Lina):
             self.get_centrality_ranks()
             self.get_ranking_stability_measures()
             self.add_ranking_stability_metrics()
+            self.get_quartiles()
             self.export_char_metrics()
             self.export_graph_metrics()
 
@@ -260,12 +275,26 @@ class DramaAnalyzer(Lina):
             # check ascending value for each metric
             self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
 
+    def get_quartiles(self):
+        metrics = ['degree', 'closeness', 'betweenness',
+                   'strength', 'eigenvector_centrality',
+                   'frequency', 'speech_acts', 'words']
+        index = ["q4", "q3", "q2", "q1"]
+        df = pd.DataFrame(columns=metrics, index=index)
+        for metric in metrics:
+            df[metric] = ((pd.cut(self.centralities[metric], 4)
+                             .value_counts()
+                             .sort_index(ascending=False)/len(self.centralities))
+                         .tolist())
+        self.quartile_quot = df.loc["q4"]/df.loc["q1"]
+        self.quartile_quot.name = self.ID
+
     def get_centrality_ranks(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")]
         self.centralities['centrality_rank_avg'] = self.centralities[ranks].sum(axis=1)/len(ranks)
         self.centralities['centrality_rank_std'] = self.centralities[ranks].std(axis=1)/len(ranks)
         for metric in ['centrality_rank_avg', 'centrality_rank_std']:
-            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
+            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=True)
 
     def get_ranking_stability_measures(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")][:8]

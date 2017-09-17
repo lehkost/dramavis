@@ -207,7 +207,10 @@ class Lina(object):
             speakers = list(chain.from_iterable(speakers))
             for speaker in speakers:
                 for amount in ["speech_acts", "words", "lines", "chars"]:
-                    spk = self.charmap[speaker]
+                    try:
+                        spk = self.charmap[speaker]
+                    except:
+                        pass
                     try:
                         n = segment.findall(".//{*}sp[@who='#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
                         n = int(n)
