@@ -10,12 +10,12 @@ __version__ = "0.4 (beta)"
 __maintainer__ = "Frank Fischer <ffischer at hse.ru>"
 __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
-from lxml import etree
 import os
 import glob
 import pandas as pd
 import networkx as nx
 import csv
+from lxml import etree
 from itertools import chain, zip_longest
 from collections import Counter
 import argparse
@@ -222,9 +222,12 @@ class DramaAnalyzer(Lina):
                             ))
 
     def export_graph_metrics(self):
+        self.graph_metrics.index.name = "ID"
+        self.graph_metrics.index = self.graph_metrics["ID"]
         self.graph_metrics.to_csv(os.path.join(
                                     self.outputfolder,
-                                    "%s_%s_graph.csv" % (self.ID, self.title)))
+                                    "%s_%s_graph.csv" % (self.ID, self.title)),
+                                   sep=";")
         self.export_table(
                 self.get_drama_change_rate(),
                 "_".join([self.filepath, self.title,"change_rates"])+".csv")
