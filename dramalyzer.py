@@ -63,7 +63,7 @@ class CorpusAnalyzer(LinaCorpus):
                  ]
         dfs = []
         for drama in dramas:
-            temp_df = pd.DataFrame()
+            temp_df = pd.DataFrame(index=[drama.ID])
             for m in header[1:3]:
                 temp_df[m] = drama.metadata.get(m)
             temp_df['year'] = drama.metadata.get('date_definite')
@@ -92,7 +92,7 @@ class CorpusAnalyzer(LinaCorpus):
                 ]
         df.index = df["ID"]
         df.index.name = "index"
-        df.to_csv(os.path.join(self.outputfolder, "corpus_metrics"), sep=";")
+        df[header].to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
 
 
 class DramaAnalyzer(Lina):
