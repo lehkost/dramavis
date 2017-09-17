@@ -28,21 +28,28 @@ from dramalyzer import CorpusAnalyzer, DramaAnalyzer
 
 
 def main(args):
-    corpus = CorpusAnalyzer(args.inputfolder, args.outputfolder)
+    corpus = CorpusAnalyzer(args.inputfolder, args.outputfolder, args.logpath)
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "metrics":
         corpus.get_metrics()
-    if args.action == "char_ranks":
-        cc = corpus.get_central_characters()
-        cc.to_csv(os.path.join(args.outputfolder, "central_characters.csv"), sep=";")
+        corpus.get_central_characters()
+        corpus.get_individual_outputs()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='analyze and plot from lina-xml to networks')
-    parser.add_argument('--input', dest='inputfolder', help='relative or absolute path of the input-xmls folder')
-    parser.add_argument('--output', dest='outputfolder', help='relative or absolute path of the output folder')
-    parser.add_argument('--action', dest='action', help='what to do, either plotsuperposter, metrics, char_ranks')
-    parser.add_argument('--debug', dest='debug', help='print debug message or not', action="store_true")
-    parser.add_argument('--randomization', dest='random', help='plot randomized graphs', action="store_true")
+    parser = argparse.ArgumentParser(description='analyze and plot from '
+                                     'lina-xml to networks')
+    parser.add_argument('--input', dest='inputfolder', help='relative or '
+                        'absolute path of the input-xmls folder')
+    parser.add_argument('--output', dest='outputfolder', help='relative or '
+                        'absolute path of the output folder')
+    parser.add_argument('--logpath', dest='logpath', help='relative or '
+                        'absolute path of the logfile')
+    parser.add_argument('--action', dest='action', help='what to do, either '
+                        'plotsuperposter, metrics, char_ranks')
+    parser.add_argument('--debug', dest='debug', help='print debug message '
+                        'or not', action="store_true")
+    parser.add_argument('--randomization', dest='random',
+                        help='plot randomized graphs', action="store_true")
     args = parser.parse_args()
     main(args)
