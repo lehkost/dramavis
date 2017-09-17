@@ -31,10 +31,10 @@ def main(args):
     corpus = CorpusAnalyzer(args.inputfolder, args.outputfolder, args.logpath)
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
-    if args.action == "metrics":
-        corpus.get_metrics()
-        corpus.get_central_characters()
-        corpus.get_individual_outputs()
+    if args.action == "corpus_metrics":
+        corpus.get_graph_metrics()
+    if args.action == "char_metrics":
+        corpus.get_char_metrics()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from '
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument('--logpath', dest='logpath', help='relative or '
                         'absolute path of the logfile')
     parser.add_argument('--action', dest='action', help='what to do, either '
-                        'plotsuperposter, metrics, char_ranks')
+                        'plotsuperposter, corpus_metrics, char_metrics')
     parser.add_argument('--debug', dest='debug', help='print debug message '
                         'or not', action="store_true")
     parser.add_argument('--randomization', dest='random',

@@ -27,8 +27,6 @@ from tqdm import tqdm
 from linacorpus import LinaCorpus, Lina
 
 
-
-
 class CorpusAnalyzer(LinaCorpus):
 
     def __init__(self, inputfolder, outputfolder, logpath):
@@ -42,7 +40,7 @@ class CorpusAnalyzer(LinaCorpus):
         self.logpath = logpath
 
 
-    def analyze_dramas(self):
+    def analyze_dramas(self, action):
         """
         Reads all XMLs in the inputfolder,
         returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
@@ -51,12 +49,13 @@ class CorpusAnalyzer(LinaCorpus):
         for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=0.5):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
-            drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath)
+            drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
+                                  action)
             yield drama
 
-    def get_central_characters(self):
+    def get_char_metrics(self):
         self.logger.info("Exporting character metrics.")
-        dramas = self.analyze_dramas()
+        dramas = self.analyze_dramas(action="char_metrics")
         header = [
                     'ID', 'author', 'title', 'year',
                     'frequency', 'degree', 'betweenness', 'closeness',
@@ -64,7 +63,7 @@ class CorpusAnalyzer(LinaCorpus):
                  ]
         dfs = []
         for drama in dramas:
-            temp_df = drama.graph_metrics.copy()
+            temp_df = pd.DataFrame()
             for m in header[1:3]:
                 temp_df[m] = drama.metadata.get(m)
             temp_df['year'] = drama.metadata.get('date_definite')
@@ -79,34 +78,27 @@ class CorpusAnalyzer(LinaCorpus):
         df.to_csv(os.path.join(self.outputfolder,
                                "central_characters.csv"), sep=";")
 
-    def get_metrics(self):
+    def get_graph_metrics(self):
         self.logger.info("Exporting corpus metrics.")
-        dramas = self.analyze_dramas()
+        dramas = self.analyze_dramas(action="corpus_metrics")
         df = pd.concat([d.graph_metrics for d in dramas])
-        header =    [
-                    'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
-                    'charcount', 'edgecount', 'maxdegree', 'avgdegree',
-                    'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                    'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
-                    'central_character', 'characters_last_in',
-                    'connected_components'
-                    ]
+        header = [
+                'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
+                'charcount', 'edgecount', 'maxdegree', 'avgdegree',
+                'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
+                'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
+                'central_character', 'characters_last_in',
+                'connected_components'
+                ]
         df.index = df["ID"]
         df.index.name = "index"
         df.to_csv(os.path.join(self.outputfolder, "corpus_metrics"), sep=";")
 
-    def get_individual_outputs(self):
-        self.logger.info("Exporting individual drama plots and metrics.")
-        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=0.5):
-            # ID, ps = parse_drama(tree, filename)
-            # dramas[ID] = ps
-            drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath)
-            drama.write_output()
-
 
 class DramaAnalyzer(Lina):
 
-    def __init__(self, dramafile, outputfolder, logpath):
+    def __init__(self, dramafile, outputfolder, logpath,
+                 action, randomization=1000):
         super(DramaAnalyzer, self).__init__(dramafile, outputfolder)
         self.logger = logging.getLogger("dramaAnalyzer")
         formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
@@ -117,15 +109,19 @@ class DramaAnalyzer(Lina):
         self.n_personae = len(self.personae)
         self.centralities = pd.DataFrame(index = [p for p in self.personae])
         self.centralities.index.name = "name"
-        self.randomization = 1000
+        self.randomization = randomization
         self.metrics = pd.DataFrame()
         self.G = self.create_graph()
-        self.analyze_characters()
-        self.get_character_frequencies()
-        self.get_character_ranks()
-        self.get_centrality_ranks()
-        self.get_central_characters()
-        self.graph_metrics = self.get_graph_metrics()
+        if action == "char_metrics":
+            self.analyze_characters()
+            self.get_character_frequencies()
+            self.get_character_ranks()
+            self.get_centrality_ranks()
+            self.get_central_characters()
+            self.export_char_metrics()
+        if action == "corpus_metrics":
+            self.graph_metrics = self.get_graph_metrics()
+            self.export_graph_metrics()
 
     def get_final_scene_size(self):
         last_scene_size = len(self.segments[-1])
@@ -217,20 +213,21 @@ class DramaAnalyzer(Lina):
                 # print(all_in_index, len(self.segments), len(appeared), self.num_chars_total)
                 return all_in_index
 
-    def write_output(self):
-        self.centralities.index = self.centralities["ID"]
-        self.centralities.index.name = "index"
+    def export_char_metrics(self):
+        self.centralities.index.name = "name"
+        self.centralities.to_csv(
+                os.path.join(
+                            self.outputfolder,
+                            "%s_%s_chars.csv" % (self.ID, self.title)
+                            ))
+
+    def export_graph_metrics(self):
         self.graph_metrics.to_csv(os.path.join(
                                     self.outputfolder,
                                     "%s_%s_graph.csv" % (self.ID, self.title)))
         self.export_table(
                 self.get_drama_change_rate(),
                 "_".join([self.filepath, self.title,"change_rates"])+".csv")
-        self.centralities.to_csv(
-                os.path.join(
-                            self.outputfolder,
-                            "%s_%s_chars.csv" % (self.ID, self.title)
-                            ))
         nx.write_edgelist(
                 self.G,
                 os.path.join(self.outputfolder,

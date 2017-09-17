@@ -205,7 +205,9 @@ class Lina(object):
             speakers = [speaker.attrib.get("who").replace("#", "").split()
                         for speaker in segment.findall(".//{*}sp")]
             speakers = list(chain.from_iterable(speakers))
-            speakers = [self.charmap[speaker] for speaker in speakers]
+            speakers = [self.charmap[speaker]
+                        for speaker in speakers
+                        if speaker in self.charmap]
             speakers = list(set(speakers))
             for name in speakers:
                 self.personae[name].appears_in.add(i)
