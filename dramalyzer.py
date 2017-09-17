@@ -93,6 +93,45 @@ class CorpusAnalyzer(LinaCorpus):
         df.index.name = "index"
         df[header].to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
 
+    def get_both_metrics(self):
+        self.logger.info("Exporting character metrics.")
+        dramas = self.analyze_dramas(action="both")
+        header = [
+                    'ID', 'author', 'title', 'year',
+                    'frequency', 'degree', 'betweenness', 'closeness'
+                 ]
+        char_dfs = []
+        graph_dfs = []
+        for drama in dramas:
+            temp_df = pd.DataFrame(index=[drama.ID])
+            for m in header[1:3]:
+                temp_df[m] = drama.metadata.get(m)
+            temp_df['year'] = drama.metadata.get('date_definite')
+            for m in header[4:]:
+                temp_df[m] = drama.get_top_ranked_chars()[m]
+            temp_df['ID'] = drama.ID
+            char_dfs.append(temp_df)
+            graph_dfs.append(d.graph_metrics)
+        df = pd.concat(char_dfs)
+        df = df[header]
+        df.index = df['ID']
+        df.index.name = 'index'
+        df.to_csv(os.path.join(self.outputfolder,
+                               "central_characters.csv"), sep=";")
+        self.logger.info("Exporting corpus metrics.")
+        df = pd.concat(graph_dfs)
+        header = [
+                'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
+                'charcount', 'edgecount', 'maxdegree', 'avgdegree',
+                'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
+                'segment_count', 'count_type', 'all_in_index', 'central_character_entry_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
+                'central_character', 'characters_last_in',
+                'connected_components'
+                ]
+        df.index = df["ID"]
+        df.index.name = "index"
+        df[header].to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
+
 
 class DramaAnalyzer(Lina):
 
@@ -117,7 +156,7 @@ class DramaAnalyzer(Lina):
             self.get_character_speech_amounts()
             self.get_character_ranks()
             self.get_centrality_ranks()
-            # self.get_central_characters()
+            self.get_ranking_stability_measures()
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
@@ -129,7 +168,7 @@ class DramaAnalyzer(Lina):
             self.get_character_speech_amounts()
             self.get_character_ranks()
             self.get_centrality_ranks()
-            # self.get_central_characters()
+            self.get_ranking_stability_measures()
             self.export_char_metrics()
             self.export_graph_metrics()
 
@@ -209,9 +248,9 @@ class DramaAnalyzer(Lina):
 
     def get_centrality_ranks(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")]
-        self.centralities['avg_centrality_rank'] = self.centralities[ranks].sum(axis=1)/len(ranks)
-        self.centralities['std_centrality_rank'] = self.centralities[ranks].std(axis=1)/len(ranks)
-        for metric in ['avg_centrality_rank', 'std_centrality_rank']:
+        self.centralities['centrality_rank_avg'] = self.centralities[ranks].sum(axis=1)/len(ranks)
+        self.centralities['centrality_rank_std'] = self.centralities[ranks].std(axis=1)/len(ranks)
+        for metric in ['centrality_rank_avg', 'centrality_rank_std']:
             self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
 
     def get_central_characters(self):
@@ -221,7 +260,8 @@ class DramaAnalyzer(Lina):
                                         axis=1)
 
     def get_ranking_stability_measures(self):
-
+        ranks = [c for c in self.centralities.columns if c.endswith("rank")][:8]
+        self.ranking_stability = self.centralities[ranks].corr(method='kendall')
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -240,6 +280,11 @@ class DramaAnalyzer(Lina):
                 os.path.join(
                             self.outputfolder,
                             "%s_%s_chars.csv" % (self.ID, self.title)
+                            ))
+        self.ranking_stability.to_csv(
+                os.path.join(
+                            self.outputfolder,
+                            "%s_%s_kendalltaus.csv" % (self.ID, self.title)
                             ))
 
     def export_graph_metrics(self):
