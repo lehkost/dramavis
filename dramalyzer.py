@@ -38,7 +38,7 @@ class CorpusAnalyzer(LinaCorpus):
         returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
         """
         # dramas = {}
-        for dramafile in tqdm(self.dramafiles, desc="Dramas"):
+        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=2):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder)
@@ -93,6 +93,7 @@ class DramaAnalyzer(Lina):
         self.n_personae = len(self.personae)
         self.centralities = pd.DataFrame(index = [p for p in self.personae])
         self.centralities.index.name = "name"
+        self.randomization = 1000
         self.metrics = pd.DataFrame()
         self.G = self.create_graph()
         self.analyze_characters()
@@ -315,6 +316,7 @@ class DramaAnalyzer(Lina):
         except nx.NetworkXError:
             print("NetworkXError: Graph is not connected.")
             try:
+                self.randomization = 50
                 values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
             except:
                 values["avgpathlength"] = "NaN"
@@ -398,10 +400,12 @@ class DramaAnalyzer(Lina):
         """
         randcluster = 0
         randavgpathl = 0
+        # what is c, what is a, what is n, what is e?
+        # e=edges?, c=clustering_coefficient?, a=average_shortest_path_length?
         c = 0
         a = 0
 
-        for i in range(0, 1000):
+        for i in tqdm(range(self.randomization), desc="Randomization"):
             R = nx.gnm_random_graph(n, e)
             try:
                 randcluster += nx.average_clustering(R)
