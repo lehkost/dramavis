@@ -35,6 +35,8 @@ def main(args):
         corpus.get_graph_metrics()
     if args.action == "char_metrics":
         corpus.get_char_metrics()
+    if args.action == "both":
+        corpus.get_both_metrics()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='analyze and plot from '
