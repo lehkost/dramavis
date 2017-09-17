@@ -31,6 +31,16 @@ from linacorpus import LinaCorpus, Lina
 
 class CorpusAnalyzer(LinaCorpus):
 
+    def __init__(self, inputfolder, outputfolder, logpath):
+        super(CorpusAnalyzer, self).__init__(inputfolder, outputfolder)
+        self.logger = logging.getLogger("corpusAnalyzer")
+        formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
+                                      '%(message)s')
+        fh = logging.FileHandler(logpath)
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
+        self.logpath = logpath
+
 
     def analyze_dramas(self):
         """
@@ -38,41 +48,39 @@ class CorpusAnalyzer(LinaCorpus):
         returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
         """
         # dramas = {}
-        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=2):
+        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=0.5):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
-            drama = DramaAnalyzer(dramafile, self.outputfolder)
+            drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath)
             yield drama
 
     def get_central_characters(self):
+        self.logger.info("Exporting character metrics.")
+        dramas = self.analyze_dramas()
         header = [
-                    'author', 'title', 'year',
+                    'ID', 'author', 'title', 'year',
                     'frequency', 'degree', 'betweenness', 'closeness',
                     'central'
                  ]
-        # with open(os.path.join(self.outputfolder, "central_characters.csv"), "w") as outfile:
-        #     csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
-        #     csvwriter.writerow(header)
-        # with open(os.path.join(self.outputfolder, "central_characters.csv"), "a") as outfile:
-        #     csvwriter = csv.writer(outfile, delimiter=";", quotechar='"')
-        #     for drama in dramas:
-        #         metadata = [drama.metadata.get('author'), drama.metadata.get('title'), drama.metadata.get('date_definite')]
-        #         chars = [drama.get_top_ranked_chars()[m] for m in header[3:]]
-        #         csvwriter.writerow(metadata+chars)
         dfs = []
         for drama in dramas:
             temp_df = drama.graph_metrics.copy()
-            for m in header[:2]:
+            for m in header[1:3]:
                 temp_df[m] = drama.metadata.get(m)
             temp_df['year'] = drama.metadata.get('date_definite')
-            for m in header[3:]:
+            for m in header[4:]:
                 temp_df[m] = drama.get_top_ranked_chars()[m]
+            temp_df['ID'] = drama.ID
             dfs.append(temp_df)
         df = pd.concat(dfs)
         df = df[header]
-        return df
+        df.index = df['ID']
+        df.index.name = 'index'
+        df.to_csv(os.path.join(self.outputfolder,
+                               "central_characters.csv"), sep=";")
 
     def get_metrics(self):
+        self.logger.info("Exporting corpus metrics.")
         dramas = self.analyze_dramas()
         df = pd.concat([d.graph_metrics for d in dramas])
         header =    [
@@ -83,13 +91,29 @@ class CorpusAnalyzer(LinaCorpus):
                     'central_character', 'characters_last_in',
                     'connected_components'
                     ]
+        df.index = df["ID"]
+        df.index.name = "index"
         df.to_csv(os.path.join(self.outputfolder, "corpus_metrics"), sep=";")
+
+    def get_individual_outputs(self):
+        self.logger.info("Exporting individual drama plots and metrics.")
+        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=0.5):
+            # ID, ps = parse_drama(tree, filename)
+            # dramas[ID] = ps
+            drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath)
+            drama.write_output()
 
 
 class DramaAnalyzer(Lina):
 
-    def __init__(self, dramafile, outputfolder):
+    def __init__(self, dramafile, outputfolder, logpath):
         super(DramaAnalyzer, self).__init__(dramafile, outputfolder)
+        self.logger = logging.getLogger("dramaAnalyzer")
+        formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
+                                      '%(message)s')
+        fh = logging.FileHandler(logpath)
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
         self.n_personae = len(self.personae)
         self.centralities = pd.DataFrame(index = [p for p in self.personae])
         self.centralities.index.name = "name"
@@ -194,15 +218,31 @@ class DramaAnalyzer(Lina):
                 return all_in_index
 
     def write_output(self):
-        self.export_dict(self.graph_metrics, "_".join([self.filepath,self.title,"graph"])+".csv")
-        self.export_table(self.get_drama_change_rate(), "_".join([self.filepath, self.title,"change_rates"])+".csv")
+        self.centralities.index = self.centralities["ID"]
+        self.centralities.index.name = "index"
+        self.graph_metrics.to_csv(os.path.join(
+                                    self.outputfolder,
+                                    "%s_%s_graph.csv" % (self.ID, self.title)))
+        self.export_table(
+                self.get_drama_change_rate(),
+                "_".join([self.filepath, self.title,"change_rates"])+".csv")
         self.centralities.to_csv(
-            os.path.join(
-                        self.outputfolder,
-                        "%s_%s_chars.csv" % (self.ID, self.title)
-                        ))
-        nx.write_edgelist(self.G, os.path.join(self.outputfolder, "_".join([str(self.ID),self.title,"edgelist"])+".csv"), delimiter=";", data=["weight"])
-        plotGraph(self.G, filename=os.path.join(self.outputfolder, "_".join([str(self.ID),self.title])+".svg"))
+                os.path.join(
+                            self.outputfolder,
+                            "%s_%s_chars.csv" % (self.ID, self.title)
+                            ))
+        nx.write_edgelist(
+                self.G,
+                os.path.join(self.outputfolder,
+                             "_".join([str(self.ID),
+                             self.title,"edgelist"])+".csv"),
+                delimiter=";",
+                data=["weight"])
+        plotGraph(
+                self.G,
+                filename=os.path.join(self.outputfolder,
+                                      "_".join([str(self.ID),
+                                      self.title])+".svg"))
 
     def export_table(self, t, filepath):
         with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
@@ -297,13 +337,13 @@ class DramaAnalyzer(Lina):
         try:
             values["maxdegree"] = max(G.degree().values())
         except:
-            print("ValueError: max() arg is an empty sequence")
+            self.logger.error("ID %s ValueError: max() arg is an empty sequence" % self.ID)
             values["maxdegree"] = "NaN"
 
         try:
             values["avgdegree"] = sum(G.degree().values())/len(G.nodes())
         except:
-            print("ZeroDivisionError: division by zero")
+            self.logger.error("ID %s ZeroDivisionError: division by zero" % self.ID)
             values["avgdegree"] = "NaN"
 
         try:
@@ -314,20 +354,22 @@ class DramaAnalyzer(Lina):
         try:
             values["avgpathlength"] = nx.average_shortest_path_length(G)
         except nx.NetworkXError:
-            print("NetworkXError: Graph is not connected.")
+            self.logger.error("ID %s NetworkXError: Graph is not connected." % self.ID)
             try:
                 self.randomization = 50
-                values["avgpathlength"] = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
+                values["avgpathlength"] = nx.average_shortest_path_length(
+                            max(nx.connected_component_subgraphs(G), key=len))
             except:
                 values["avgpathlength"] = "NaN"
         except:
-            print("NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.')")
+            self.logger.error("ID %s NetworkXPointlessConcept: ('Connectivity is "
+                              "undefined for the null graph.')"  % self.ID)
             values["avgpathlength"] = "NaN"
 
         try:
             values["clustering_coefficient"] = nx.average_clustering(G)
         except:
-            print("ZeroDivisionError: float division by zero")
+            self.logger.error("ID %s ZeroDivisionError: float division by zero" % self.ID)
             values["clustering_coefficient"] = "NaN"
         values["connected_components"] = nx.number_connected_components(G)
         return values
@@ -371,24 +413,6 @@ class DramaAnalyzer(Lina):
         except:
             pass
         return td
-
-    def export_dict(self, d, filepath):
-        with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
-            w = csv.DictWriter(f, d.keys())
-            w.writeheader()
-            w.writerow(d)
-
-    def export_dicts(self, d, filepath):
-        with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
-            w = csv.writer(f, delimiter=";")
-            d = self.transpose_dict(d)
-            try:
-                subkeys = list(list(d.values())[0].keys())
-                w.writerow([""] + subkeys)
-                for k, v in d.items():
-                    w.writerow([k] + list(v.values()))
-            except:
-                print("Empty values.")
 
     def randomize_graph(self, n, e):
         """
