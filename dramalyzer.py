@@ -30,7 +30,7 @@ from linacorpus import LinaCorpus, Lina
 
 class CorpusAnalyzer(LinaCorpus):
 
-    def __init__(self, inputfolder, outputfolder, logpath):
+    def __init__(self, inputfolder, outputfolder, logpath, major_only=False):
         super(CorpusAnalyzer, self).__init__(inputfolder, outputfolder)
         self.logger = logging.getLogger("corpusAnalyzer")
         formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
@@ -50,7 +50,7 @@ class CorpusAnalyzer(LinaCorpus):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
-                                  action)
+                                  action, self.major_only)
             yield drama
 
     def get_char_metrics(self):
@@ -151,7 +151,7 @@ class CorpusAnalyzer(LinaCorpus):
 class DramaAnalyzer(Lina):
 
     def __init__(self, dramafile, outputfolder, logpath,
-                 action, randomization=1000):
+                 action, major_only, randomization=1000):
         super(DramaAnalyzer, self).__init__(dramafile, outputfolder)
         self.logger = logging.getLogger("dramaAnalyzer")
         formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
@@ -159,6 +159,7 @@ class DramaAnalyzer(Lina):
         fh = logging.FileHandler(logpath)
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
+        self.major_only = major_only
         self.n_personae = len(self.personae)
         self.centralities = pd.DataFrame(index = [p for p in self.personae])
         self.centralities.index.name = "name"
@@ -431,6 +432,8 @@ class DramaAnalyzer(Lina):
         person_nodes = set(B) - scene_nodes
         nx.is_bipartite(B)
         G = nx.bipartite.weighted_projected_graph(B, person_nodes)
+        if self.major_only:
+            G = max(nx.connected_component_subgraphs(G), key=len)
         return G
 
     def analyze_graph(self):
