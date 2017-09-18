@@ -12,13 +12,17 @@
 
 * v0.0: Spaghetti-code version written in August, 2014 (never published);
 * v0.1: rewritten in June, 2015 (archived [here](https://github.com/lehkost/dramavis/tree/master/archive/v0.1));
-* v0.2: major rewrite in February, 2016.
-* v0.2.1: minor bugfixes and usability improvements
+* v0.2: major rewrite in February, 2016;
+* v0.2.1: minor bugfixes and usability improvements;
+* v0.3: object-oriented restructurations of code base, introduced measures for dynamic network changes; December, 2016.
 * v0.4: rewritten in September 2017, reworked datamodel, added new metrics
 
 ## New in v0.4:
 
-
+* reworked composite ranking index now based on 5 network-metrics and 3 content metrics (character-level)
+* introduced Kendall-Tau measure for ranking stability (drama-level)
+* reworked data model, now based on pandas (functions and workflow now cleaner and simpler)
+* reworked package structure, separated into workflow, I/O, plotting, and analysis
 
 ## Installation
 
@@ -49,14 +53,3 @@ You can download the dlina XMLs from [here](https://github.com/dlina/project/tre
 (should be 465 XML files); it might be easier to get hold of them if you ``git clone``
 our [DLINA project repository](https://github.com/dlina/project) and then extract the
 XMLs from the /zwischenformat/ folder.
-
-## Plans for v0.3 (December 2016)
-
-* main goal: introduce measures/formats for dynamic network analysis
-* planned minor enhancements:
-  * option to put labels on all nodes or a specific number of nodes per graph (based on node values like degree, average distance or betweenness centrality)
-  * reintroduce option for input of CSV files (like in v0.1)
-  * introduce option for output as CSV files (to further use them with Gephi, Cytoscape or the likes)
-  * option for choosing type of spring-embedder layout
-  * collect centrality valus over time and check how they change (is the character with the highest betweenness centrality in the first act still the one with the highest BC at the end?)
-  * …
