@@ -28,7 +28,8 @@ from dramalyzer import CorpusAnalyzer, DramaAnalyzer
 
 
 def main(args):
-    corpus = CorpusAnalyzer(args.inputfolder, args.outputfolder, args.logpath)
+    corpus = CorpusAnalyzer(args.inputfolder, args.outputfolder,
+                            args.logpath, args.major_only)
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "corpus_metrics":
@@ -49,6 +50,7 @@ if __name__ == '__main__':
                         'absolute path of the logfile')
     parser.add_argument('--action', dest='action', help='what to do, either '
                         'plotsuperposter, corpus_metrics, char_metrics')
+    parser.add_argument('--major-only', dest='major_only', default=False)
     parser.add_argument('--debug', dest='debug', help='print debug message '
                         'or not', action="store_true")
     parser.add_argument('--randomization', dest='random',
