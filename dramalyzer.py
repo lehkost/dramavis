@@ -22,6 +22,7 @@ import argparse
 from superposter import plotGraph, plot_superposter
 import logging
 import numpy as np
+from scipy import stats
 from tqdm import tqdm
 
 from linacorpus import LinaCorpus, Lina
@@ -38,7 +39,6 @@ class CorpusAnalyzer(LinaCorpus):
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
         self.logpath = logpath
-
 
     def analyze_dramas(self, action):
         """
@@ -83,7 +83,6 @@ class CorpusAnalyzer(LinaCorpus):
         df.index.name = "index"
         df.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
 
-
     def get_graph_metrics(self):
         self.logger.info("Exporting corpus metrics.")
         dramas = self.analyze_dramas(action="corpus_metrics")
@@ -94,7 +93,8 @@ class CorpusAnalyzer(LinaCorpus):
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
-                'connected_components', 'kendall_tau_avg', 'kendall_tau_std'
+                'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
+                'kendall_tau_content_vs_network'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -135,15 +135,17 @@ class CorpusAnalyzer(LinaCorpus):
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
-                'connected_components', 'kendall_tau_avg', 'kendall_tau_std'
+                'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
+                'kendall_tau_content_vs_network'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
         df.to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
         self.logger.info("Exporting corpus quartile metrics.")
-        df = pd.concat(quot_quot_dfs, axis=1).T
-        df.index.name = "index"
-        df.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
+        df_cq = pd.concat(quot_quot_dfs, axis=1).T
+        df_cq.index = df["ID"]
+        df_cq.index.name = "index"
+        df_cq.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
 
 
 class DramaAnalyzer(Lina):
@@ -163,6 +165,7 @@ class DramaAnalyzer(Lina):
         self.randomization = randomization
         self.metrics = pd.DataFrame()
         self.G = self.create_graph()
+        self.action = action
         if action == "char_metrics":
             self.analyze_characters()
             self.get_character_frequencies()
@@ -170,6 +173,8 @@ class DramaAnalyzer(Lina):
             self.get_character_ranks()
             self.get_centrality_ranks()
             self.get_ranking_stability_measures()
+            self.add_ranking_stability_metrics()
+            self.get_structural_ranking_measures()
             self.get_quartiles()
             self.export_char_metrics()
         if action == "corpus_metrics":
@@ -184,6 +189,7 @@ class DramaAnalyzer(Lina):
             self.get_centrality_ranks()
             self.get_ranking_stability_measures()
             self.add_ranking_stability_metrics()
+            self.get_structural_ranking_measures()
             self.get_quartiles()
             self.export_char_metrics()
             self.export_graph_metrics()
@@ -288,6 +294,7 @@ class DramaAnalyzer(Lina):
                          .tolist())
         self.quartile_quot = df.loc["q4"]/df.loc["q1"]
         self.quartile_quot.name = self.ID
+        self.quartile_quot = self.quartile_quot.append(df.T.stack())
 
     def get_centrality_ranks(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")]
@@ -301,6 +308,17 @@ class DramaAnalyzer(Lina):
         self.ranking_stability = self.centralities[ranks].corr(method='kendall')
         np.fill_diagonal(self.ranking_stability.values, np.nan)
         self.ranking_stability.index.name = "rank_name"
+
+    def get_structural_ranking_measures(self):
+        graph_ranks = ['degree_rank', 'closeness_rank', 'betweenness_rank',
+                       'strength_rank', 'eigenvector_centrality_rank']
+        content_ranks = ['frequency_rank', 'speech_acts_rank', 'words_rank']
+        avg_graph_rank = self.centralities[graph_ranks].mean(axis=1).rank(method='min')
+        avg_content_rank = self.centralities[content_ranks].mean(axis=1).rank(method='min')
+        self.centralities["avg_graph_rank"] = avg_graph_rank
+        self.centralities["avg_content_rank"] = avg_content_rank
+        struct_corr = stats.kendalltau(avg_content_rank, avg_graph_rank)[0]
+        self.graph_metrics["kendall_tau_content_vs_network"] = struct_corr
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -508,6 +526,7 @@ class DramaAnalyzer(Lina):
             self.logger.error("%s networkx.exception.NetworkXError: "
                               "eigenvector_centrality(): power iteration "
                               "failed to converge in 500 iterations." % self.ID)
+        self.centralities['avg_distance'] = 1/self.centralities['closeness']
 
     def transpose_dict(self, d):
         """
