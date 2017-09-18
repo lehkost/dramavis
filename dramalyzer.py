@@ -516,8 +516,9 @@ class DramaAnalyzer(Lina):
             self.centralities.loc[char, 'degree'] = metric
         for char, metric in nx.degree(self.G, weight="weight").items():
             self.centralities.loc[char, 'strength'] = metric
-        for char, metric in nx.closeness_centrality(self.G).items():
-            self.centralities.loc[char, 'closeness'] = metric
+        for g in nx.connected_component_subgraphs(self.G):
+            for char, metric in nx.closeness_centrality(g).items():
+                self.centralities.loc[char, 'closeness'] = metric
         try:
             for char, metric in nx.eigenvector_centrality(self.G,
                                                 max_iter=500).items():
