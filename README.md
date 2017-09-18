@@ -14,10 +14,11 @@
 * v0.1: rewritten in June, 2015 (archived [here](https://github.com/lehkost/dramavis/tree/master/archive/v0.1));
 * v0.2: major rewrite in February, 2016.
 * v0.2.1: minor bugfixes and usability improvements
+* v0.4: rewritten in September 2017, reworked datamodel, added new metrics
 
-## New in v0.2.1:
+## New in v0.4:
 
-* added virtualenv file
+
 
 ## Installation
 
@@ -32,13 +33,9 @@ source activate dramavis
 Run:
 
 ```
-python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action metrics
+python3 workflow.py --input /home/chris/data/dlina/data/zwischenformat --output charmetrics --action char_metrics --logpath all.log
 ```
-or
-
-```
-python3 dramavis.py --input LINAXMLFOLDER --output OUTPUTFOLDER --action plotsuperposter
-```
+* alternative actions: corpus_metrics, both
 
 * additional flags
   * `--debug` prints alot of internal variables when running
