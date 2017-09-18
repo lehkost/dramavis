@@ -94,7 +94,7 @@ class CorpusAnalyzer(LinaCorpus):
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
                 'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
-                'kendall_tau_content_vs_network'
+                'kendall_tau_content_vs_network', 'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -136,7 +136,7 @@ class CorpusAnalyzer(LinaCorpus):
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
                 'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
-                'kendall_tau_content_vs_network'
+                'kendall_tau_content_vs_network', 'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -493,6 +493,8 @@ class DramaAnalyzer(Lina):
             self.logger.error("ID %s ZeroDivisionError: float division by zero" % self.ID)
             values["clustering_coefficient"] = "NaN"
         values["connected_components"] = nx.number_connected_components(G)
+        components = nx.connected_component_subgraphs(G)
+        values["component_sizes"] = [len(c.nodes()) for c in components]
         return values
 
     def analyze_characters(self):
@@ -507,7 +509,9 @@ class DramaAnalyzer(Lina):
         }
         """
         # initialize columns with 0
-        for metric in ['betweenness', 'degree', 'closeness', 'strength',
+        for metric in ['betweenness', 'degree',
+                       'closeness', 'closeness_corrected',
+                       'strength',
                        'eigenvector_centrality']:
             self.centralities[metric] = 0
         for char, metric in nx.betweenness_centrality(self.G).items():
@@ -516,9 +520,11 @@ class DramaAnalyzer(Lina):
             self.centralities.loc[char, 'degree'] = metric
         for char, metric in nx.degree(self.G, weight="weight").items():
             self.centralities.loc[char, 'strength'] = metric
+        for char, metric in nx.closeness_centrality(self.G).items():
+            self.centralities.loc[char, 'closeness'] = metric
         for g in nx.connected_component_subgraphs(self.G):
             for char, metric in nx.closeness_centrality(g).items():
-                self.centralities.loc[char, 'closeness'] = metric
+                self.centralities.loc[char, 'closeness_corrected'] = metric
         try:
             for char, metric in nx.eigenvector_centrality(self.G,
                                                 max_iter=500).items():
@@ -528,6 +534,7 @@ class DramaAnalyzer(Lina):
                               "eigenvector_centrality(): power iteration "
                               "failed to converge in 500 iterations." % self.ID)
         self.centralities['avg_distance'] = 1/self.centralities['closeness']
+        self.centralities['avg_distance_corrected'] = 1/self.centralities['closeness_corrected']
 
     def transpose_dict(self, d):
         """
