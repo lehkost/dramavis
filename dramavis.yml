@@ -37,7 +37,7 @@ dependencies:
   - lumpy==0.3.1
   - lxml==3.6.0
   - markupsafe==0.23
-  - matplotlib==1.5.1
+  - matplotlib==2.0.2
   - mccabe==0.6.1
   - mistune==0.7.3
   - nbconvert==4.2.0
@@ -45,7 +45,7 @@ dependencies:
   - networkx==1.11
   - nose2==0.6.5
   - notebook==4.2.3
-  - numpy==1.11.0
+  - numpy==1.13.1
   - pandas==0.20.3
   - paramiko==1.17.0
   - patsy==0.4.1
@@ -58,9 +58,9 @@ dependencies:
   - pycrypto==2.6.1
   - pyflakes==1.5.0
   - pygments==2.1.3
-  - pyparsing==2.1.5
-  - python-dateutil==2.5.3
-  - pytz==2016.4
+  - pyparsing==2.2.0
+  - python-dateutil==2.6.1
+  - pytz==2017.2
   - pyzmq==16.0.2
   - qtconsole==4.2.1
   - requests==2.10.0
@@ -68,7 +68,7 @@ dependencies:
   - seaborn==0.8.1
   - simplegeneric==0.8.1
   - simplejson==3.8.2
-  - six==1.10.0
+  - six==1.11.0
   - statsmodels==0.8.0
   - streamparse==2.1.4
   - terminado==0.6

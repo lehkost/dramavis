@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import math
-
+import numpy as np
+from tqdm import tqdm
 
 def plot_superposter(corpus, outputdir, debug=False):
     """
@@ -31,9 +32,9 @@ def plot_superposter(corpus, outputdir, debug=False):
     right = left + width
     top = bottom + height
     dramas = {drama.ID:drama
-              for drama in corpus.read_dramas(metrics=False)}
+              for drama in corpus.analyze_dramas(action=None)}
     id2date = {drama.ID:drama.metadata.get("date_definite")
-               for drama in corpus.read_dramas(metrics=False)}
+               for drama in corpus.analyze_dramas(action=None)}
     if debug:
         print(id2date)
 
@@ -118,4 +119,122 @@ def plot_superposter(corpus, outputdir, debug=False):
         i += 1
 
     fig.savefig(os.path.join(outputdir,"superposter.svg"))
+    plt.close(fig)
+
+
+def plot_quartett_poster(corpus, outputdir):
+
+    # build rectangle in axis coords for text plotting
+    left, width = .25, .5
+    bottom, height = .25, .5
+    right = left + width
+    top = bottom + height
+    dramas = {drama.ID:drama
+              for drama in corpus.analyze_dramas(action="both")}
+    id2date = {drama.ID:drama.metadata.get("date_definite")
+               for drama in corpus.analyze_dramas(action=None)}
+
+    sorted_by_date = sorted(id2date, key=id2date.__getitem__)
+
+
+    x = 4
+    y = 8
+    fig = plt.figure(figsize = (80, 80))
+    outer = gridspec.GridSpec(x, y)
+    outer.update(wspace=0.0, hspace=0.00) # set the spacing between axes.
+    i = 0
+    for ID in tqdm(sorted_by_date, desc="Plotting"):
+        drama = dramas.get(ID)
+
+        inner = gridspec.GridSpecFromSubplotSpec(2, 1,
+                subplot_spec=outer[i], wspace=0.0, hspace=0.0)
+        G = drama.G
+
+
+        # PLOT NETWORK
+        try:
+            # for networks with only one node
+            d = nx.degree_centrality(G)
+            nodesize = [v * 110 for v in d.values()]
+        except:
+            nodesize = [1 * 110 for n in G.nodes()]
+        layout=nx.spring_layout
+        pos=layout(G)
+
+        ax = plt.Subplot(fig, inner[1])
+        ax.tick_params(color='white', labelcolor='white')
+        ax.spines['bottom'].set_color('white')
+        ax.spines['top'].set_color('white')
+        ax.spines['left'].set_color('white')
+        ax.spines['right'].set_color('white')
+
+        node_color = "steelblue"
+        nx.draw_networkx_nodes(G,pos,
+                            nodelist=G.nodes(),
+                            node_color=node_color,
+                            node_size=nodesize,
+                            alpha=0.8)
+
+        weights = [math.log(G[u][v]['weight']+1)  for u,v in G.edges()]
+
+        edge_color = "grey"
+        nx.draw_networkx_edges(G,pos,
+                               with_labels=False,
+                               edge_color=edge_color,
+                               width=weights
+                            )
+
+        title_bark = "".join([w[0] for w in drama.title.split()])
+        caption = ", ".join([drama.metadata.get("author").split(",")[0],
+                             title_bark,
+                             str(drama.metadata.get("date_definite"))])
+
+        ax.text(0.5, 0.1, caption,
+                horizontalalignment='center',
+                verticalalignment='top',
+                fontsize=40, color='black',
+                transform=ax.transAxes)
+
+        ax.set_frame_on(True)
+        ax.axes.get_yaxis().set_visible(False)
+        ax.axes.get_xaxis().set_visible(False)
+        fig.add_subplot(ax)
+
+        # PLOT TEXTBOX
+
+        text_ax = plt.Subplot(fig, inner[0])
+        # Autor*in – Titel – Untertitel – Jahr
+        metadata = [drama.metadata.get('author'),
+                    drama.metadata.get('title'),
+                    drama.metadata.get('subtitle'),
+                    drama.metadata.get('date_definite')]
+        metadata = [str(m) for m in metadata]
+        metadata = "\n".join(metadata)
+        # Anzahl von Subgraphen – Netzwerkgröße – Netzwerkdichte –
+        # Clustering-Koeffizient – Durchschnittliche Pfadlänge –
+        # Höchster Degreewert und Name der entsprechenden Figur, all-in index
+        metrics = [drama.graph_metrics.loc[drama.ID]['charcount'],
+                   drama.graph_metrics.loc[drama.ID]['density'],
+                   drama.graph_metrics.loc[drama.ID]['connected_components'],
+                   drama.graph_metrics.loc[drama.ID]['clustering_coefficient'],
+                   drama.graph_metrics.loc[drama.ID]['avgpathlength'],
+                   drama.graph_metrics.loc[drama.ID]['maxdegree'],
+                   drama.centralities.apply(lambda x: np.argmax(x), axis=0)['degree'],
+                   drama.graph_metrics.loc[drama.ID]['all_in_index']]
+        metrics = [str(m) for m in metrics]
+        metrics = "\n".join(metrics)
+        text_ax.text(0, 0, metadata+metrics,
+                     ha='left',va="top",
+                     wrap=True, transform=text_ax.transAxes,
+                     fontsize=26)
+
+        text_ax.set_frame_on(True)
+        text_ax.axes.get_yaxis().set_visible(False)
+        text_ax.axes.get_xaxis().set_visible(False)
+        fig.add_subplot(text_ax)
+
+        i += 1
+    plt.tight_layout()
+
+    fig.savefig(os.path.join(outputdir,"quartettposter.svg"))
     plt.close(fig)
