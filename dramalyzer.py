@@ -23,6 +23,8 @@ from superposter import plotGraph, plot_superposter
 import logging
 import numpy as np
 from scipy import stats
+import statsmodels.api as sm
+import statsmodels.formula.api as sm_formula
 from tqdm import tqdm
 
 from linacorpus import LinaCorpus, Lina
@@ -318,6 +320,9 @@ class DramaAnalyzer(Lina):
         avg_content_rank = self.centralities[content_ranks].mean(axis=1).rank(method='min')
         self.centralities["avg_graph_rank"] = avg_graph_rank
         self.centralities["avg_content_rank"] = avg_content_rank
+        self.centralities["overall_avg"] = self.centralities[["avg_graph_rank",
+                                                              "avg_content_rank"]].mean(axis=1)
+        self.centralities["overall_avg_rank"] = self.centralities["overall_avg"].rank(method='min')
         struct_corr = stats.kendalltau(avg_content_rank, avg_graph_rank)[0]
         self.graph_metrics["kendall_tau_content_vs_network"] = struct_corr
 
@@ -604,3 +609,57 @@ class DramaAnalyzer(Lina):
         except:
             randavgpathl = "NaN"
         return randavgpathl, randcluster
+
+    def get_regression_metrics(self):
+        metrics = ['degree', 'closeness', 'betweenness',
+                   'strength', 'eigenvector_centrality',
+                   'frequency', 'speech_acts', 'words']
+        index = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+        deciles = pd.DataFrame(columns=metrics, index=index)
+        for metric in metrics:
+            deciles[metric+"_interval"] = [i.mid
+                               for i in pd.cut(self.centralities[metric], 10)
+                                          .value_counts()
+                                          .sort_values(ascending=False)
+                                          .index.tolist()]
+            deciles[metric] = (pd.cut(self.centralities[metric], 10)
+                                    .value_counts()
+                                    .sort_values(ascending=False)
+                                    .tolist())
+        index = ["linear", "exp", "powerlaw", "quadratic", "poly3", "poly4"]
+        reg_metrics = pd.DataFrame(columns=metrics, index=index)
+        # fit linear models
+        for metric in metrics:
+            res = sm.OLS(deciles[metric+"_interval"].tolist(),
+                           deciles[metric].tolist()).fit()
+            reg_metrics.loc["linear", metric] = res.rsquared
+        # fit quadratic models
+        for metric in metrics:
+            data = {"a": deciles[metric+"_interval"].tolist(),
+                    "b": deciles[metric].tolist()}
+            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2)',
+                                 data = data).fit()
+            reg_metrics.loc["quadratic", metric] = res.rsquared
+        # fit exp models
+        for metric in metrics:
+            res = sm.OLS(deciles[metric+"_interval"].tolist(),
+                         np.log((deciles[metric]+1).tolist())).fit()
+            reg_metrics.loc["exp", metric] = res.rsquared
+
+        # fit poly3 models
+        for metric in metrics:
+            data = {"a": deciles[metric+"_interval"].tolist(),
+                    "b": deciles[metric].tolist()}
+            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3)',
+                                 data = data).fit()
+            reg_metrics.loc["poly3", metric] = res.rsquared
+
+        # fit poly4 models
+        for metric in metrics:
+            data = {"a": deciles[metric+"_interval"].tolist(),
+                    "b": deciles[metric].tolist()}
+            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3) + np.power(b, 4)',
+                                 data = data).fit()
+            reg_metrics.loc["poly4", metric] = res.rsquared
+
+        # fit powerlaw models
