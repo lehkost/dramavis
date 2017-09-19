@@ -3,28 +3,25 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
+import os
+import networkx as nx
+import csv
+from itertools import chain, zip_longest
+import argparse
+import logging
+import numpy
+
+from linacorpus import LinaCorpus, Lina
+from dramalyzer import CorpusAnalyzer, DramaAnalyzer
+from superposter import plot_superposter
+
+
 __author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
 __copyright__ = "Copyright 2017"
 __license__ = "MIT"
 __version__ = "0.4 (beta)"
 __maintainer__ = "Frank Fischer <ffischer at hse.ru>"
 __status__ = "Development" # 'Development', 'Production' or 'Prototype'
-
-from lxml import etree
-import os
-import glob
-import pandas as pd
-import networkx as nx
-import csv
-from itertools import chain, zip_longest
-from collections import Counter
-import argparse
-from superposter import plotGraph, plot_superposter
-import logging
-import numpy
-
-from linacorpus import LinaCorpus, Lina
-from dramalyzer import CorpusAnalyzer, DramaAnalyzer
 
 
 def main(args):
