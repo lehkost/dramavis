@@ -47,11 +47,11 @@ class CorpusAnalyzer(LinaCorpus):
         returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
         """
         # dramas = {}
-        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=0.5):
+        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=1):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
-                                  action, self.major_only)
+                                  action, self.major_only, randomization=0)
             yield drama
 
     def get_char_metrics(self):
@@ -580,7 +580,7 @@ class DramaAnalyzer(Lina):
         c = 0
         a = 0
 
-        for i in tqdm(range(self.randomization), desc="Randomization"):
+        for i in tqdm(range(self.randomization), desc="Randomization", mininterval=1):
             R = nx.gnm_random_graph(n, e)
             try:
                 randcluster += nx.average_clustering(R)
@@ -627,6 +627,9 @@ class DramaAnalyzer(Lina):
                                     .value_counts()
                                     .sort_values(ascending=False)
                                     .tolist())
+        deciles.to_csv(os.path.join(self.outputfolder,
+                                    "%s_%s_deciles_table.csv" % (self.ID, self.title)
+                                    ))
         index = ["linear", "exponential", "powerlaw", "quadratic"]
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models

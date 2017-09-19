@@ -3,17 +3,10 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
-import os
-import networkx as nx
-import csv
-from itertools import chain, zip_longest
 import argparse
-import logging
-import numpy
 
-from linacorpus import LinaCorpus, Lina
-from dramalyzer import CorpusAnalyzer, DramaAnalyzer
-from superposter import plot_superposter
+from dramalyzer import CorpusAnalyzer
+from superposter import plot_superposter, plot_quartett_poster
 
 
 __author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
@@ -29,6 +22,8 @@ def main(args):
                             args.logpath, args.major_only)
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
+    if args.action == "plotquartett":
+        plot_quartett_poster(corpus, args.outputfolder)
     if args.action == "corpus_metrics":
         corpus.get_graph_metrics()
     if args.action == "char_metrics":
