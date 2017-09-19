@@ -22,7 +22,7 @@ import argparse
 from superposter import plotGraph, plot_superposter
 import logging
 import numpy as np
-from scipy import stats
+from scipy import stats, optimize
 import statsmodels.api as sm
 import statsmodels.formula.api as sm_formula
 from tqdm import tqdm
@@ -41,6 +41,7 @@ class CorpusAnalyzer(LinaCorpus):
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
         self.logpath = logpath
+        self.major_only = major_only
 
     def analyze_dramas(self, action):
         """
@@ -182,6 +183,7 @@ class DramaAnalyzer(Lina):
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
+            self.get_regression_metrics()
             self.export_graph_metrics()
         if action == "both":
             self.graph_metrics = self.get_graph_metrics()
@@ -194,6 +196,7 @@ class DramaAnalyzer(Lina):
             self.add_ranking_stability_metrics()
             self.get_structural_ranking_measures()
             self.get_quartiles()
+            self.get_regression_metrics()
             self.export_char_metrics()
             self.export_graph_metrics()
 
@@ -626,7 +629,7 @@ class DramaAnalyzer(Lina):
                                     .value_counts()
                                     .sort_values(ascending=False)
                                     .tolist())
-        index = ["linear", "exp", "powerlaw", "quadratic", "poly3", "poly4"]
+        index = ["linear", "exponential", "powerlaw", "quadratic"]
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models
         for metric in metrics:
@@ -644,22 +647,38 @@ class DramaAnalyzer(Lina):
         for metric in metrics:
             res = sm.OLS(deciles[metric+"_interval"].tolist(),
                          np.log((deciles[metric]+1).tolist())).fit()
-            reg_metrics.loc["exp", metric] = res.rsquared
+            reg_metrics.loc["exponential", metric] = res.rsquared
 
-        # fit poly3 models
+        # poly3/4 removed at the moment due to risk of overfitting
+        # # fit poly3 models
+        # for metric in metrics:
+        #     data = {"a": deciles[metric+"_interval"].tolist(),
+        #             "b": deciles[metric].tolist()}
+        #     res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3)',
+        #                          data = data).fit()
+        #     reg_metrics.loc["poly3", metric] = res.rsquared
+        #
+        # # fit poly4 models
+        # for metric in metrics:
+        #     data = {"a": deciles[metric+"_interval"].tolist(),
+        #             "b": deciles[metric].tolist()}
+        #     res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3) + np.power(b, 4)',
+        #                          data = data).fit()
+        #     reg_metrics.loc["poly4", metric] = res.rsquared
+
+        # fit powerlaw models: http://scipy-cookbook.readthedocs.io/items/FittingData.html
         for metric in metrics:
-            data = {"a": deciles[metric+"_interval"].tolist(),
-                    "b": deciles[metric].tolist()}
-            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3)',
-                                 data = data).fit()
-            reg_metrics.loc["poly3", metric] = res.rsquared
-
-        # fit poly4 models
+            logx = np.log10((deciles[metric+"_interval"]+1).tolist())
+            logy = np.log10((deciles[metric]+1).tolist())
+            res = sm.OLS(logx, logy).fit()
+            reg_metrics.loc["powerlaw", metric] = res.rsquared
+        self.regression_metrics = reg_metrics.T
+        self.regression_metrics.index.name = "metrics"
+        self.regression_metrics["max_val"] = self.regression_metrics.apply(lambda x: np.max(x), axis=1)
+        self.regression_metrics["max_type"] = self.regression_metrics.apply(lambda x: np.argmax(x), axis=1)
         for metric in metrics:
-            data = {"a": deciles[metric+"_interval"].tolist(),
-                    "b": deciles[metric].tolist()}
-            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3) + np.power(b, 4)',
-                                 data = data).fit()
-            reg_metrics.loc["poly4", metric] = res.rsquared
-
-        # fit powerlaw models
+            self.graph_metrics[metric+"_reg_type"] = self.regression_metrics.loc[metric, 'max_type']
+            self.graph_metrics[metric+"_reg_val"] = self.regression_metrics.loc[metric, 'max_val']
+        self.regression_metrics.to_csv(os.path.join(self.outputfolder,
+                                                    "%s_%s_regression_table.csv" % (self.ID, self.title)
+                                                    ))
