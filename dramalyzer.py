@@ -51,7 +51,7 @@ class CorpusAnalyzer(LinaCorpus):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
-                                  action, self.major_only, randomization=0)
+                                  action, self.major_only, randomization=1000)
             yield drama
 
     def get_char_metrics(self):
@@ -94,8 +94,8 @@ class CorpusAnalyzer(LinaCorpus):
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
-                'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
-                'kendall_tau_content_vs_network', 'component_sizes'
+                'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
+                'spearman_rho_content_vs_network', 'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -136,8 +136,8 @@ class CorpusAnalyzer(LinaCorpus):
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
-                'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
-                'kendall_tau_content_vs_network', 'component_sizes'
+                'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
+                'spearman_rho_content_vs_network', 'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -199,8 +199,8 @@ class DramaAnalyzer(Lina):
             self.export_graph_metrics()
 
     def add_ranking_stability_metrics(self):
-        self.graph_metrics["kendall_tau_avg"] = self.ranking_stability.stack().mean()
-        self.graph_metrics["kendall_tau_std"] = self.ranking_stability.stack().std()
+        self.graph_metrics["spearman_rho_avg"] = self.ranking_stability.stack().mean()
+        self.graph_metrics["spearman_rho_std"] = self.ranking_stability.stack().std()
         (self.graph_metrics["top_rank_char_count"],
          self.graph_metrics["top_rank_char_avg"],
          self.graph_metrics["top_rank_char_std"]) = self.get_top_ranked_char_count()
@@ -309,7 +309,7 @@ class DramaAnalyzer(Lina):
 
     def get_ranking_stability_measures(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")][:8]
-        self.ranking_stability = self.centralities[ranks].corr(method='kendall')
+        self.ranking_stability = self.centralities[ranks].corr(method='spearman')
         np.fill_diagonal(self.ranking_stability.values, np.nan)
         self.ranking_stability.index.name = "rank_name"
 
@@ -324,8 +324,8 @@ class DramaAnalyzer(Lina):
         self.centralities["overall_avg"] = self.centralities[["avg_graph_rank",
                                                               "avg_content_rank"]].mean(axis=1)
         self.centralities["overall_avg_rank"] = self.centralities["overall_avg"].rank(method='min')
-        struct_corr = stats.kendalltau(avg_content_rank, avg_graph_rank)[0]
-        self.graph_metrics["kendall_tau_content_vs_network"] = struct_corr
+        struct_corr = stats.spearmanr(avg_content_rank, avg_graph_rank)[0]
+        self.graph_metrics["spearman_rho_content_vs_network"] = struct_corr
 
     def get_characters_all_in_index(self):
         appeared = set()
