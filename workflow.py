@@ -19,7 +19,7 @@ __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
 def main(args):
     corpus = CorpusAnalyzer(args.inputfolder, args.outputfolder,
-                            args.logpath, args.major_only)
+                            args.logpath, args.major_only, args.randomization)
     if args.action == "plotsuperposter":
         plot_superposter(corpus, args.outputfolder, args.debug)
     if args.action == "plotquartett":
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument('--debug', dest='debug', help='print debug message '
                         'or not', action="store_true")
-    parser.add_argument('--randomization', dest='random',
-                        help='plot randomized graphs', action="store_true")
+    parser.add_argument('--randomization', dest='randomization',
+                        help='number of random graphs generated', type=int)
     args = parser.parse_args()
     main(args)

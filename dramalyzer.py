@@ -30,7 +30,8 @@ __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
 class CorpusAnalyzer(LinaCorpus):
 
-    def __init__(self, inputfolder, outputfolder, logpath, major_only=False):
+    def __init__(self, inputfolder, outputfolder, logpath, major_only=False,
+                 randomization=1000):
         super(CorpusAnalyzer, self).__init__(inputfolder, outputfolder)
         self.logger = logging.getLogger("corpusAnalyzer")
         formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
@@ -40,6 +41,7 @@ class CorpusAnalyzer(LinaCorpus):
         self.logger.addHandler(fh)
         self.logpath = logpath
         self.major_only = major_only
+        self.randomization = randomization
 
     def analyze_dramas(self, action):
         """
@@ -51,7 +53,7 @@ class CorpusAnalyzer(LinaCorpus):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
-                                  action, self.major_only, randomization=1000)
+                                  action, self.major_only, self.randomization)
             yield drama
 
     def get_char_metrics(self):
