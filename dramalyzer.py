@@ -3,6 +3,23 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
+import os
+import csv
+from itertools import chain, zip_longest
+from collections import Counter
+import logging
+import numpy as np
+import pandas as pd
+import networkx as nx
+from scipy import stats
+import statsmodels.api as sm
+import statsmodels.formula.api as sm_formula
+from tqdm import tqdm
+
+from linacorpus import LinaCorpus, Lina
+from dramaplotter import plotGraph
+
+
 __author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
 __copyright__ = "Copyright 2017"
 __license__ = "MIT"
@@ -10,27 +27,11 @@ __version__ = "0.4 (beta)"
 __maintainer__ = "Frank Fischer <ffischer at hse.ru>"
 __status__ = "Development" # 'Development', 'Production' or 'Prototype'
 
-import os
-import glob
-import pandas as pd
-import networkx as nx
-import csv
-from lxml import etree
-from itertools import chain, zip_longest
-from collections import Counter
-import argparse
-from superposter import plotGraph, plot_superposter
-import logging
-import numpy as np
-from scipy import stats
-from tqdm import tqdm
-
-from linacorpus import LinaCorpus, Lina
-
 
 class CorpusAnalyzer(LinaCorpus):
 
-    def __init__(self, inputfolder, outputfolder, logpath, major_only=False):
+    def __init__(self, inputfolder, outputfolder, logpath, major_only=False,
+                 randomization=1000):
         super(CorpusAnalyzer, self).__init__(inputfolder, outputfolder)
         self.logger = logging.getLogger("corpusAnalyzer")
         formatter = logging.Formatter('%(asctime)-15s %(name)s [%(levelname)s]'
@@ -39,6 +40,8 @@ class CorpusAnalyzer(LinaCorpus):
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
         self.logpath = logpath
+        self.major_only = major_only
+        self.randomization = randomization
 
     def analyze_dramas(self, action):
         """
@@ -46,11 +49,11 @@ class CorpusAnalyzer(LinaCorpus):
         returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
         """
         # dramas = {}
-        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=0.5):
+        for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=1):
             # ID, ps = parse_drama(tree, filename)
             # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
-                                  action, self.major_only)
+                                  action, self.major_only, self.randomization)
             yield drama
 
     def get_char_metrics(self):
@@ -93,8 +96,8 @@ class CorpusAnalyzer(LinaCorpus):
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
-                'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
-                'kendall_tau_content_vs_network', 'component_sizes'
+                'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
+                'spearman_rho_content_vs_network', 'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -135,8 +138,8 @@ class CorpusAnalyzer(LinaCorpus):
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
-                'connected_components', 'kendall_tau_avg', 'kendall_tau_std',
-                'kendall_tau_content_vs_network', 'component_sizes'
+                'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
+                'spearman_rho_content_vs_network', 'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -180,6 +183,7 @@ class DramaAnalyzer(Lina):
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
+            self.get_regression_metrics()
             self.export_graph_metrics()
         if action == "both":
             self.graph_metrics = self.get_graph_metrics()
@@ -192,12 +196,13 @@ class DramaAnalyzer(Lina):
             self.add_ranking_stability_metrics()
             self.get_structural_ranking_measures()
             self.get_quartiles()
+            self.get_regression_metrics()
             self.export_char_metrics()
             self.export_graph_metrics()
 
     def add_ranking_stability_metrics(self):
-        self.graph_metrics["kendall_tau_avg"] = self.ranking_stability.stack().mean()
-        self.graph_metrics["kendall_tau_std"] = self.ranking_stability.stack().std()
+        self.graph_metrics["spearman_rho_avg"] = self.ranking_stability.stack().mean()
+        self.graph_metrics["spearman_rho_std"] = self.ranking_stability.stack().std()
         (self.graph_metrics["top_rank_char_count"],
          self.graph_metrics["top_rank_char_avg"],
          self.graph_metrics["top_rank_char_std"]) = self.get_top_ranked_char_count()
@@ -306,7 +311,7 @@ class DramaAnalyzer(Lina):
 
     def get_ranking_stability_measures(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")][:8]
-        self.ranking_stability = self.centralities[ranks].corr(method='kendall')
+        self.ranking_stability = self.centralities[ranks].corr(method='spearman')
         np.fill_diagonal(self.ranking_stability.values, np.nan)
         self.ranking_stability.index.name = "rank_name"
 
@@ -318,8 +323,11 @@ class DramaAnalyzer(Lina):
         avg_content_rank = self.centralities[content_ranks].mean(axis=1).rank(method='min')
         self.centralities["avg_graph_rank"] = avg_graph_rank
         self.centralities["avg_content_rank"] = avg_content_rank
-        struct_corr = stats.kendalltau(avg_content_rank, avg_graph_rank)[0]
-        self.graph_metrics["kendall_tau_content_vs_network"] = struct_corr
+        self.centralities["overall_avg"] = self.centralities[["avg_graph_rank",
+                                                              "avg_content_rank"]].mean(axis=1)
+        self.centralities["overall_avg_rank"] = self.centralities["overall_avg"].rank(method='min')
+        struct_corr = stats.spearmanr(avg_content_rank, avg_graph_rank)[0]
+        self.graph_metrics["spearman_rho_content_vs_network"] = struct_corr
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -574,7 +582,7 @@ class DramaAnalyzer(Lina):
         c = 0
         a = 0
 
-        for i in tqdm(range(self.randomization), desc="Randomization"):
+        for i in tqdm(range(self.randomization), desc="Randomization", mininterval=1):
             R = nx.gnm_random_graph(n, e)
             try:
                 randcluster += nx.average_clustering(R)
@@ -604,3 +612,76 @@ class DramaAnalyzer(Lina):
         except:
             randavgpathl = "NaN"
         return randavgpathl, randcluster
+
+    def get_regression_metrics(self):
+        metrics = ['degree', 'closeness', 'betweenness',
+                   'strength', 'eigenvector_centrality',
+                   'frequency', 'speech_acts', 'words']
+        index = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+        deciles = pd.DataFrame(columns=metrics, index=index)
+        for metric in metrics:
+            deciles[metric+"_interval"] = [i.mid
+                               for i in pd.cut(self.centralities[metric], 10)
+                                          .value_counts()
+                                          .sort_values(ascending=False)
+                                          .index.tolist()]
+            deciles[metric] = (pd.cut(self.centralities[metric], 10)
+                                    .value_counts()
+                                    .sort_values(ascending=False)
+                                    .tolist())
+        deciles.to_csv(os.path.join(self.outputfolder,
+                                    "%s_%s_deciles_table.csv" % (self.ID, self.title)
+                                    ))
+        index = ["linear", "exponential", "powerlaw", "quadratic"]
+        reg_metrics = pd.DataFrame(columns=metrics, index=index)
+        # fit linear models
+        for metric in metrics:
+            res = sm.OLS(deciles[metric+"_interval"].tolist(),
+                           deciles[metric].tolist()).fit()
+            reg_metrics.loc["linear", metric] = res.rsquared
+        # fit quadratic models
+        for metric in metrics:
+            data = {"a": deciles[metric+"_interval"].tolist(),
+                    "b": deciles[metric].tolist()}
+            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2)',
+                                 data = data).fit()
+            reg_metrics.loc["quadratic", metric] = res.rsquared
+        # fit exp models
+        for metric in metrics:
+            res = sm.OLS(deciles[metric+"_interval"].tolist(),
+                         np.log((deciles[metric]+1).tolist())).fit()
+            reg_metrics.loc["exponential", metric] = res.rsquared
+
+        # poly3/4 removed at the moment due to risk of overfitting
+        # # fit poly3 models
+        # for metric in metrics:
+        #     data = {"a": deciles[metric+"_interval"].tolist(),
+        #             "b": deciles[metric].tolist()}
+        #     res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3)',
+        #                          data = data).fit()
+        #     reg_metrics.loc["poly3", metric] = res.rsquared
+        #
+        # # fit poly4 models
+        # for metric in metrics:
+        #     data = {"a": deciles[metric+"_interval"].tolist(),
+        #             "b": deciles[metric].tolist()}
+        #     res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3) + np.power(b, 4)',
+        #                          data = data).fit()
+        #     reg_metrics.loc["poly4", metric] = res.rsquared
+
+        # fit powerlaw models: http://scipy-cookbook.readthedocs.io/items/FittingData.html
+        for metric in metrics:
+            logx = np.log10((deciles[metric+"_interval"]+1).tolist())
+            logy = np.log10((deciles[metric]+1).tolist())
+            res = sm.OLS(logx, logy).fit()
+            reg_metrics.loc["powerlaw", metric] = res.rsquared
+        self.regression_metrics = reg_metrics.T
+        self.regression_metrics.index.name = "metrics"
+        self.regression_metrics["max_val"] = self.regression_metrics.apply(lambda x: np.max(x), axis=1)
+        self.regression_metrics["max_type"] = self.regression_metrics.apply(lambda x: np.argmax(x), axis=1)
+        for metric in metrics:
+            self.graph_metrics[metric+"_reg_type"] = self.regression_metrics.loc[metric, 'max_type']
+            self.graph_metrics[metric+"_reg_val"] = self.regression_metrics.loc[metric, 'max_val']
+        self.regression_metrics.to_csv(os.path.join(self.outputfolder,
+                                                    "%s_%s_regression_table.csv" % (self.ID, self.title)
+                                                    ))

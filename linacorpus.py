@@ -3,18 +3,19 @@
 #
 # dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
+import os
+import glob
+from lxml import etree
+from itertools import chain
+import pandas as pd
+
+
 __author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
 __copyright__ = "Copyright 2017"
 __license__ = "MIT"
 __version__ = "0.4 (beta)"
 __maintainer__ = "Frank Fischer <ffischer at hse.ru>"
 __status__ = "Development" # 'Development', 'Production' or 'Prototype'
-
-import os
-import glob
-from lxml import etree
-from itertools import chain
-import pandas as pd
 
 
 class LinaCorpus(object):
