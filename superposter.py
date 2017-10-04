@@ -132,7 +132,7 @@ def plot_quartett_poster(corpus, outputdir):
     y = 8
     fig = plt.figure(figsize=(80, 80))
     outer = gridspec.GridSpec(x, y)
-    outer.update(wspace=0.125, hspace=0.125)  # set the spacing between axes.
+    outer.update(wspace=0.06, hspace=0.06)  # set the spacing between axes.
     i = 0
     for ID in tqdm(sorted_by_date, desc="Plotting"):
         drama = dramas.get(ID)
@@ -205,12 +205,27 @@ def plot_quartett_poster(corpus, outputdir):
         # Höchster Degreewert und Name der entsprechenden Figur, all-in index
         metrics = ['charcount', 'density', 'connected_components',
                    'clustering_coefficient', 'avgpathlength',
-                   'all_in_index', 'maxdegree']
-        metrics = [": ".join([metric, str(drama.graph_metrics.loc[drama.ID][metric])])
-                   for metric in metrics]
-        metrics.append("%s: %s" % ('degree', drama.centralities.apply(lambda x: np.argmax(x), axis=0)['degree']))
-        metrics = "\n".join(metrics)
-        text_ax.text(0, -0.15, metadata+metrics,
+                   'all_in_index']
+        metric_strings = []
+        for metric in metrics:
+            value = drama.graph_metrics.loc[drama.ID][metric]
+            if type(value) == int:
+                value = "%.d" % value
+            if type(value) == float:
+                value = "%.2f" % value
+            else:
+                value = str(value)
+            metric_strings.append(": ".join([metric, value]))
+        max_degree = drama.graph_metrics.loc[drama.ID]['maxdegree']
+        cent_max = drama.centralities['degree'].max()
+        top_char = drama.centralities[drama.centralities['degree'] == cent_max].index.tolist()
+        if len(top_char) != 1:
+            max_degree_char = "SEVERAL"
+        else:
+            max_degree_char = top_char[0]
+        metric_strings.append('max_degree: %.d, (%s)' % (max_degree, max_degree_char))
+        metric_strings = "\n".join(metric_strings)
+        text_ax.text(0, -0.15, metadata+"\n"+"\n"+metric_strings,
                      ha='left', va="top",
                      wrap=True, transform=text_ax.transAxes,
                      fontsize=20)
