@@ -213,7 +213,7 @@ class Lina(object):
                     except:
                         pass
                     try:
-                        n = segment.findall(".//{*}sp[@who='#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
+                        n = segment.findall(".//{*}sp[@who='*#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
                         n = int(n)
                         self.personae[spk].amounts[amount] += n
                     except Exception as e:
