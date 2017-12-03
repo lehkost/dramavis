@@ -226,7 +226,7 @@ def plot_quartett_poster(corpus, outputdir):
             max_degree_char = "SEVERAL"
         else:
             max_degree_char = top_char[0]
-        metric_strings.append('max_degree: %.d, (%s)' % (max_degree, max_degree_char))
+        metric_strings.append('max_degree: %.d (%s)' % (max_degree, max_degree_char))
         metric_strings = "\n".join(metric_strings)
         text_ax.text(0, -0.15, metadata+"\n"+"\n"+metric_strings,
                      ha='left', va="top",
