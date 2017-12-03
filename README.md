@@ -49,7 +49,8 @@ Running dramavis can take up to 4 seconds per play with an average of 2.5 second
 
 ## Input data
 
-You can download the dlina XMLs from [here](https://github.com/dlina/project/tree/master/data/zwischenformat)
-(should be 465 XML files); it might be easier to get hold of them if you ``git clone``
-our [DLINA project repository](https://github.com/dlina/project) and then extract the
-XMLs from the /zwischenformat/ folder.
+An easy way to download the dlina 'zwischenformat' XMLs without additional repo information is this:
+
+```svn export https://github.com/dlina/project/trunk/data/zwischenformat```
+
+Then just point the input directory to the cloned folder (which should include 465 XML files in the main directory).
