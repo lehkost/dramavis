@@ -103,7 +103,10 @@ class CorpusAnalyzer(LinaCorpus):
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
                 'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
-                'spearman_rho_content_vs_network', 'component_sizes'
+                'spearman_rho_content_vs_network',
+                'spearman_rho_content_vs_network_top',
+                'spearman_rho_content_vs_network_bottom',
+                'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -633,62 +636,60 @@ class DramaAnalyzer(Lina):
         metrics = ['degree', 'closeness', 'betweenness',
                    'strength', 'eigenvector_centrality',
                    'frequency', 'speech_acts', 'words']
-        index = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-        deciles = pd.DataFrame(columns=metrics, index=index)
+        metrics_dfs = []
         for metric in metrics:
-            deciles[metric+"_interval"] = [i.mid
+            temp_df = pd.DataFrame(columns=[metric])
+            temp_df[metric+"_interval"] = [i.mid
                                for i in pd.cut(self.centralities[metric], 10)
                                           .value_counts()
-                                          .sort_values(ascending=False)
                                           .index.tolist()]
-            deciles[metric] = (pd.cut(self.centralities[metric], 10)
+            temp_df[metric] = (pd.cut(self.centralities[metric], 10)
                                     .value_counts()
-                                    .sort_values(ascending=False)
                                     .tolist())
-        print(deciles)
-        deciles.to_csv(os.path.join(self.outputfolder,
-                                    "%s_%s_deciles_table.csv" % (self.ID, self.title)
-                                    ))
+            temp_df.sort_values(metric+"_interval", inplace=True)
+            temp_df.reset_index(drop=True, inplace=True)
+            metrics_dfs.append(temp_df)
+        # deciles.to_csv(os.path.join(self.outputfolder,
+        #                             "%s_%s_deciles_table.csv" % (self.ID, self.title)
+        #                             ))
         index = ["linear", "exponential", "powerlaw", "quadratic"]
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models
-        X = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape(-1, 1)
-        for metric in metrics:
-            y = np.array(deciles[metric]).reshape(-1, 1)
-            print(y)
-            regr = linear_model.LinearRegression()
+        # X = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape(-1, 1)
+        print(self.ID)
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
+            y = np.array(temp_df[metric]).reshape(-1, 1)
+            model = linear_model.LinearRegression()
             model.fit(X, y)
             reg_metrics.loc["linear", metric] = model.score(X, y)
-            print("linear %s %.4f" % (metric, model.score(X, y)))
+            # print("linear %s %.4f" % (metric, model.score(X, y)))
         # fit quadratic models
-        for metric in metrics:
-            y = np.array(deciles[metric]).reshape(-1, 1)
-            print(y)
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
+            y = np.array(temp_df[metric]).reshape(-1, 1)
             regr = linear_model.LinearRegression()
             model = make_pipeline(PolynomialFeatures(2), regr)
             model.fit(X, y)
             reg_metrics.loc["quadratic", metric] = model.score(X, y)
-            print("quadratic %s %.4f" % (metric, model.score(X, y)))
+            # print("quadratic %s %.4f" % (metric, model.score(X, y)))
         # fit exp models
-        for metric in metrics:
-            y = np.array(deciles[metric]).reshape(-1, 1)
-            # model.fit(np.exp(X), ma.exp(y))
-            popt, pcov = curve_fit(expcurve_func,
-                                   np.log10(X).flatten(), ma.log10(y).flatten(),
-                                   p0=(1, 1e-5))
-            y_pred = expcurve_func(X, *popt)
-            reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
-            print(r2_score(y, y_pred))
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"])
+            y = np.array(temp_df[metric])
+            # print(X)
+            # print(y)
+            # popt, pcov = curve_fit(func_exp,  X,  y,  p0=(1, 1))
+            # y_pred = func_exp(X, *popt)
+            # reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
+            # print("exponential %s %.4f" % (metric, r2_score(y, y_pred)))
         # fit power law models
-        for metric in metrics:
-            y = np.array(deciles[metric]).reshape(-1, 1)
-            # model = linear_model.LinearRegression()
-            # model.fit(ma.log10(X), ma.log10(y))
-            popt, pcov = curve_fit(powerlaw_func,
-                                   np.log10(X).flatten(), ma.log10(y).flatten(),
-                                   p0=(1, 1e-3))
-            y_pred = powerlaw_func(X, *popt)
-            reg_metrics.loc["powerlaw", metric] = r2_score(y, y_pred)
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"])
+            y = np.array(temp_df[metric])
+            popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([-1, 10**5, 0]), maxfev=3000)
+            y_pred = func_powerlaw(X, *popt)
+            # print("powerlaw %s %.4f" % (metric, r2_score(y, y_pred)))
         self.regression_metrics = reg_metrics.T
         self.regression_metrics.index.name = "metrics"
         self.regression_metrics["max_val"] = self.regression_metrics.apply(lambda x: np.max(x), axis=1)
@@ -700,8 +701,8 @@ class DramaAnalyzer(Lina):
                                                     "%s_%s_regression_table.csv" % (self.ID, self.title)
                                                     ))
 
-def expcurve_func(x, a, c):
-    return a * np.exp(c * x)
+def func_exp(x, a, b):
+    return a * np.exp(b*x)
 
-def powerlaw_func(x, a, b):
-    return a * (x**b)
+def func_powerlaw(x, m, c, c0):
+    return c0 + x**m * c
