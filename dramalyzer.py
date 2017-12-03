@@ -9,9 +9,15 @@ from itertools import chain, zip_longest
 from collections import Counter
 import logging
 import numpy as np
+from numpy import ma
 import pandas as pd
 import networkx as nx
 from scipy import stats
+from scipy.optimize import curve_fit
+from sklearn import datasets, linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 import statsmodels.api as sm
 import statsmodels.formula.api as sm_formula
 from tqdm import tqdm
@@ -97,7 +103,10 @@ class CorpusAnalyzer(LinaCorpus):
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
                 'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
-                'spearman_rho_content_vs_network', 'component_sizes'
+                'spearman_rho_content_vs_network',
+                'spearman_rho_content_vs_network_top',
+                'spearman_rho_content_vs_network_bottom',
+                'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -139,7 +148,10 @@ class CorpusAnalyzer(LinaCorpus):
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
                 'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
-                'spearman_rho_content_vs_network', 'component_sizes'
+                'spearman_rho_content_vs_network',
+                'spearman_rho_content_vs_network_top',
+                'spearman_rho_content_vs_network_bottom',
+                'component_sizes'
                 ]
         df.index = df["ID"]
         df.index.name = "index"
@@ -328,6 +340,14 @@ class DramaAnalyzer(Lina):
         self.centralities["overall_avg_rank"] = self.centralities["overall_avg"].rank(method='min')
         struct_corr = stats.spearmanr(avg_content_rank, avg_graph_rank)[0]
         self.graph_metrics["spearman_rho_content_vs_network"] = struct_corr
+        top, bottom = np.split(self.centralities,
+                               [int(.5*len(self.centralities))])
+        struct_corr_top = stats.spearmanr(top["avg_content_rank"],
+                                          top["avg_graph_rank"])[0]
+        self.graph_metrics["spearman_rho_content_vs_network_top"] = struct_corr_top
+        struct_corr_bottom = stats.spearmanr(bottom["avg_content_rank"],
+                                             bottom["avg_graph_rank"])[0]
+        self.graph_metrics["spearman_rho_content_vs_network_bottom"] = struct_corr_bottom
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -337,7 +357,6 @@ class DramaAnalyzer(Lina):
             if len(appeared) >= self.num_chars_total:
                 i += 1
                 all_in_index = float(i/len(self.segments))
-                # print(all_in_index, len(self.segments), len(appeared), self.num_chars_total)
                 return all_in_index
 
     def export_char_metrics(self):
@@ -350,7 +369,7 @@ class DramaAnalyzer(Lina):
         self.ranking_stability.to_csv(
                 os.path.join(
                             self.outputfolder,
-                            "%s_%s_kendalltaus.csv" % (self.ID, self.title)
+                            "%s_%s_spearmanrho.csv" % (self.ID, self.title)
                             ))
 
     def export_graph_metrics(self):
@@ -617,64 +636,60 @@ class DramaAnalyzer(Lina):
         metrics = ['degree', 'closeness', 'betweenness',
                    'strength', 'eigenvector_centrality',
                    'frequency', 'speech_acts', 'words']
-        index = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-        deciles = pd.DataFrame(columns=metrics, index=index)
+        metrics_dfs = []
         for metric in metrics:
-            deciles[metric+"_interval"] = [i.mid
+            temp_df = pd.DataFrame(columns=[metric])
+            temp_df[metric+"_interval"] = [i.mid
                                for i in pd.cut(self.centralities[metric], 10)
                                           .value_counts()
-                                          .sort_values(ascending=False)
                                           .index.tolist()]
-            deciles[metric] = (pd.cut(self.centralities[metric], 10)
+            temp_df[metric] = (pd.cut(self.centralities[metric], 10)
                                     .value_counts()
-                                    .sort_values(ascending=False)
                                     .tolist())
-        deciles.to_csv(os.path.join(self.outputfolder,
-                                    "%s_%s_deciles_table.csv" % (self.ID, self.title)
-                                    ))
+            temp_df.sort_values(metric+"_interval", inplace=True)
+            temp_df.reset_index(drop=True, inplace=True)
+            metrics_dfs.append(temp_df)
+        # deciles.to_csv(os.path.join(self.outputfolder,
+        #                             "%s_%s_deciles_table.csv" % (self.ID, self.title)
+        #                             ))
         index = ["linear", "exponential", "powerlaw", "quadratic"]
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models
-        for metric in metrics:
-            res = sm.OLS(deciles[metric+"_interval"].tolist(),
-                           deciles[metric].tolist()).fit()
-            reg_metrics.loc["linear", metric] = res.rsquared
+        # X = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape(-1, 1)
+        print(self.ID)
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
+            y = np.array(temp_df[metric]).reshape(-1, 1)
+            model = linear_model.LinearRegression()
+            model.fit(X, y)
+            reg_metrics.loc["linear", metric] = model.score(X, y)
+            # print("linear %s %.4f" % (metric, model.score(X, y)))
         # fit quadratic models
-        for metric in metrics:
-            data = {"a": deciles[metric+"_interval"].tolist(),
-                    "b": deciles[metric].tolist()}
-            res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2)',
-                                 data = data).fit()
-            reg_metrics.loc["quadratic", metric] = res.rsquared
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
+            y = np.array(temp_df[metric]).reshape(-1, 1)
+            regr = linear_model.LinearRegression()
+            model = make_pipeline(PolynomialFeatures(2), regr)
+            model.fit(X, y)
+            reg_metrics.loc["quadratic", metric] = model.score(X, y)
+            # print("quadratic %s %.4f" % (metric, model.score(X, y)))
         # fit exp models
-        for metric in metrics:
-            res = sm.OLS(deciles[metric+"_interval"].tolist(),
-                         np.log((deciles[metric]+1).tolist())).fit()
-            reg_metrics.loc["exponential", metric] = res.rsquared
-
-        # poly3/4 removed at the moment due to risk of overfitting
-        # # fit poly3 models
-        # for metric in metrics:
-        #     data = {"a": deciles[metric+"_interval"].tolist(),
-        #             "b": deciles[metric].tolist()}
-        #     res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3)',
-        #                          data = data).fit()
-        #     reg_metrics.loc["poly3", metric] = res.rsquared
-        #
-        # # fit poly4 models
-        # for metric in metrics:
-        #     data = {"a": deciles[metric+"_interval"].tolist(),
-        #             "b": deciles[metric].tolist()}
-        #     res = sm_formula.ols(formula = 'a ~ 1 + b + np.power(b, 2) + np.power(b, 3) + np.power(b, 4)',
-        #                          data = data).fit()
-        #     reg_metrics.loc["poly4", metric] = res.rsquared
-
-        # fit powerlaw models: http://scipy-cookbook.readthedocs.io/items/FittingData.html
-        for metric in metrics:
-            logx = np.log10((deciles[metric+"_interval"]+1).tolist())
-            logy = np.log10((deciles[metric]+1).tolist())
-            res = sm.OLS(logx, logy).fit()
-            reg_metrics.loc["powerlaw", metric] = res.rsquared
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"])
+            y = np.array(temp_df[metric])
+            # print(X)
+            # print(y)
+            # popt, pcov = curve_fit(func_exp,  X,  y,  p0=(1, 1))
+            # y_pred = func_exp(X, *popt)
+            # reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
+            # print("exponential %s %.4f" % (metric, r2_score(y, y_pred)))
+        # fit power law models
+        for metric, temp_df in zip(metrics, metrics_dfs):
+            X = np.array(temp_df[metric+"_interval"])
+            y = np.array(temp_df[metric])
+            popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([-1, 10**5, 0]), maxfev=3000)
+            y_pred = func_powerlaw(X, *popt)
+            # print("powerlaw %s %.4f" % (metric, r2_score(y, y_pred)))
         self.regression_metrics = reg_metrics.T
         self.regression_metrics.index.name = "metrics"
         self.regression_metrics["max_val"] = self.regression_metrics.apply(lambda x: np.max(x), axis=1)
@@ -685,3 +700,9 @@ class DramaAnalyzer(Lina):
         self.regression_metrics.to_csv(os.path.join(self.outputfolder,
                                                     "%s_%s_regression_table.csv" % (self.ID, self.title)
                                                     ))
+
+def func_exp(x, a, b):
+    return a * np.exp(b*x)
+
+def func_powerlaw(x, m, c, c0):
+    return c0 + x**m * c
