@@ -600,7 +600,8 @@ class DramaAnalyzer(Lina):
         # e=edges?, c=clustering_coefficient?, a=average_shortest_path_length?
         c = 0
         a = 0
-
+        if not self.randomization:  # hack so that quartett poster works
+            self.randomization = 50
         for i in tqdm(range(self.randomization), desc="Randomization", mininterval=1):
             R = nx.gnm_random_graph(n, e)
             try:
@@ -676,8 +677,6 @@ class DramaAnalyzer(Lina):
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"])
             y = np.array(temp_df[metric])
-            # print(X)
-            # print(y)
             popt, pcov = curve_fit(func_exp,  ma.log(X),  y,  p0=(2, 1e-5), maxfev=30000)
             y_pred = func_exp(ma.log(X), *popt)
             reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
@@ -686,9 +685,14 @@ class DramaAnalyzer(Lina):
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"])
             y = np.array(temp_df[metric])
-            popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([1, 10**5, 0]), maxfev=30000)
-            y_pred = func_powerlaw(X, *popt)
-            reg_metrics.loc["powerlaw", metric] = r2_score(y, y_pred)
+            # popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([1, 10**5, 0]), maxfev=30000)
+            # y_pred = func_powerlaw(X, *popt)
+            # reg_metrics.loc["powerlaw", metric] = r2_score(y, y_pred)
+            logx = ma.log(X).reshape(-1, 1)
+            logy = ma.log(y).reshape(-1, 1)
+            model = linear_model.LinearRegression()
+            model.fit(logx, logy)
+            reg_metrics.loc["powerlaw", metric] = model.score(logx, logy)
             # print("powerlaw %s %.4f" % (metric, r2_score(y, y_pred)))
         self.regression_metrics = reg_metrics.T
         self.regression_metrics.index.name = "metrics"
@@ -700,9 +704,10 @@ class DramaAnalyzer(Lina):
         self.regression_metrics.to_csv(os.path.join(self.outputfolder,
                                                     "%s_%s_regression_table.csv" % (self.ID, self.title)
                                                     ))
+        for temp_df in metrics_dfs:
+            temp_df.to_csv(os.path.join(os.path.join(self.outputfolder),
+                                                    "%s_%s_regression_table.csv" % (self.ID, self.title)),
+                                                    mode='a', header=True)
 
 def func_exp(x, a, b):
     return a + b*x
-
-def func_powerlaw(x, m, c, c0):
-    return c0 + x**m * c

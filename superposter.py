@@ -208,11 +208,14 @@ def plot_quartett_poster(corpus, outputdir):
                    'all_in_index']
         metric_strings = []
         for metric in metrics:
-            value = drama.graph_metrics.loc[drama.ID][metric]
-            if type(value) == int:
-                value = "%.d" % value
-            if type(value) == float:
-                value = "%.2f" % value
+            v = drama.graph_metrics.loc[drama.ID][metric]
+            if type(v) == int:
+                value = "%.d" % v
+            if type(v) == float:
+                value = "%.2f" % v
+            if metric == "all_in_index":
+                v = int(v*100)
+                value = "%.d" % v +"%"
             else:
                 value = str(value)
             metric_strings.append(": ".join([metric, value]))
