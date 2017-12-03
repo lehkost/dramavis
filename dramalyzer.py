@@ -656,7 +656,6 @@ class DramaAnalyzer(Lina):
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models
         # X = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape(-1, 1)
-        print(self.ID)
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
             y = np.array(temp_df[metric]).reshape(-1, 1)
@@ -679,16 +678,17 @@ class DramaAnalyzer(Lina):
             y = np.array(temp_df[metric])
             # print(X)
             # print(y)
-            # popt, pcov = curve_fit(func_exp,  X,  y,  p0=(1, 1))
-            # y_pred = func_exp(X, *popt)
-            # reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
+            popt, pcov = curve_fit(func_exp,  ma.log(X),  y,  p0=(2, 1e-5), maxfev=30000)
+            y_pred = func_exp(ma.log(X), *popt)
+            reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
             # print("exponential %s %.4f" % (metric, r2_score(y, y_pred)))
         # fit power law models
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"])
             y = np.array(temp_df[metric])
-            popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([-1, 10**5, 0]), maxfev=3000)
+            popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([1, 10**5, 0]), maxfev=30000)
             y_pred = func_powerlaw(X, *popt)
+            reg_metrics.loc["powerlaw", metric] = r2_score(y, y_pred)
             # print("powerlaw %s %.4f" % (metric, r2_score(y, y_pred)))
         self.regression_metrics = reg_metrics.T
         self.regression_metrics.index.name = "metrics"
@@ -702,7 +702,7 @@ class DramaAnalyzer(Lina):
                                                     ))
 
 def func_exp(x, a, b):
-    return a * np.exp(b*x)
+    return a + b*x
 
 def func_powerlaw(x, m, c, c0):
     return c0 + x**m * c
