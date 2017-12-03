@@ -600,7 +600,8 @@ class DramaAnalyzer(Lina):
         # e=edges?, c=clustering_coefficient?, a=average_shortest_path_length?
         c = 0
         a = 0
-
+        if not self.randomization:  # hack so that quartett poster works
+            self.randomization = 50
         for i in tqdm(range(self.randomization), desc="Randomization", mininterval=1):
             R = nx.gnm_random_graph(n, e)
             try:
