@@ -213,9 +213,13 @@ class Lina(object):
                     except:
                         pass
                     try:
-                        n = segment.findall(".//{*}sp[@who='*#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
-                        n = int(n)
-                        self.personae[spk].amounts[amount] += n
+                        # n = segment.findall(".//{*}sp[@who='*#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
+                        s = segment.findall(".//{*}sp")
+                        for sm in s:
+                            whos = sm.attrib.get('who').split(" ")
+                            if "#"+speaker in whos:
+                                n = int(sm.findall("{*}amount[@unit='%s']" % amount)[0].attrib.get('n'))
+                                self.personae[spk].amounts[amount] += n
                     except Exception as e:
                         continue
             speakers = [self.charmap[speaker]
