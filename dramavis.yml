@@ -64,6 +64,7 @@ dependencies:
   - pyzmq==16.0.2
   - qtconsole==4.2.1
   - requests==2.10.0
+  - scikit-learn==0.19.1
   - scipy==0.19.1
   - seaborn==0.8.1
   - simplegeneric==0.8.1
