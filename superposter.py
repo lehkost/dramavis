@@ -204,7 +204,7 @@ def plot_quartett_poster(corpus, outputdir):
         # Clustering-Koeffizient – Durchschnittliche Pfadlänge –
         # Höchster Degreewert und Name der entsprechenden Figur, all-in index
         metrics = ['charcount', 'density', 'connected_components',
-                   'clustering_coefficient', 'avgpathlength',
+                   'clustering_coefficient', 'avgpathlength', 'diameter',
                    'all_in_index']
         metric_strings = []
         for metric in metrics:

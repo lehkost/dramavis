@@ -98,7 +98,7 @@ class CorpusAnalyzer(LinaCorpus):
         df = pd.concat([d.graph_metrics for d in dramas])
         header = [
                 'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
-                'charcount', 'edgecount', 'maxdegree', 'avgdegree',
+                'charcount', 'edgecount', 'maxdegree', 'avgdegree', 'diameter',
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
@@ -143,7 +143,7 @@ class CorpusAnalyzer(LinaCorpus):
         df = pd.concat(graph_dfs)
         header = [
                 'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
-                'charcount', 'edgecount', 'maxdegree', 'avgdegree',
+                'charcount', 'edgecount', 'maxdegree', 'avgdegree', 'diameter',
                 'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
                 'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
                 'characters_last_in',
@@ -525,6 +525,12 @@ class DramaAnalyzer(Lina):
         values["connected_components"] = nx.number_connected_components(G)
         components = nx.connected_component_subgraphs(G)
         values["component_sizes"] = [len(c.nodes()) for c in components]
+        try:
+            values["diameter"] = nx.diameter(G)
+        except nx.NetworkXError:
+            self.logger.error("ID %s NetworkXError: Graph is not connected." % self.ID)
+            values["diameter"] = nx.diameter(
+                        max(nx.connected_component_subgraphs(G), key=len))
         return values
 
     def analyze_characters(self):
