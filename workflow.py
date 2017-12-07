@@ -48,6 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('--debug', dest='debug', help='print debug message '
                         'or not', action="store_true")
     parser.add_argument('--randomization', dest='randomization',
-                        help='number of random graphs generated', type=int)
+                        help='number of random graphs generated', type=int,
+                        default=1000)
     args = parser.parse_args()
     main(args)
