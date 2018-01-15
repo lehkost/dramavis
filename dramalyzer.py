@@ -728,13 +728,17 @@ class DramaAnalyzer(Lina):
             y = np.array(temp_df[metric]).reshape(-1, 1)
             model = linear_model.LinearRegression()
             model.fit(X, y)
-            reg_metrics.loc["linear", metric] = model.score(X, y)
+            score = model.score(X, y)
+            reg_metrics.loc["linear", metric] = score
             ax = plt.subplot(gs[i])
             plt.scatter(X, y)
             plt.plot(X, model.predict(X), 'r--',
                      label='coeff: %.3f, intercept: %.3f' % (model.coef_[0][0],
                                                              model.intercept_[0]))
-            plt.legend(fontsize='small')
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " linear R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric)
+            ax.set_ylabel("value counts")
             i += 1
         # fit quadratic models
         for metric, temp_df in zip(metrics, metrics_dfs):
@@ -744,29 +748,35 @@ class DramaAnalyzer(Lina):
             model = Pipeline(steps=[('polyfeatures', PolynomialFeatures(2)),
                                     ('reg', regr)])
             model.fit(X, y)
-            reg_metrics.loc["quadratic", metric] = model.score(X, y)
+            score = model.score(X, y)
+            reg_metrics.loc["quadratic", metric] = score
             ax = plt.subplot(gs[i])
             plt.scatter(X, y)
             plt.plot(X, model.predict(X), 'r--',
                      label='coeff: %s, intercept: %s' % (
                                     str(model.named_steps['reg'].coef_),
                                     str(model.named_steps['reg'].intercept_)))
-            plt.legend(fontsize='small')
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " quadratic R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric)
+            ax.set_ylabel("value counts")
             i += 1
         # fit exp models
         for metric, temp_df in zip(metrics, metrics_dfs):
-            X = np.array(temp_df[metric+"_interval"])
-            y = np.array(temp_df[metric])
-            popt, pcov = curve_fit(exponenial_func,
-                                   ma.log(X), y, p0=(1, 0.1, 1),
-                                   maxfev=3000000)
-            y_pred = exponenial_func(ma.log(X), *popt)
-            reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
+            X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
+            y = np.array(temp_df[metric]).reshape(-1, 1)
+            logy = ma.log(y).reshape(-1, 1)
+            model = linear_model.LinearRegression()
+            model.fit(X, logy)
+            score = model.score(X, logy)
+            reg_metrics.loc["exponential", metric] = score
             ax = plt.subplot(gs[i])
-            plt.scatter(X, y)
-            plt.plot(X, y_pred, 'r--',
-                     label='exp fit: a=%5.3f, b=%5.3f, c=%5.3f' % tuple(popt))
-            plt.legend(fontsize='small')
+            plt.scatter(X, logy)
+            plt.plot(X, model.predict(X), 'r--')
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " exp. R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric)
+            ax.set_ylabel("value counts (log)")
             i += 1
         # fit power law models
         for metric, temp_df in zip(metrics, metrics_dfs):
@@ -776,14 +786,19 @@ class DramaAnalyzer(Lina):
             logy = ma.log(y).reshape(-1, 1)
             model = linear_model.LinearRegression()
             model.fit(logx, logy)
-            reg_metrics.loc["powerlaw", metric] = model.score(logx, logy)
+            score = model.score(logx, logy)
+            reg_metrics.loc["powerlaw", metric] = score
             ax = plt.subplot(gs[i])
-            plt.scatter(X, y)
-            plt.plot(X, model.predict(logx), 'r--',
+            plt.scatter(logx, logy)
+            plt.plot(logx, model.predict(logx), 'r--',
                      label='coeff: %s, intercept: %s' % (str(model.coef_),
                                                          str(model.intercept_)))
-            plt.legend(fontsize='small')
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " power law R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric + " (log)")
+            ax.set_ylabel("value counts (log)")
             i += 1
+        plt.tight_layout()
         self.reg_metrics = reg_metrics.T
         self.reg_metrics.index.name = "metrics"
         self.reg_metrics["max_val"] = self.reg_metrics.apply(
@@ -810,5 +825,5 @@ class DramaAnalyzer(Lina):
                                  % (self.ID, self.title)))
 
 
-def exponenial_func(x, a, b, c):
-    return a * np.exp(-b*x) + c
+def exponential_func(t, a, b):
+    return a + t*np.log(t)
