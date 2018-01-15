@@ -16,12 +16,14 @@ from scipy.optimize import curve_fit
 from sklearn import linear_model
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import Pipeline
 from tqdm import tqdm
 
 from linacorpus import LinaCorpus, Lina
 from dramaplotter import plotGraph
-
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import seaborn as sns
 
 __author__ = """Christopher Kittel <web at christopherkittel.eu>,
                 Frank Fischer <ffischer at hse.ru>"""
@@ -202,7 +204,6 @@ class DramaAnalyzer(Lina):
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
-            self.get_regression_metrics()
             self.export_graph_metrics()
         if action == "both":
             self.graph_metrics = self.get_graph_metrics()
@@ -719,45 +720,70 @@ class DramaAnalyzer(Lina):
         index = ["linear", "exponential", "powerlaw", "quadratic"]
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models
-        # X = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape(-1, 1)
+        fig = plt.figure(figsize=(len(metrics)*4, len(index)*4))
+        gs = gridspec.GridSpec(len(index), len(metrics))
+        i = 0  # subplot enumerator
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
             y = np.array(temp_df[metric]).reshape(-1, 1)
             model = linear_model.LinearRegression()
             model.fit(X, y)
             reg_metrics.loc["linear", metric] = model.score(X, y)
-            # print("linear %s %.4f" % (metric, model.score(X, y)))
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, y)
+            plt.plot(X, model.predict(X), 'r--',
+                     label='coeff: %.3f, intercept: %.3f' % (model.coef_[0][0],
+                                                             model.intercept_[0]))
+            plt.legend(fontsize='small')
+            i += 1
         # fit quadratic models
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
             y = np.array(temp_df[metric]).reshape(-1, 1)
             regr = linear_model.LinearRegression()
-            model = make_pipeline(PolynomialFeatures(2), regr)
+            model = Pipeline(steps=[('polyfeatures', PolynomialFeatures(2)),
+                                    ('reg', regr)])
             model.fit(X, y)
             reg_metrics.loc["quadratic", metric] = model.score(X, y)
-            # print("quadratic %s %.4f" % (metric, model.score(X, y)))
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, y)
+            plt.plot(X, model.predict(X), 'r--',
+                     label='coeff: %s, intercept: %s' % (
+                                    str(model.named_steps['reg'].coef_),
+                                    str(model.named_steps['reg'].intercept_)))
+            plt.legend(fontsize='small')
+            i += 1
         # fit exp models
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"])
             y = np.array(temp_df[metric])
-            popt, pcov = curve_fit(func_exp,  ma.log(X),  y,  p0=(2, 1e-5),
-                                   maxfev=30000)
-            y_pred = func_exp(ma.log(X), *popt)
+            popt, pcov = curve_fit(exponenial_func,
+                                   ma.log(X), y, p0=(1, 0.1, 1),
+                                   maxfev=3000000)
+            y_pred = exponenial_func(ma.log(X), *popt)
             reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
-            # print("exponential %s %.4f" % (metric, r2_score(y, y_pred)))
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, y)
+            plt.plot(X, y_pred, 'r--',
+                     label='exp fit: a=%5.3f, b=%5.3f, c=%5.3f' % tuple(popt))
+            plt.legend(fontsize='small')
+            i += 1
         # fit power law models
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"])
             y = np.array(temp_df[metric])
-            # popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([1, 10**5, 0]), maxfev=30000)
-            # y_pred = func_powerlaw(X, *popt)
-            # reg_metrics.loc["powerlaw", metric] = r2_score(y, y_pred)
             logx = ma.log(X).reshape(-1, 1)
             logy = ma.log(y).reshape(-1, 1)
             model = linear_model.LinearRegression()
             model.fit(logx, logy)
             reg_metrics.loc["powerlaw", metric] = model.score(logx, logy)
-            # print("powerlaw %s %.4f" % (metric, r2_score(y, y_pred)))
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, y)
+            plt.plot(X, model.predict(logx), 'r--',
+                     label='coeff: %s, intercept: %s' % (str(model.coef_),
+                                                         str(model.intercept_)))
+            plt.legend(fontsize='small')
+            i += 1
         self.reg_metrics = reg_metrics.T
         self.reg_metrics.index.name = "metrics"
         self.reg_metrics["max_val"] = self.reg_metrics.apply(
@@ -779,7 +805,10 @@ class DramaAnalyzer(Lina):
                                         "%s_%s_regression_table.csv"
                                         % (self.ID, self.title)),
                            mode='a', header=True)
+        fig.savefig(os.path.join(self.outputfolder,
+                                 '%s_%s_regression_plots.png'
+                                 % (self.ID, self.title)))
 
 
-def func_exp(x, a, b):
-    return a + b*x
+def exponenial_func(x, a, b, c):
+    return a * np.exp(-b*x) + c
