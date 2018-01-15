@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
+# dramavis by frank fischer (@umblaetterer)
+# & christopher kittel (@chris_kittel)
 
 import os
 import glob
@@ -10,12 +11,13 @@ from itertools import chain
 import pandas as pd
 
 
-__author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
+__author__ = """Christopher Kittel <web at christopherkittel.eu>,
+                Frank Fischer <ffischer at hse.ru>"""
 __copyright__ = "Copyright 2017"
 __license__ = "MIT"
 __version__ = "0.4 (beta)"
 __maintainer__ = "Frank Fischer <ffischer at hse.ru>"
-__status__ = "Development" # 'Development', 'Production' or 'Prototype'
+__status__ = "Development"  # 'Development', 'Production' or 'Prototype'
 
 
 class LinaCorpus(object):
@@ -40,7 +42,6 @@ class Lina(object):
         self.filepath = os.path.join(self.outputfolder, str(self.ID))
         self.title = self.metadata.get("title", self.ID)
 
-
     def parse_drama(self):
         """
         Parses a single drama,
@@ -59,7 +60,6 @@ class Lina(object):
         self.ID = root.attrib.get("id")
         header = root.find("{*}header")
         persons = root.find("{*}personae")
-        text = root.find("{*}text")
         self.metadata = self.extract_metadata(header)
         self.metadata["filename"] = self.filename
         self.personae = self.extract_personae(persons)
@@ -67,11 +67,6 @@ class Lina(object):
         self.segments = self.extract_speakers()
         self.metadata["segment_count"] = len(self.segments)
         self.metadata["count_type"] = self.get_count_type()
-        # parsed_drama = (ID, {"metadata": metadata, "personae":personae, "speakers":speakers})
-        # return parsed_drama
-
-        # if args.debug:
-        #     print("SEGMENTS:", segments)
 
     def extract_metadata(self, header):
         """
@@ -89,7 +84,8 @@ class Lina(object):
              'genretitle': 'Lustspiel',
              'pnd': 'Die Lügnerin',
              'segment_count': 8,
-             'source_textgrid': 'https://textgridlab.org/1.0/tgcrud-public/rest/textgrid:kjfz.0/data',
+             'source_textgrid': 'https://textgridlab.org/'
+                                '1.0/tgcrud-public/rest/textgrid:kjfz.0/data',
              'subtitle': 'Lustspiel in einem Aufzuge',
              'title': 'Die Lügnerin'}
         """
@@ -105,15 +101,18 @@ class Lina(object):
         author = header.find("{*}author").text
         pnd = header.find("{*}title").text
         try:
-            date_print = int(header.find("{*}date[@type='print']").attrib.get("when"))
+            date_print = int(header.find("{*}date[@type='print']")
+                                   .attrib.get("when"))
         except:
             date_print = None
         try:
-            date_written = int(header.find("{*}date[@type='written']").attrib.get("when"))
+            date_written = int(header.find("{*}date[@type='written']")
+                                     .attrib.get("when"))
         except:
             date_written = None
         try:
-            date_premiere = int(header.find("{*}date[@type='premiere']").attrib.get("when"))
+            date_premiere = int(header.find("{*}date[@type='premiere']")
+                                      .attrib.get("when"))
         except:
             date_premiere = None
 
@@ -123,15 +122,6 @@ class Lina(object):
             date_definite = date_premiere
         else:
             date_definite = date_print
-
-        ## date is a string hotfix
-        # if type(date_print) != int:
-        #     date_print = 9999
-        # if type(date_written) != int:
-        #     date_print = 9999
-        # if type(date_premiere) != int:
-        #     date_print = 9999
-
         if date_written and date_definite:
             if date_definite - date_written > 10:
                 date_definite = date_written
@@ -141,16 +131,16 @@ class Lina(object):
         source_textgrid = header.find("{*}source").text
 
         metadata = {
-            "title":title,
-            "subtitle":subtitle,
-            "genretitle":genretitle,
-            "author":author,
-            "pnd":pnd,
-            "date_print":date_print,
-            "date_written":date_written,
-            "date_premiere":date_premiere,
-            "date_definite":date_definite,
-            "source_textgrid":source_textgrid
+            "title": title,
+            "subtitle": subtitle,
+            "genretitle": genretitle,
+            "author": author,
+            "pnd": pnd,
+            "date_print": date_print,
+            "date_written": date_written,
+            "date_premiere": date_premiere,
+            "date_definite": date_definite,
+            "source_textgrid": source_textgrid
         }
         return metadata
 
@@ -183,7 +173,6 @@ class Lina(object):
         parentsegments = list()
         for speaker in speakers:
             parent = speaker.getparent()
-            head = parent.getchildren()[0]
             if parent not in parentsegments:
                 parentsegments.append(parent)
             # check if scene (ends with "Szene/Szene./Auftritt/Auftritt.")
@@ -196,9 +185,7 @@ class Lina(object):
          ['BACKES', 'HAHNENBEIN', 'CONSTANZE', 'GUSTCHEN', 'MORITZ'],
          ['CONSTANZE', 'GUSTCHEN', 'MORITZ'],
          ['FR. GREINER', 'CONSTANZE', 'MORITZ'],
-         ['BACKES', 'HAHNENBEIN', 'GUSTCHEN', 'CONSTANZE', 'MORITZ'],
-         ['HAHNENBEIN', 'CONSTANZE', 'BACKES', 'GUSTCHEN', 'MORITZ', 'HAUPTMANN'],
-         ['HAHNENBEIN', 'CONSTANZE', 'BACKES', 'GUSTCHEN', 'MORITZ', 'HAUPTMANN', 'LANGENBERG']]
+         ['BACKES', 'HAHNENBEIN', 'GUSTCHEN', 'CONSTANZE', 'MORITZ']
         """
         parentsegments = self.extract_structure()
         segments = list()
@@ -213,12 +200,13 @@ class Lina(object):
                     except:
                         pass
                     try:
-                        # n = segment.findall(".//{*}sp[@who='*#%s']/{*}amount[@unit='%s']" %(speaker, amount))[0].attrib.get('n')
                         s = segment.findall(".//{*}sp")
                         for sm in s:
                             whos = sm.attrib.get('who').split(" ")
                             if "#"+speaker in whos:
-                                n = int(sm.findall("{*}amount[@unit='%s']" % amount)[0].attrib.get('n'))
+                                n = int(sm.findall("{*}amount[@unit='%s']"
+                                                   % amount)[0].attrib.get('n')
+                                        )
                                 self.personae[spk].amounts[amount] += n
                     except Exception as e:
                         continue
@@ -241,12 +229,9 @@ class Lina(object):
         for speaker in speakers:
             parent = speaker.getparent()
             head = parent.getchildren()[0]
-            if (head.text.endswith("ne") or
-                head.text.endswith("ne.") or
-                head.text.endswith("tt") or
-                head.text.endswith("tt.")):
+            if (head.text.endswith("ne") or head.text.endswith("ne.") or
+                    head.text.endswith("tt") or head.text.endswith("tt.")):
                 count_type = "scenes"
-                # print(head.text)
         return count_type
 
     def create_charmap(self):
@@ -273,9 +258,9 @@ class Character(object):
         super(Character, self).__init__()
         self.name = name
         self.aliases = aliases
-        self.appears_in = set() # which segments
-        self.amounts = {"speech_acts":0,
-                        "words":0,
-                        "lines":0,
-                        "chars":0}
+        self.appears_in = set()  # which segments
+        self.amounts = {"speech_acts": 0,
+                        "words": 0,
+                        "lines": 0,
+                        "chars": 0}
         self.data = pd.DataFrame()
