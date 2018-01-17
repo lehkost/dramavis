@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# dramavis by frank fischer (@umblaetterer) & christopher kittel (@chris_kittel)
 
 import os
 import csv
@@ -14,24 +13,25 @@ import pandas as pd
 import networkx as nx
 from scipy import stats
 from scipy.optimize import curve_fit
-from sklearn import datasets, linear_model
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn import linear_model
+from sklearn.metrics import r2_score
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
-import statsmodels.api as sm
-import statsmodels.formula.api as sm_formula
+from sklearn.pipeline import Pipeline
 from tqdm import tqdm
 
 from linacorpus import LinaCorpus, Lina
 from dramaplotter import plotGraph
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import seaborn as sns
 
-
-__author__ = "Christopher Kittel <web at christopherkittel.eu>, Frank Fischer <ffischer at hse.ru>"
+__author__ = """Christopher Kittel <web at christopherkittel.eu>,
+                Frank Fischer <ffischer at hse.ru>"""
 __copyright__ = "Copyright 2017"
 __license__ = "MIT"
 __version__ = "0.4 (beta)"
 __maintainer__ = "Frank Fischer <ffischer at hse.ru>"
-__status__ = "Development" # 'Development', 'Production' or 'Prototype'
+__status__ = "Development"  # 'Development', 'Production' or 'Prototype'
 
 
 class CorpusAnalyzer(LinaCorpus):
@@ -52,12 +52,10 @@ class CorpusAnalyzer(LinaCorpus):
     def analyze_dramas(self, action):
         """
         Reads all XMLs in the inputfolder,
-        returns an iterator of lxml.etree-objects created with lxml.etree.parse("dramafile.xml").
+        returns an iterator of lxml.etree-objects created
+        with lxml.etree.parse("dramafile.xml").
         """
-        # dramas = {}
         for dramafile in tqdm(self.dramafiles, desc="Dramas", mininterval=1):
-            # ID, ps = parse_drama(tree, filename)
-            # dramas[ID] = ps
             drama = DramaAnalyzer(dramafile, self.outputfolder, self.logpath,
                                   action, self.major_only, self.randomization)
             yield drama
@@ -90,18 +88,23 @@ class CorpusAnalyzer(LinaCorpus):
         self.logger.info("Exporting corpus quartile metrics.")
         df = pd.concat(quot_quot_dfs, axis=1).T
         df.index.name = "index"
-        df.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
+        df.to_csv(os.path.join(self.outputfolder,
+                               "corpus_quartile_metrics.csv"),
+                  sep=";")
 
     def get_graph_metrics(self):
         self.logger.info("Exporting corpus metrics.")
         dramas = self.analyze_dramas(action="corpus_metrics")
         df = pd.concat([d.graph_metrics for d in dramas])
         header = [
-                'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
+                'ID', 'author', 'title', 'subtitle', 'year', 'genretitle',
+                'filename',
                 'charcount', 'edgecount', 'maxdegree', 'avgdegree', 'diameter',
-                'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
-                'characters_last_in',
+                'clustering_coefficient', 'clustering_coefficient_random',
+                'avgpathlength', 'average_path_length_random', 'density',
+                'segment_count', 'count_type', 'all_in_index',
+                'change_rate_mean', 'change_rate_std',
+                'final_scene_size_index', 'characters_last_in',
                 'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
                 'spearman_rho_content_vs_network',
                 'spearman_rho_content_vs_network_top',
@@ -110,7 +113,8 @@ class CorpusAnalyzer(LinaCorpus):
                 ]
         df.index = df["ID"]
         df.index.name = "index"
-        df[header].to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
+        df[header].to_csv(os.path.join(self.outputfolder,
+                                       "corpus_metrics.csv"), sep=";")
 
     def get_both_metrics(self):
         self.logger.info("Exporting character metrics.")
@@ -142,11 +146,14 @@ class CorpusAnalyzer(LinaCorpus):
         self.logger.info("Exporting corpus metrics.")
         df = pd.concat(graph_dfs)
         header = [
-                'ID', 'author', 'title', 'subtitle', 'year', 'genretitle', 'filename',
+                'ID', 'author', 'title', 'subtitle', 'year', 'genretitle',
+                'filename',
                 'charcount', 'edgecount', 'maxdegree', 'avgdegree', 'diameter',
-                'clustering_coefficient', 'clustering_coefficient_random', 'avgpathlength', 'average_path_length_random', 'density',
-                'segment_count', 'count_type', 'all_in_index', 'change_rate_mean', 'change_rate_std', 'final_scene_size_index',
-                'characters_last_in',
+                'clustering_coefficient', 'clustering_coefficient_random',
+                'avgpathlength', 'average_path_length_random', 'density',
+                'segment_count', 'count_type', 'all_in_index',
+                'change_rate_mean', 'change_rate_std',
+                'final_scene_size_index', 'characters_last_in',
                 'connected_components', 'spearman_rho_avg', 'spearman_rho_std',
                 'spearman_rho_content_vs_network',
                 'spearman_rho_content_vs_network_top',
@@ -155,12 +162,14 @@ class CorpusAnalyzer(LinaCorpus):
                 ]
         df.index = df["ID"]
         df.index.name = "index"
-        df.to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"), sep=";")
+        df.to_csv(os.path.join(self.outputfolder, "corpus_metrics.csv"),
+                  sep=";")
         self.logger.info("Exporting corpus quartile metrics.")
         df_cq = pd.concat(quot_quot_dfs, axis=1).T
         df_cq.index = df["ID"]
         df_cq.index.name = "index"
-        df_cq.to_csv(os.path.join(self.outputfolder, "corpus_quartile_metrics.csv"), sep=";")
+        df_cq.to_csv(os.path.join(self.outputfolder,
+                                  "corpus_quartile_metrics.csv"), sep=";")
 
 
 class DramaAnalyzer(Lina):
@@ -176,7 +185,7 @@ class DramaAnalyzer(Lina):
         self.logger.addHandler(fh)
         self.major_only = major_only
         self.n_personae = len(self.personae)
-        self.centralities = pd.DataFrame(index = [p for p in self.personae])
+        self.centralities = pd.DataFrame(index=[p for p in self.personae])
         self.centralities.index.name = "name"
         self.randomization = randomization
         self.metrics = pd.DataFrame()
@@ -188,14 +197,13 @@ class DramaAnalyzer(Lina):
             self.get_character_speech_amounts()
             self.get_character_ranks()
             self.get_centrality_ranks()
-            self.get_ranking_stability_measures()
-            self.add_ranking_stability_metrics()
+            self.get_rank_stability_measures()
+            self.add_rank_stability_metrics()
             self.get_structural_ranking_measures()
             self.get_quartiles()
             self.export_char_metrics()
         if action == "corpus_metrics":
             self.graph_metrics = self.get_graph_metrics()
-            self.get_regression_metrics()
             self.export_graph_metrics()
         if action == "both":
             self.graph_metrics = self.get_graph_metrics()
@@ -204,20 +212,25 @@ class DramaAnalyzer(Lina):
             self.get_character_speech_amounts()
             self.get_character_ranks()
             self.get_centrality_ranks()
-            self.get_ranking_stability_measures()
-            self.add_ranking_stability_metrics()
+            self.get_rank_stability_measures()
+            self.add_rank_stability_metrics()
             self.get_structural_ranking_measures()
             self.get_quartiles()
             self.get_regression_metrics()
             self.export_char_metrics()
             self.export_graph_metrics()
 
-    def add_ranking_stability_metrics(self):
-        self.graph_metrics["spearman_rho_avg"] = self.ranking_stability.stack().mean()
-        self.graph_metrics["spearman_rho_std"] = self.ranking_stability.stack().std()
+    def add_rank_stability_metrics(self):
+        self.graph_metrics["spearman_rho_avg"] = (self.rank_stability
+                                                      .stack()
+                                                      .mean())
+        self.graph_metrics["spearman_rho_std"] = (self.rank_stability
+                                                      .stack()
+                                                      .std())
         (self.graph_metrics["top_rank_char_count"],
          self.graph_metrics["top_rank_char_avg"],
-         self.graph_metrics["top_rank_char_std"]) = self.get_top_ranked_char_count()
+         self.graph_metrics["top_rank_char_std"]) = (
+                self.get_top_ranked_char_count())
 
     def get_final_scene_size(self):
         last_scene_size = len(self.segments[-1])
@@ -270,14 +283,16 @@ class DramaAnalyzer(Lina):
         for amount in ["speech_acts", "words", "lines", "chars"]:
             self.centralities[amount] = 0
             for name, person in self.personae.items():
-                self.centralities.loc[person.name, amount] = person.amounts.get(amount)
+                self.centralities.loc[person.name, amount] = (person.amounts
+                                                              .get(amount))
 
     def get_top_ranked_chars(self):
         top_ranked = {}
-        # check whether metric should be sorted ascending(min) or descending(max)
+        # check whether metric should be sorted asc(min) or desc(max)
         for metric in ['degree', 'closeness', 'betweenness', 'frequency']:
             cent_max = self.centralities[metric].max()
-            top_char = self.centralities[self.centralities[metric] == cent_max].index.tolist()
+            top_char = self.centralities[self.centralities[metric]
+                                         == cent_max].index.tolist()
             if len(top_char) != 1:
                 top_ranked[metric] = "SEVERAL"
             else:
@@ -287,8 +302,10 @@ class DramaAnalyzer(Lina):
 
     def get_top_ranked_char_count(self):
         avg_min = self.centralities['centrality_rank_avg'].min()
-        top_chars = self.centralities[self.centralities['centrality_rank_avg'] == avg_min].index.tolist()
-        top_std = self.centralities[self.centralities['centrality_rank_avg'] == avg_min]['centrality_rank_std']
+        top_chars = self.centralities[self.centralities['centrality_rank_avg']
+                                      == avg_min].index.tolist()
+        top_std = self.centralities[self.centralities['centrality_rank_avg']
+                                    == avg_min]['centrality_rank_std']
         return len(top_chars), avg_min, top_std
 
     def get_character_ranks(self):
@@ -297,7 +314,9 @@ class DramaAnalyzer(Lina):
                        'frequency', 'speech_acts', 'words']:
             # ascending: False for ranks by high (1) to low (N)
             # check ascending value for each metric
-            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=False)
+            self.centralities[metric+"_rank"] = (self.centralities[metric]
+                                                     .rank(method='min',
+                                                           ascending=False))
 
     def get_quartiles(self):
         metrics = ['degree', 'closeness', 'betweenness',
@@ -308,46 +327,66 @@ class DramaAnalyzer(Lina):
         for metric in metrics:
             df[metric] = ((pd.cut(self.centralities[metric], 4)
                              .value_counts()
-                             .sort_index(ascending=False)/len(self.centralities))
-                         .tolist())
+                             .sort_index(ascending=False) /
+                           len(self.centralities))
+                          .tolist())
         self.quartile_quot = df.loc["q4"]/df.loc["q1"]
         self.quartile_quot.name = self.ID
         self.quartile_quot = self.quartile_quot.append(df.T.stack())
 
     def get_centrality_ranks(self):
         ranks = [c for c in self.centralities.columns if c.endswith("rank")]
-        self.centralities['centrality_rank_avg'] = self.centralities[ranks].sum(axis=1)/len(ranks)
-        self.centralities['centrality_rank_std'] = self.centralities[ranks].std(axis=1)/len(ranks)
+        self.centralities['centrality_rank_avg'] = (self.centralities[ranks]
+                                                        .sum(axis=1) /
+                                                    len(ranks))
+        self.centralities['centrality_rank_std'] = (self.centralities[ranks]
+                                                        .std(axis=1) /
+                                                    len(ranks))
         for metric in ['centrality_rank_avg', 'centrality_rank_std']:
-            self.centralities[metric+"_rank"] = self.centralities[metric].rank(method='min', ascending=True)
+            self.centralities[metric+"_rank"] = (self.centralities[metric]
+                                                     .rank(method='min',
+                                                           ascending=True))
 
-    def get_ranking_stability_measures(self):
-        ranks = [c for c in self.centralities.columns if c.endswith("rank")][:8]
-        self.ranking_stability = self.centralities[ranks].corr(method='spearman')
-        np.fill_diagonal(self.ranking_stability.values, np.nan)
-        self.ranking_stability.index.name = "rank_name"
+    def get_rank_stability_measures(self):
+        ranks = [c
+                 for c in self.centralities.columns
+                 if c.endswith("rank")][:8]
+        self.rank_stability = (self.centralities[ranks]
+                                   .corr(method='spearman'))
+        np.fill_diagonal(self.rank_stability.values, np.nan)
+        self.rank_stability.index.name = "rank_name"
 
     def get_structural_ranking_measures(self):
         graph_ranks = ['degree_rank', 'closeness_rank', 'betweenness_rank',
                        'strength_rank', 'eigenvector_centrality_rank']
         content_ranks = ['frequency_rank', 'speech_acts_rank', 'words_rank']
-        avg_graph_rank = self.centralities[graph_ranks].mean(axis=1).rank(method='min')
-        avg_content_rank = self.centralities[content_ranks].mean(axis=1).rank(method='min')
+        avg_graph_rank = (self.centralities[graph_ranks]
+                              .mean(axis=1)
+                              .rank(method='min'))
+        avg_content_rank = (self.centralities[content_ranks]
+                                .mean(axis=1)
+                                .rank(method='min'))
         self.centralities["avg_graph_rank"] = avg_graph_rank
         self.centralities["avg_content_rank"] = avg_content_rank
-        self.centralities["overall_avg"] = self.centralities[["avg_graph_rank",
-                                                              "avg_content_rank"]].mean(axis=1)
-        self.centralities["overall_avg_rank"] = self.centralities["overall_avg"].rank(method='min')
+        self.centralities["overall_avg"] = (self.centralities[
+                                                 ["avg_graph_rank",
+                                                  "avg_content_rank"]]
+                                                .mean(axis=1))
+        self.centralities["overall_avg_rank"] = (self.centralities[
+                                                        "overall_avg"]
+                                                     .rank(method='min'))
         struct_corr = stats.spearmanr(avg_content_rank, avg_graph_rank)[0]
         self.graph_metrics["spearman_rho_content_vs_network"] = struct_corr
         top, bottom = np.split(self.centralities,
                                [int(.5*len(self.centralities))])
         struct_corr_top = stats.spearmanr(top["avg_content_rank"],
                                           top["avg_graph_rank"])[0]
-        self.graph_metrics["spearman_rho_content_vs_network_top"] = struct_corr_top
+        self.graph_metrics["spearman_rho_content_vs_network_top"] = (
+                                                            struct_corr_top)
         struct_corr_bottom = stats.spearmanr(bottom["avg_content_rank"],
                                              bottom["avg_graph_rank"])[0]
-        self.graph_metrics["spearman_rho_content_vs_network_bottom"] = struct_corr_bottom
+        self.graph_metrics["spearman_rho_content_vs_network_bottom"] = (
+                                                        struct_corr_bottom)
 
     def get_characters_all_in_index(self):
         appeared = set()
@@ -366,7 +405,7 @@ class DramaAnalyzer(Lina):
                             self.outputfolder,
                             "%s_%s_chars.csv" % (self.ID, self.title)
                             ))
-        self.ranking_stability.to_csv(
+        self.rank_stability.to_csv(
                 os.path.join(
                             self.outputfolder,
                             "%s_%s_spearmanrho.csv" % (self.ID, self.title)
@@ -378,22 +417,22 @@ class DramaAnalyzer(Lina):
         self.graph_metrics.to_csv(os.path.join(
                                     self.outputfolder,
                                     "%s_%s_graph.csv" % (self.ID, self.title)),
-                                   sep=";")
+                                  sep=";")
         self.export_table(
                 self.get_drama_change_rate(),
-                "_".join([self.filepath, self.title,"change_rates"])+".csv")
+                "_".join([self.filepath, self.title, "change_rates"])+".csv")
         nx.write_edgelist(
                 self.G,
                 os.path.join(self.outputfolder,
                              "_".join([str(self.ID),
-                             self.title,"edgelist"])+".csv"),
+                                      self.title, "edgelist"])+".csv"),
                 delimiter=";",
                 data=["weight"])
         plotGraph(
                 self.G,
                 filename=os.path.join(self.outputfolder,
                                       "_".join([str(self.ID),
-                                      self.title])+".svg"))
+                                               self.title])+".svg"))
 
     def export_table(self, t, filepath):
         with open(filepath, 'w') as f:  # Just use 'w' mode in 3.x
@@ -405,7 +444,10 @@ class DramaAnalyzer(Lina):
     def get_graph_metrics(self):
         graph_metrics = self.analyze_graph()
         graph_metrics["ID"] = self.ID
-        graph_metrics["average_path_length_random"], graph_metrics["clustering_coefficient_random"] = self.randomize_graph(graph_metrics.get("charcount"), graph_metrics.get("edgecount"))
+        (graph_metrics["average_path_length_random"],
+         graph_metrics["clustering_coefficient_random"]) = (
+                self.randomize_graph(graph_metrics.get("charcount"),
+                                     graph_metrics.get("edgecount")))
         graph_metrics["year"] = self.metadata.get("date_definite")
         graph_metrics["author"] = self.metadata.get("author")
         graph_metrics["title"] = self.title
@@ -415,7 +457,9 @@ class DramaAnalyzer(Lina):
         graph_metrics["segment_count"] = self.metadata.get("segment_count")
         graph_metrics["count_type"] = self.metadata.get("count_type")
         graph_metrics["all_in_index"] = self.get_characters_all_in_index()
-        graph_metrics["change_rate_mean"], graph_metrics["change_rate_std"] = self.get_drama_change_rate_metrics()
+        (graph_metrics["change_rate_mean"],
+         graph_metrics["change_rate_std"]) = (
+            self.get_drama_change_rate_metrics())
         graph_metrics["final_scene_size_index"] = self.get_final_scene_size()
         graph_metrics["characters_last_in"] = self.get_characters_last_in()
         return pd.DataFrame.from_dict(graph_metrics, orient='index').T
@@ -444,18 +488,18 @@ class DramaAnalyzer(Lina):
             # if args.debug:
             #     print("SOURCE, TARGET:", source, targets)
 
-            if not source in B.nodes():
+            if source not in B.nodes():
                 B.add_node(source, bipartite=0)
                 labels[source] = source
 
             for target in targets:
-                if not target in B.nodes():
+                if target not in B.nodes():
                     B.add_node(target, bipartite=1)
                 B.add_edge(source, target)
 
-        # if args.debug:
-        #     print("EDGES:", B.edges())
-        scene_nodes = set(n for n,d in B.nodes(data=True) if d['bipartite']==0)
+        scene_nodes = set(n
+                          for n, d in B.nodes(data=True)
+                          if d['bipartite'] == 0)
         person_nodes = set(B) - scene_nodes
         nx.is_bipartite(B)
         G = nx.bipartite.weighted_projected_graph(B, person_nodes)
@@ -471,14 +515,22 @@ class DramaAnalyzer(Lina):
         {
             "charcount" = len(G.nodes()),
             "edgecount" = len(G.edges()),
-            "maxdegree" = max(G.degree().values()) or "NaN" if ValueError: max() arg is an empty sequence,
-            "avgdegree" = sum(G.degree().values())/len(G.nodes()) or "NaN" if ZeroDivisionError: division by zero,
+            "maxdegree" = max(G.degree().values()) or "NaN"
+                          if ValueError: max() arg is an empty sequence,
+            "avgdegree" = sum(G.degree().values())/len(G.nodes()) or "NaN"
+                          if ZeroDivisionError: division by zero,
             "density" = nx.density(G) or "NaN",
-            "avgpathlength" = nx.average_shortest_path_length(G) or "NaN" if NetworkXError: Graph is not connected,
-                                then it tries to get the average_shortest_path_length from the giant component,
-            "avgpathlength" = nx.average_shortest_path_length(max(nx.connected_component_subgraphs(G), key=len))
-                                    except NetworkXPointlessConcept: ('Connectivity is undefined ', 'for the null graph.'),
-            "clustering_coefficient" = nx.average_clustering(G) or "NaN" if ZeroDivisionError: float division by zero
+            "avgpathlength" = nx.average_shortest_path_length(G) or "NaN"
+                              if NetworkXError: Graph is not connected,
+                              then it tries to get the average shortest path
+                              length from the giant component,
+            "avgpathlength" = nx.average_shortest_path_length(
+                             max(nx.connected_component_subgraphs(G),
+                                 key=len))
+                             except NetworkXPointlessConcept:
+                             ('Connectivity is undefined for the null graph.'),
+            "clustering_coefficient" = nx.average_clustering(G) or "NaN"
+                            if ZeroDivisionError: float division by zero
         }
         """
         G = self.G
@@ -488,13 +540,15 @@ class DramaAnalyzer(Lina):
         try:
             values["maxdegree"] = max(G.degree().values())
         except:
-            self.logger.error("ID %s ValueError: max() arg is an empty sequence" % self.ID)
+            self.logger.error(
+                "ID %s ValueError: max() arg is an empty sequence" % self.ID)
             values["maxdegree"] = "NaN"
 
         try:
             values["avgdegree"] = sum(G.degree().values())/len(G.nodes())
         except:
-            self.logger.error("ID %s ZeroDivisionError: division by zero" % self.ID)
+            self.logger.error(
+                "ID %s ZeroDivisionError: division by zero" % self.ID)
             values["avgdegree"] = "NaN"
 
         try:
@@ -505,7 +559,8 @@ class DramaAnalyzer(Lina):
         try:
             values["avgpathlength"] = nx.average_shortest_path_length(G)
         except nx.NetworkXError:
-            self.logger.error("ID %s NetworkXError: Graph is not connected." % self.ID)
+            self.logger.error(
+                "ID %s NetworkXError: Graph is not connected." % self.ID)
             try:
                 self.randomization = 50
                 values["avgpathlength"] = nx.average_shortest_path_length(
@@ -513,14 +568,15 @@ class DramaAnalyzer(Lina):
             except:
                 values["avgpathlength"] = "NaN"
         except:
-            self.logger.error("ID %s NetworkXPointlessConcept: ('Connectivity is "
-                              "undefined for the null graph.')"  % self.ID)
+            self.logger.error("ID %s NetworkXPointlessConcept: ('Connectivity"
+                              "is undefined for the null graph.')" % self.ID)
             values["avgpathlength"] = "NaN"
 
         try:
             values["clustering_coefficient"] = nx.average_clustering(G)
         except:
-            self.logger.error("ID %s ZeroDivisionError: float division by zero" % self.ID)
+            self.logger.error(
+                "ID %s ZeroDivisionError: float division by zero" % self.ID)
             values["clustering_coefficient"] = "NaN"
         values["connected_components"] = nx.number_connected_components(G)
         components = nx.connected_component_subgraphs(G)
@@ -528,7 +584,8 @@ class DramaAnalyzer(Lina):
         try:
             values["diameter"] = nx.diameter(G)
         except nx.NetworkXError:
-            self.logger.error("ID %s NetworkXError: Graph is not connected." % self.ID)
+            self.logger.error(
+                "ID %s NetworkXError: Graph is not connected." % self.ID)
             values["diameter"] = nx.diameter(
                         max(nx.connected_component_subgraphs(G), key=len))
         return values
@@ -562,15 +619,17 @@ class DramaAnalyzer(Lina):
             for char, metric in nx.closeness_centrality(g).items():
                 self.centralities.loc[char, 'closeness_corrected'] = metric
         try:
-            for char, metric in nx.eigenvector_centrality(self.G,
-                                                max_iter=500).items():
+            for char, metric in nx.eigenvector_centrality(
+                                    self.G, max_iter=500).items():
                 self.centralities.loc[char, 'eigenvector_centrality'] = metric
         except Exception as e:
-            self.logger.error("%s networkx.exception.NetworkXError: "
-                              "eigenvector_centrality(): power iteration "
-                              "failed to converge in 500 iterations." % self.ID)
+            self.logger.error(
+                "%s networkx.exception.NetworkXError:"
+                " eigenvector_centrality(): power iteration failed to converge"
+                " in 500 iterations." % self.ID)
         self.centralities['avg_distance'] = 1/self.centralities['closeness']
-        self.centralities['avg_distance_corrected'] = 1/self.centralities['closeness_corrected']
+        self.centralities['avg_distance_corrected'] = (
+                                1 / self.centralities['closeness_corrected'])
 
     def transpose_dict(self, d):
         """
@@ -594,9 +653,10 @@ class DramaAnalyzer(Lina):
 
     def randomize_graph(self, n, e):
         """
-        Creates 1000 random graphs with networkx.gnm_random_graph(nodecount, edgecount),
-        and computes average_clustering_coefficient and average_shortest_path_length,
-        to compare with drama-graph.
+        Creates 1000 random graphs with
+        networkx.gnm_random_graph(nodecount, edgecount),
+        and computes average_clustering_coefficient and
+        average_shortest_path_length, to compare with drama-graph.
         Returns a tuple:
         randavgpathl, randcluster = (float or "NaN", float or "NaN")
         """
@@ -608,7 +668,8 @@ class DramaAnalyzer(Lina):
         a = 0
         if not self.randomization:  # hack so that quartett poster works
             self.randomization = 50
-        for i in tqdm(range(self.randomization), desc="Randomization", mininterval=1):
+        for i in tqdm(range(self.randomization), desc="Randomization",
+                      mininterval=1):
             R = nx.gnm_random_graph(n, e)
             try:
                 randcluster += nx.average_clustering(R)
@@ -646,74 +707,123 @@ class DramaAnalyzer(Lina):
         metrics_dfs = []
         for metric in metrics:
             temp_df = pd.DataFrame(columns=[metric])
-            temp_df[metric+"_interval"] = [i.mid
-                               for i in pd.cut(self.centralities[metric], 10)
-                                          .value_counts()
-                                          .index.tolist()]
+            temp_df[metric+"_interval"] = [
+                        i.mid for i in pd.cut(self.centralities[metric], 10)
+                                         .value_counts()
+                                         .index.tolist()]
             temp_df[metric] = (pd.cut(self.centralities[metric], 10)
-                                    .value_counts()
-                                    .tolist())
+                                 .value_counts()
+                                 .tolist())
             temp_df.sort_values(metric+"_interval", inplace=True)
             temp_df.reset_index(drop=True, inplace=True)
             metrics_dfs.append(temp_df)
-        # deciles.to_csv(os.path.join(self.outputfolder,
-        #                             "%s_%s_deciles_table.csv" % (self.ID, self.title)
-        #                             ))
         index = ["linear", "exponential", "powerlaw", "quadratic"]
         reg_metrics = pd.DataFrame(columns=metrics, index=index)
         # fit linear models
-        # X = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape(-1, 1)
+        fig = plt.figure(figsize=(len(metrics)*4, len(index)*4))
+        gs = gridspec.GridSpec(len(index), len(metrics))
+        i = 0  # subplot enumerator
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
             y = np.array(temp_df[metric]).reshape(-1, 1)
             model = linear_model.LinearRegression()
             model.fit(X, y)
-            reg_metrics.loc["linear", metric] = model.score(X, y)
-            # print("linear %s %.4f" % (metric, model.score(X, y)))
+            score = model.score(X, y)
+            reg_metrics.loc["linear", metric] = score
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, y)
+            plt.plot(X, model.predict(X), 'r--',
+                     label='coeff: %.3f, intercept: %.3f' % (model.coef_[0][0],
+                                                             model.intercept_[0]))
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " linear R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric)
+            ax.set_ylabel("value counts")
+            i += 1
         # fit quadratic models
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
             y = np.array(temp_df[metric]).reshape(-1, 1)
             regr = linear_model.LinearRegression()
-            model = make_pipeline(PolynomialFeatures(2), regr)
+            model = Pipeline(steps=[('polyfeatures', PolynomialFeatures(2)),
+                                    ('reg', regr)])
             model.fit(X, y)
-            reg_metrics.loc["quadratic", metric] = model.score(X, y)
-            # print("quadratic %s %.4f" % (metric, model.score(X, y)))
+            score = model.score(X, y)
+            reg_metrics.loc["quadratic", metric] = score
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, y)
+            plt.plot(X, model.predict(X), 'r--',
+                     label='coeff: %s, intercept: %s' % (
+                                    str(model.named_steps['reg'].coef_),
+                                    str(model.named_steps['reg'].intercept_)))
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " quadratic R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric)
+            ax.set_ylabel("value counts")
+            i += 1
         # fit exp models
         for metric, temp_df in zip(metrics, metrics_dfs):
-            X = np.array(temp_df[metric+"_interval"])
-            y = np.array(temp_df[metric])
-            popt, pcov = curve_fit(func_exp,  ma.log(X),  y,  p0=(2, 1e-5), maxfev=30000)
-            y_pred = func_exp(ma.log(X), *popt)
-            reg_metrics.loc["exponential", metric] = r2_score(y, y_pred)
-            # print("exponential %s %.4f" % (metric, r2_score(y, y_pred)))
+            X = np.array(temp_df[metric+"_interval"]).reshape(-1, 1)
+            y = np.array(temp_df[metric]).reshape(-1, 1)
+            logy = ma.log(y).reshape(-1, 1)
+            model = linear_model.LinearRegression()
+            model.fit(X, logy)
+            score = model.score(X, logy)
+            reg_metrics.loc["exponential", metric] = score
+            ax = plt.subplot(gs[i])
+            plt.scatter(X, logy)
+            plt.plot(X, model.predict(X), 'r--')
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " exp. R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric)
+            ax.set_ylabel("value counts (log)")
+            i += 1
         # fit power law models
         for metric, temp_df in zip(metrics, metrics_dfs):
             X = np.array(temp_df[metric+"_interval"])
             y = np.array(temp_df[metric])
-            # popt, pcov = curve_fit(func_powerlaw, X, y, p0 = np.asarray([1, 10**5, 0]), maxfev=30000)
-            # y_pred = func_powerlaw(X, *popt)
-            # reg_metrics.loc["powerlaw", metric] = r2_score(y, y_pred)
             logx = ma.log(X).reshape(-1, 1)
             logy = ma.log(y).reshape(-1, 1)
             model = linear_model.LinearRegression()
             model.fit(logx, logy)
-            reg_metrics.loc["powerlaw", metric] = model.score(logx, logy)
-            # print("powerlaw %s %.4f" % (metric, r2_score(y, y_pred)))
-        self.regression_metrics = reg_metrics.T
-        self.regression_metrics.index.name = "metrics"
-        self.regression_metrics["max_val"] = self.regression_metrics.apply(lambda x: np.max(x), axis=1)
-        self.regression_metrics["max_type"] = self.regression_metrics.apply(lambda x: np.argmax(x), axis=1)
+            score = model.score(logx, logy)
+            reg_metrics.loc["powerlaw", metric] = score
+            ax = plt.subplot(gs[i])
+            plt.scatter(logx, logy)
+            plt.plot(logx, model.predict(logx), 'r--',
+                     label='coeff: %s, intercept: %s' % (str(model.coef_),
+                                                         str(model.intercept_)))
+            # plt.legend(fontsize='x-small')
+            ax.set_title(metric + " power law R2 %.3f" % score, size='medium')
+            ax.set_xlabel(metric + " (log)")
+            ax.set_ylabel("value counts (log)")
+            i += 1
+        plt.tight_layout()
+        self.reg_metrics = reg_metrics.T
+        self.reg_metrics.index.name = "metrics"
+        self.reg_metrics["max_val"] = self.reg_metrics.apply(
+                                                lambda x: np.max(x), axis=1)
+        self.reg_metrics["max_type"] = self.reg_metrics.apply(
+                                                lambda x: np.argmax(x), axis=1)
         for metric in metrics:
-            self.graph_metrics[metric+"_reg_type"] = self.regression_metrics.loc[metric, 'max_type']
-            self.graph_metrics[metric+"_reg_val"] = self.regression_metrics.loc[metric, 'max_val']
-        self.regression_metrics.to_csv(os.path.join(self.outputfolder,
-                                                    "%s_%s_regression_table.csv" % (self.ID, self.title)
-                                                    ))
+            self.graph_metrics[metric+"_reg_type"] = (self.reg_metrics
+                                                          .loc[metric,
+                                                               'max_type'])
+            self.graph_metrics[metric+"_reg_val"] = (self.reg_metrics
+                                                         .loc[metric,
+                                                              'max_val'])
+        self.reg_metrics.to_csv(os.path.join(self.outputfolder,
+                                             "%s_%s_regression_table.csv"
+                                             % (self.ID, self.title)))
         for temp_df in metrics_dfs:
             temp_df.to_csv(os.path.join(os.path.join(self.outputfolder),
-                                                    "%s_%s_regression_table.csv" % (self.ID, self.title)),
-                                                    mode='a', header=True)
+                                        "%s_%s_regression_table.csv"
+                                        % (self.ID, self.title)),
+                           mode='a', header=True)
+        fig.savefig(os.path.join(self.outputfolder,
+                                 '%s_%s_regression_plots.png'
+                                 % (self.ID, self.title)))
 
-def func_exp(x, a, b):
-    return a + b*x
+
+def exponential_func(t, a, b):
+    return a + t*np.log(t)
